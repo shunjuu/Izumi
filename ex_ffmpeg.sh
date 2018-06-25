@@ -1,12 +1,30 @@
 #!/bin/bash
-SUBS="subtitles='""$3""'"
-echo "$SUBS"
+SUBS="subtitles='""$2""'"
+THREADS=$6
 
-#$1 -i "$2" -vf "$SUBS" "$4"
-$1 -i "$2" -vf "$SUBS" -threads 12 "$4"
+is_rclone() {
+	while pgrep -u "$(whoami)" -x "rclone" >/dev/null
+	do
+		echo "Detected rclone is running. Waiting 60 seconds..."
+		secs=$((1 * 60))
+		while [ $secs -gt 0 ]; do
+			echo -ne "Remaining: $secs\033[0K\r"
+			sleep 1
+			: $((secs--))
+		done
+	done
 
-/bin/bash /media/9da3/rocalyte/private/scripts/clean/is_rclone.sh
+}
 
-mkdir "$6"
-mv "$4" "$5"
+ffmpeg -i "$1" -vf "$SUBS" -c:a copy -threads $THREADS -y "$3"
 
+newsize=$(wc -c < "$3")
+if [[ "$newsize" == "0" ]]; then
+	echo "Error with 8-bit ffmpeg, trying 10-bit..."
+	ffmpeg-10bit -i "$1" -vf "$SUBS" -c:a copy -threads $THREADS -y "$3"
+fi
+
+#is_rclone
+
+mkdir -p "$5"
+mv "$3" "$4"
