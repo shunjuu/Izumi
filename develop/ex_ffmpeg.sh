@@ -24,7 +24,7 @@ if [[ "$newsize" == "0" ]]; then
 	ffmpeg-10bit -i "$1" -vf "$SUBS" -c:a copy -threads $THREADS -y "$3"
 fi
 
-is_rclone
+#is_rclone
 
 mkdir -p "$5"
 mv "$3" "$4"

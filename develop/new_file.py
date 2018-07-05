@@ -128,26 +128,21 @@ def clean_filename(filename, ext):
 
     # Strip fansub names that only have a prefix
     prefixes_only = list()
-    prefixes_only.append("[HorribleSubs]")
-    prefixes_only.append("[meta]")
-    prefixes_only.append("[Dial8!]")
+    prefixes_only.append("[HorribleSubs] ")
+    prefixes_only.append("[meta] ")
 
     # Strip fansub groups that have both a prefix and a suffix
     pre_and_suff14 = list()
-    pre_and_suff14.append("[AoD]")
-    pre_and_suff14.append("[Chyuu]")
-    pre_and_suff14.append("[Davinci]")
-    pre_and_suff14.append("[AnimeKayo]")
-
-    # Another suffix that only has 10 characters
+    pre_and_suff14.append("[AoD] ")
+    pre_and_suff14.append("[Chyuu] ")
 
     newname = filename
     for prefix in prefixes_only:
-        newname = newname.replace(prefix + " ", "", 1)
+        newname = newname.replace(prefix, "", 1)
 
     for ix in pre_and_suff14:
         if ix in newname:
-            newname = newname.replace(ix + " ", "", 1)
+            newname = newname.replace(ix, "", 1)
             newname = newname[:-14] + ext
 
     return newname
@@ -218,24 +213,21 @@ def request(location, file_name, file_path, json_type, show_path):
     jsdata = json.dumps(build_body(location, file_name, file_path, json_type, show_path))
     js8 = jsdata.encode('utf-8')
     req.add_header('Content-Length', len(js8))
-    try:
-        urllib.request.urlopen(req, js8)
-    except:
-        pass
+    urllib.request.urlopen(req, js8)
 
 def sync_mkv(root_dir, mkv_fname_clean_notif, src_file_shlex, src_dir):
-    print("Syncing MKV... (Using v2 background)")
-    os.system(root_dir + "util/is_rclone.sh")
-    os.system(root_dir + "sync/airing-mkv2.sh") 
-    request("Currently Airing", mkv_fname_clean_notif, src_file_shlex, 1, src_dir)
+    print("Syncing MKV...")
+#    os.system(root_dir + "util/is_rclone.sh")
+    os.system(root_dir + "sync/airing-mkv.sh") 
+    request("Ananke", mkv_fname_clean_notif, src_file_shlex, 1, src_dir)
     print("Done syncing MKV files.")
 
 def sync_mp4(root_dir, mp4_fname_clean_notif, dest_file_shlex, src_dir):
-    print("Syncing MP4... (Using v2 background)")
-    os.system(root_dir + "util/is_rclone.sh")
-    os.system(root_dir + "sync/airing-mp42.sh")
-    request("Currently Airing [Hardsub]", mp4_fname_clean_notif, dest_file_shlex, 2, src_dir)
-    print("Done syncing MP4 files.")
+    print("Syncing MP4...")
+#    os.system(root_dir + "util/is_rclone.sh")
+    os.system(root_dir + "sync/airing-mp4.sh")
+    request("Ananke", mp4_fname_clean_notif, dest_file_shlex, 2, src_dir)
+    print("Done syncing MKV files.")
 
 def rest(secs):
     """
@@ -312,11 +304,9 @@ def convert(inotifywatch_str):
     root_dir = os.getcwd() + "/"
 
     # Print everything #
-    # print("Current working directory: " + os.getcwd())
-    # print()
+    print("Current working directory: " + os.getcwd())
+    print()
     print("mkv_fname: " + mkv_fname)
-
-    """
     print("mp4_fname: " + mp4_fname)
     print("mkv_fname_clean: " + mkv_fname_clean)
     print("mp4_fname_clean: " + mp4_fname_clean)
@@ -343,8 +333,6 @@ def convert(inotifywatch_str):
     print("DIRHEAD: " + (get_DIRHEAD(src_dir, nyaa_fol)))
     print("show name: " + (get_show_name(src_dir, nyaa_fol)))
     print()
-    """
-
     print()
 
 
