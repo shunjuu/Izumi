@@ -8,7 +8,7 @@ clear
 #echo
 
 echo "IsDir"
-python3 new_file.py '/media/9da3/rocalyte/www/rocalyte.ananke/public_html/Public/.NyaaV2/,"CREATE,ISDIR",Full Metal Panic'
+python3 new_file.py '/media/9da3/rocalyte/www/rocalyte.ananke/public_html/Public/.NyaaV2/,CREATE,Uchiage Hanabi, Shita kara Miru ka?.mkv'
 
 echo
 

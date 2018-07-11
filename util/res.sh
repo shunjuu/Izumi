@@ -26,3 +26,6 @@ else
 	/bin/echo -e "\033[31m""rTorrent is not installed. Nothing to do""\e[0m"
 	/bin/echo
 fi
+
+#/usr/bin/screen -fa -dmS rtorrent-beta rtorrent -n -o import=~/.rtorrent-beta.rc
+#/usr/bin/screen -dmS autodl-beta irssi --home=$HOME/.irssi-beta/

@@ -18,6 +18,9 @@ from shlex import quote
 import urllib.request
 import json
 
+# Import raw ripper
+import raw
+
 
 # CONSTANTS
 
@@ -42,6 +45,12 @@ def parse_args(inotifywatch_str):
 
     print("Arg: " + inotifywatch_str)
     print()
+
+    # Special case, we want to check for raws submodule 
+    if "ReinForce" in inotifywatch_str:
+        print("Reinforce RAW detected, switching modes...")
+        raw.handle_raw(inotifywatch_str)
+        sys.exit(0)
 
     args = inotifywatch_str.split(',')
 
@@ -247,6 +256,21 @@ def rest(secs):
         sleep(1)
     print()
 
+def purify_args(args):
+    if len(args) < 3: return
+    new_args = [None] * 2
+    new_args[0] = args[0]
+    new_args[1] = args[1]
+
+    new_fname = args[2]
+
+    for i in range(3, len(args)):
+        new_fname = new_fname + "," + args[i]
+
+    new_args.append(new_fname)
+
+    return new_args
+
 ### THE ONLY METHOD YOU SHOULD CALL FROM MAIN ###
 def convert(inotifywatch_str):
     """
@@ -267,6 +291,7 @@ def convert(inotifywatch_str):
     args = parse_args(inotifywatch_str)
 
     args = args.split(',')
+    args = purify_args(args)
 
     mkv_fname = args[2]
     mp4_fname = str(args[2][:-4]) + ".mp4"

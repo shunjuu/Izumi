@@ -6,35 +6,6 @@ RED="\033[0;31m"
 GREEN="\033[0;32m"
 YELLOW="\033[1;33m"
 
-
-function update_kan {
-
-	echo
-	echo -e "Synchronizing the state of ${CYAN}$2${NC}..."
-	echo
-	
-	echo -e "${YELLOW}(1/4)${NC}: Synchronizing [${CYAN}$2${NC}] ${YELLOW}Currently Airing${NC}..."
-	echo
-	/media/9da3/rocalyte/bin/rclone --config="/media/9da3/rocalyte/.config/rclone/rclone.conf" sync $1:Anime/"Currently Airing" $3:"Currently Airing Shows" -v
-
-	echo -e "${YELLOW}(2/4)${NC}: Synchronizing [${CYAN}$2${NC}] ${YELLOW}Currently Airing [Hardsub]${NC}..."
-	echo
-	/media/9da3/rocalyte/bin/rclone --config="/media/9da3/rocalyte/.config/rclone/rclone.conf" sync $1:Anime/"Currently Airing [Hardsub]" $3:"Currently Airing Shows [Hardsub]" -v
-
-	echo -e "${YELLOW}(3/4)${NC}: Synchronizing [${CYAN}$2${NC}] ${YELLOW}Premiered${NC}..."
-	echo
-	/media/9da3/rocalyte/bin/rclone --config="/media/9da3/rocalyte/.config/rclone/rclone.conf" sync $1:Anime/"Premiered" $3:"Premiered Shows" -v
-
-	echo -e "${YELLOW}(4/4)${NC}: Synchronizing [${CYAN}$2${NC}] ${YELLOW}Premiered [Hardsub]${NC}..."
-	echo
-	/media/9da3/rocalyte/bin/rclone --config="/media/9da3/rocalyte/.config/rclone/rclone.conf" sync $1:Anime/"Premiered [Hardsub]" $3:"Premiered Shows [Hardsub]" -v
-
-	echo
-	echo -e "${GREEN}Completed ${NC}synchronizing ${CYAN}$2${NC}."
-	echo
-
-}
-
 function update_kan_parallel {
 	
 	echo
