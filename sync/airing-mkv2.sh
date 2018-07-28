@@ -2,17 +2,17 @@
 
 function update_dest {
 	echo "Syncing $1..."
-	/media/9da3/rocalyte/bin/rclone copy /media/9da3/rocalyte/www/rocalyte.ananke/public_html/Public/NyaaKV/ $2:"Currently Airing Shows" -v 
+	/media/9da3/rocalyte/bin/rclone copy /media/9da3/rocalyte/www/rocalyte.ananke/public_html/Public/NyaaKV/ $2:"Airing" -v 
 	echo "Done"
 }
 
 function update_mkv {
 
 	echo "Syncing Toshokan..."
-	/media/9da3/rocalyte/bin/rclone copy /media/9da3/rocalyte/www/rocalyte.ananke/public_html/Public/NyaaKV/ carmilla-kan:Anime/"Currently Airing" -v 
+	/media/9da3/rocalyte/bin/rclone copy /media/9da3/rocalyte/www/rocalyte.ananke/public_html/Public/NyaaKV/ sanka-kan:Anime/"Airing" -v 
 	echo "Done"
 
-	update_dest "Triton Weeaboos 2" "carmilla-tw2" &
+	# update_dest "Triton Weeaboos 2" "carmilla-tw2" &
 	update_dest "Weebrary" "carmilla-wizo" &
 
 	# Special case, testing

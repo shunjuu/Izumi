@@ -18,11 +18,6 @@ from shlex import quote
 import urllib.request
 import json
 
-# Import raw ripper
-import raw
-
-# Import the anime name parser
-import anitopy
 
 # CONSTANTS
 
@@ -47,12 +42,6 @@ def parse_args(inotifywatch_str):
 
     print("Arg: " + inotifywatch_str)
     print()
-
-    # Special case, we want to check for raws submodule 
-    if "ReinForce" in inotifywatch_str:
-        print("Reinforce RAW detected, switching modes...")
-        raw.handle_raw(inotifywatch_str)
-        sys.exit(0)
 
     args = inotifywatch_str.split(',')
 
@@ -83,7 +72,6 @@ def parse_args(inotifywatch_str):
         # Make sure we only have one file
         if len(files) != 1:
             print("The files list is not size 1; returning as an error...")
-            print()
             sys.exit(1)
 
         new_watch_str = path + ",CREATE," + files[0]
@@ -138,20 +126,26 @@ def clean_filename(filename, ext):
     - ext: The new extension to add
     """
 
-    p = anitopy.parse(filename)
-    new_file = p['anime_title'] + " - " + p['episode_number']
+    # Strip fansub names that only have a prefix
+    prefixes_only = list()
+    prefixes_only.append("[HorribleSubs] ")
+    prefixes_only.append("[meta] ")
 
-    # If uncensored, mark it
-    if 'other' in p and 'uncensored' in p['other'].lower():
-        new_file = new_file + " (Uncensored)"
+    # Strip fansub groups that have both a prefix and a suffix
+    pre_and_suff14 = list()
+    pre_and_suff14.append("[AoD] ")
+    pre_and_suff14.append("[Chyuu] ")
 
-    # Video res might not be included
-    if 'video_resolution' in p:
-        new_file = new_file + " [" + p['video_resolution'] + "]"
+    newname = filename
+    for prefix in prefixes_only:
+        newname = newname.replace(prefix, "", 1)
 
-    new_file = new_file + ext
-    return new_file
+    for ix in pre_and_suff14:
+        if ix in newname:
+            newname = newname.replace(ix, "", 1)
+            newname = newname[:-14] + ext
 
+    return newname
 
 def get_DIRHEAD(src_dir, dl_folder):
     """
@@ -219,24 +213,21 @@ def request(location, file_name, file_path, json_type, show_path):
     jsdata = json.dumps(build_body(location, file_name, file_path, json_type, show_path))
     js8 = jsdata.encode('utf-8')
     req.add_header('Content-Length', len(js8))
-    try:
-        urllib.request.urlopen(req, js8)
-    except:
-        pass
+    urllib.request.urlopen(req, js8)
 
 def sync_mkv(root_dir, mkv_fname_clean_notif, src_file_shlex, src_dir):
-    print("Syncing MKV... (Using v2 background)")
-    os.system(root_dir + "util/is_rclone.sh")
-    os.system(root_dir + "sync/airing-mkv2.sh") 
-    request("Currently Airing", mkv_fname_clean_notif, src_file_shlex, 1, src_dir)
+    print("Syncing MKV...")
+#    os.system(root_dir + "util/is_rclone.sh")
+    os.system(root_dir + "sync/airing-mkv.sh") 
+    request("Ananke", mkv_fname_clean_notif, src_file_shlex, 1, src_dir)
     print("Done syncing MKV files.")
 
 def sync_mp4(root_dir, mp4_fname_clean_notif, dest_file_shlex, src_dir):
-    print("Syncing MP4... (Using v2 background)")
-    os.system(root_dir + "util/is_rclone.sh")
-    os.system(root_dir + "sync/airing-mp42.sh")
-    request("Currently Airing [Hardsub]", mp4_fname_clean_notif, dest_file_shlex, 2, src_dir)
-    print("Done syncing MP4 files.")
+    print("Syncing MP4...")
+#    os.system(root_dir + "util/is_rclone.sh")
+    os.system(root_dir + "sync/airing-mp4.sh")
+    request("Ananke", mp4_fname_clean_notif, dest_file_shlex, 2, src_dir)
+    print("Done syncing MKV files.")
 
 def rest(secs):
     """
@@ -247,21 +238,6 @@ def rest(secs):
         print("Seconds remaining: " + str(i) + "...   \r",end="")
         sleep(1)
     print()
-
-def purify_args(args):
-    if len(args) < 3: return
-    new_args = [None] * 2
-    new_args[0] = args[0]
-    new_args[1] = args[1]
-
-    new_fname = args[2]
-
-    for i in range(3, len(args)):
-        new_fname = new_fname + "," + args[i]
-
-    new_args.append(new_fname)
-
-    return new_args
 
 ### THE ONLY METHOD YOU SHOULD CALL FROM MAIN ###
 def convert(inotifywatch_str):
@@ -280,12 +256,9 @@ def convert(inotifywatch_str):
     CONSTANTS
     """
 
-    print()
-    print()
     args = parse_args(inotifywatch_str)
 
     args = args.split(',')
-    args = purify_args(args)
 
     mkv_fname = args[2]
     mp4_fname = str(args[2][:-4]) + ".mp4"
@@ -331,12 +304,9 @@ def convert(inotifywatch_str):
     root_dir = os.getcwd() + "/"
 
     # Print everything #
-    # print("Current working directory: " + os.getcwd())
-    # print()
+    print("Current working directory: " + os.getcwd())
+    print()
     print("mkv_fname: " + mkv_fname)
-    print("mkv_fname_clean: " + mkv_fname_clean)
-
-    """
     print("mp4_fname: " + mp4_fname)
     print("mkv_fname_clean: " + mkv_fname_clean)
     print("mp4_fname_clean: " + mp4_fname_clean)
@@ -363,8 +333,6 @@ def convert(inotifywatch_str):
     print("DIRHEAD: " + (get_DIRHEAD(src_dir, nyaa_fol)))
     print("show name: " + (get_show_name(src_dir, nyaa_fol)))
     print()
-    """
-
     print()
 
 

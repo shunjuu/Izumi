@@ -8,7 +8,9 @@ clear
 #echo
 
 echo "IsDir"
-python3 new_file.py '/media/9da3/rocalyte/www/rocalyte.ananke/public_html/Public/.NyaaV2/,"CREATE,ISDIR",Violet Evergarden'
+python3 new_file.py '/media/9da3/rocalyte/www/rocalyte.ananke/public_html/Public/.NyaaV2/,"CREATE,ISDIR",Full Metal Panic'
+
+echo
 
 #echo "New for local:"
 #python3 new_file.py "/home/Jarek/Videos/Anime/.Nyaa/Arifureta Shokugyou de Sekai Saikyou/,CREATE,[HorribleSubs] Arifureta Shokugyou de Sekai Saikyou - 01 [1080p].mkv"
