@@ -16,12 +16,12 @@ is_rclone() {
 
 }
 
-ffmpeg -i "$1" -vf "$SUBS" -c:a copy -threads $THREADS -y -nostdin -strict -2 "$3"
+/bin/ffmpeg -i "$1" -vf "$SUBS" -c:a copy -threads $THREADS -y -nostdin -strict -2 "$3"
 
 newsize=$(wc -c < "$3")
 if [[ "$newsize" == "0" ]]; then
 	echo "Error with 8-bit ffmpeg, trying 10-bit..."
-	ffmpeg-10bit -i "$1" -vf "$SUBS" -c:a copy -threads $THREADS -y -nostdin -strict -2 "$3"
+	/bin/ffmpeg-10bit -i "$1" -vf "$SUBS" -c:a copy -threads $THREADS -y -nostdin -strict -2 "$3"
 fi
 
 is_rclone

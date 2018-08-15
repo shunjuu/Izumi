@@ -1,14 +1,8 @@
 #!/bin/bash
 
-SRC="/media/9da3/rocalyte/www/rocalyte.ananke/public_html/Public"
-AUTO="/media/9da3/rocalyte/private/rtorrent/data/"
+SRC="/home/izumi/izumi"
 
 cd $SRC
-
-# Clean out ruTorrent
-cd .Nyaa
-rmdir ./*
-cd ..
 
 # Clean NyaaKV
 cd NyaaKV
@@ -20,7 +14,8 @@ cd Nyaa4
 rmdir ./*
 cd ..
 
-cd $AUTO
-
-# Clean out all folders in data/
+# Clean .NyaaV2
+cd NyaaV2
 rmdir ./*
+cd ..
+

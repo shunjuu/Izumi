@@ -27,7 +27,7 @@ import anitopy
 # CONSTANTS
 
 # The current version of ".Nyaa" folder we're using:
-nyaa_fol = ".NyaaV2"
+nyaa_fol = "NyaaV2"
 
 # Determine length to active, should only be for this module
 wait_time = 180 # Deprecated
@@ -73,7 +73,9 @@ def parse_args(inotifywatch_str):
 
     # This is a more common case: A new dir was made
     elif args[2] == 'ISDIR"':
-        print("Detected new directory, processing...")
+        #print("Detected new directory, processing...")
+        print("Detected a new directory, ignoring...")
+        sys.exit(0)
         path = args[0] + args[3] + "/"
 
         # Get all the files in the new dir, should only be the .mkv softlink
@@ -228,14 +230,14 @@ def sync_mkv(root_dir, mkv_fname_clean_notif, src_file_shlex, src_dir):
     print("Syncing MKV... (Using v2 background)")
     os.system(root_dir + "util/is_rclone.sh")
     os.system(root_dir + "sync/airing-mkv2.sh") 
-    request("Currently Airing", mkv_fname_clean_notif, src_file_shlex, 1, src_dir)
+    request("Airing", mkv_fname_clean_notif, src_file_shlex, 1, src_dir)
     print("Done syncing MKV files.")
 
 def sync_mp4(root_dir, mp4_fname_clean_notif, dest_file_shlex, src_dir):
     print("Syncing MP4... (Using v2 background)")
     os.system(root_dir + "util/is_rclone.sh")
     os.system(root_dir + "sync/airing-mp42.sh")
-    request("Currently Airing [Hardsub]", mp4_fname_clean_notif, dest_file_shlex, 2, src_dir)
+    request("Airing [Hardsub]", mp4_fname_clean_notif, dest_file_shlex, 2, src_dir)
     print("Done syncing MP4 files.")
 
 def rest(secs):
@@ -335,8 +337,7 @@ def convert(inotifywatch_str):
     # print()
     print("mkv_fname: " + mkv_fname)
     print("mkv_fname_clean: " + mkv_fname_clean)
-
-    """
+    print()
     print("mp4_fname: " + mp4_fname)
     print("mkv_fname_clean: " + mkv_fname_clean)
     print("mp4_fname_clean: " + mp4_fname_clean)
@@ -363,7 +364,6 @@ def convert(inotifywatch_str):
     print("DIRHEAD: " + (get_DIRHEAD(src_dir, nyaa_fol)))
     print("show name: " + (get_show_name(src_dir, nyaa_fol)))
     print()
-    """
 
     print()
 
@@ -376,7 +376,7 @@ def convert(inotifywatch_str):
     os.system("cp -L " + mkv_fname + " " + src_file_clean)
 
     # Sync the MKV
-    sync_mkv(root_dir, mkv_fname_clean_notif, src_file_shlex, src_dir)
+    # sync_mkv(root_dir, mkv_fname_clean_notif, src_file_shlex, src_dir)
 
     # Burn the subs
     os.chdir(nyaaKV)
@@ -385,6 +385,10 @@ def convert(inotifywatch_str):
 
     # Sync the MP4
     sync_mp4(root_dir, mp4_fname_clean_notif, dest_file_shlex, src_dir)
+    
+    # Synchronize Kagami via Ananke
+    print("Calling for a sync...")
+    os.system("curl -X POST ananke.feralhosting.com:5932")
 
     # Cleanup
     os.chdir(temp_dir) # Switch into a directory that won't be deleted
