@@ -24,6 +24,8 @@ import raw
 # Import the anime name parser
 import anitopy
 
+import requests
+
 # CONSTANTS
 
 # The current version of ".Nyaa" folder we're using:
@@ -42,6 +44,8 @@ THREADS=12
 REQUEST_URL = "https://on.aeri.jp/post"
 CAS = "Currently Airing Shows"
 CASH = "Currently Airing Shows [Hardsub]"
+TSUYU = "http://izumi.best.moe:1400"
+WIZO = "http://sakura.wizo.sh:9696"
 
 def parse_args(inotifywatch_str):
 
@@ -139,7 +143,16 @@ def clean_filename(filename, ext):
     """
 
     p = anitopy.parse(filename)
-    new_file = p['anime_title'] + " - " + p['episode_number']
+    new_file = p['anime_title']
+
+    if 'anime_season' in p:
+        new_file = new_file + " S" + p['anime_season']
+
+    new_file = new_file + " - " + p['episode_number']
+
+    # Release version
+    if 'release_version' in p:
+        new_file = new_file + "v" + p['release_version']
 
     # If uncensored, mark it
     if 'other' in p and 'uncensored' in p['other'].lower():
@@ -228,14 +241,14 @@ def sync_mkv(root_dir, mkv_fname_clean_notif, src_file_shlex, src_dir):
     print("Syncing MKV... (Using v2 background)")
     os.system(root_dir + "util/is_rclone.sh")
     os.system(root_dir + "sync/airing-mkv2.sh") 
-    request("Currently Airing", mkv_fname_clean_notif, src_file_shlex, 1, src_dir)
+    request("Airing", mkv_fname_clean_notif, src_file_shlex, 1, src_dir)
     print("Done syncing MKV files.")
 
 def sync_mp4(root_dir, mp4_fname_clean_notif, dest_file_shlex, src_dir):
     print("Syncing MP4... (Using v2 background)")
     os.system(root_dir + "util/is_rclone.sh")
     os.system(root_dir + "sync/airing-mp42.sh")
-    request("Currently Airing [Hardsub]", mp4_fname_clean_notif, dest_file_shlex, 2, src_dir)
+    request("Airing [Hardsub]", mp4_fname_clean_notif, dest_file_shlex, 2, src_dir)
     print("Done syncing MP4 files.")
 
 def rest(secs):
@@ -262,6 +275,44 @@ def purify_args(args):
     new_args.append(new_fname)
 
     return new_args
+
+def cleanup(temp_dir, src_file, src_file_clean, nyaaKV_clean, src_dir_clean):
+    os.chdir(temp_dir) # Switch into a directory that won't be deleted
+    os.system("rm " + src_file) # src_file is the .NyaaV2 softlink/hardlink
+    os.system("rm " + src_file_clean)
+    os.system("rmdir " + nyaaKV_clean)
+    os.system("rmdir " + src_dir_clean)
+
+
+def tsuyu(mkv, show, og, temp_dir, src_file, src_file_clean, nyaaKV_clean, src_dir_clean):
+
+    try:
+        r = requests.post(TSUYU, json={"show": show, "episode": mkv})
+        if r.status_code != 418:
+            print("Status code isn't a teapot...")
+            raise Exception('Bad status code!')
+
+        print()
+        print("Successfully called Tsuyu for encoding.")
+
+        try:
+            r = requests.post(WIZO, json={"show": show, "episode": mkv})
+            if r.status_code != 418:
+                print("Wizo failed to establish a connection.")
+        except:
+            print("Error occured with posting Wizo...")
+            pass
+
+        print("Succesfully called Wizo for libx265 encoding.")
+        print("Completed download job for: " + og)
+        print()
+        cleanup(temp_dir, src_file, src_file_clean, nyaaKV_clean, src_dir_clean)
+        sys.exit(0)
+
+    except Exception as e:
+        print("An error occured while attempting to post Tsuyu:")
+        print(e)
+        print("Continuing with standard...")
 
 ### THE ONLY METHOD YOU SHOULD CALL FROM MAIN ###
 def convert(inotifywatch_str):
@@ -309,7 +360,6 @@ def convert(inotifywatch_str):
     dest_file = nyaa4 + mp4_fname
 
     src_file_clean = quote((nyaaKV + mkv_fname_clean))
-    src_file_unclean = quote(src_file)
     src_file_shlex = nyaaKV + mkv_fname_clean
     dest_file_clean = quote((nyaa4 + mp4_fname_clean))
     dest_file_shlex = nyaa4 + mp4_fname_clean
@@ -369,7 +419,13 @@ def convert(inotifywatch_str):
 
 
     # Let us begin the conversion!
-    os.chdir(src_dir)
+    try:
+        os.chdir(src_dir)
+    except:
+        print("Unable to cd into the following directory. This invokation was likely one triggered by the previous delete.")
+        print(src_dir)
+        print()
+        sys.exit(0)
 
     # Create a clean copy at NyaaKV
     os.system("mkdir -p " + nyaaKV_clean)
@@ -377,6 +433,9 @@ def convert(inotifywatch_str):
 
     # Sync the MKV
     sync_mkv(root_dir, mkv_fname_clean_notif, src_file_shlex, src_dir)
+
+    # Call Tsuyu for hardsubbing, if possible
+    tsuyu(mkv_fname_clean_notif, get_show_name(src_dir, nyaa_fol), mkv_fname, temp_dir, src_file, src_file_clean, nyaaKV_clean, src_dir_clean)
 
     # Burn the subs
     os.chdir(nyaaKV)
@@ -387,10 +446,13 @@ def convert(inotifywatch_str):
     sync_mp4(root_dir, mp4_fname_clean_notif, dest_file_shlex, src_dir)
 
     # Cleanup
+
+#    cleanup(temp_dir, src_file, src_file_clean, dest_file_clean, nyaaKV_clean, nyaa4_clean, src_dir_clean)
+
     os.chdir(temp_dir) # Switch into a directory that won't be deleted
+    os.system("rm " + src_file) # src_file is the .NyaaV2 softlink/hardlink
     os.system("rm " + src_file_clean)
     os.system("rm " + dest_file_clean)
-    os.system("rm " + src_file_unclean)
     os.system("rmdir " + nyaaKV_clean)
     os.system("rmdir " + nyaa4_clean)
     os.system("rmdir " + src_dir_clean)

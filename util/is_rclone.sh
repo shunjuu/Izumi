@@ -10,4 +10,3 @@ do
 		: $((secs--))
 	done
 done
-

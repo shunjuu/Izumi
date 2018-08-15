@@ -16,7 +16,7 @@ function update_mkv {
 	update_dest "Weebrary" "carmilla-wizo" &
 
 	# Special case, testing
-	/media/9da3/rocalyte/bin/rclone2 copy /media/9da3/rocalyte/www/rocalyte.ananke/public_html/Public/NyaaKV/ mega:Lagniappe/ &
+#	/media/9da3/rocalyte/bin/rclone2 copy /media/9da3/rocalyte/www/rocalyte.ananke/public_html/Public/NyaaKV/ mega:Lagniappe/ &
 
 	# We can't actually continue until all the syncs are done, so we just want to execute the all at the same time
 	# and wait for them to be done
