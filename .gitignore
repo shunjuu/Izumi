@@ -111,4 +111,7 @@ venv.bak/
 .venv/
 
 
+# Other non-python things
+*.swp
+
 # End of https://www.gitignore.io/api/python
