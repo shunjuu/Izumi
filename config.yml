@@ -3,9 +3,12 @@
 #
 # IMPORTANT: IZUMI WILL NOT VALIDATE THIS YAML FILE
 
+# Type of Izumi running (downloader or encoder)
+type: "downloader"
+
 folders:
     # The directory in which new files will be made in by ruTorrent or the flask server
-    watch: "/home/rocia/Videos/NyaaV2"
+    watch: "/home/rocia/Videos/"
 
     # Where a copy of the mkv video will be made
     mkv: "/home/rocia/Videos/NyaaKV"
@@ -22,8 +25,18 @@ sync:
     mkv:
         priority: ['sanka-kan:Airing']
         regular: ['carmilla-wizo:Airing']
+        encoders: ['http://izumi.best.moe:1400', 'http://sakura.wizo.sh:9696']
     mp4:
         priority: ['sanka-kan:Airing [Hardsub]']
         regular: ['carmilla-wizo:Airing [Hardsub]']
+        downloaders: ['http://ananke.feralhosting.com:5932']
 
+url:
+   upload:
+        mkv:
+            name: "Currently Airing"
+            urls: ['https://on.aeri.jp/post']
+        mp4:
+            name: "Currently Airing [Hardsub]"
+            urls: ['https://on.aeri.jp/post']
 
