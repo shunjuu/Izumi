@@ -1,0 +1,29 @@
+# Paths to the folders to be used for encoding
+# realpath will be used automatically, but using absolute paths is recommended
+#
+# IMPORTANT: IZUMI WILL NOT VALIDATE THIS YAML FILE
+
+folders:
+    # The directory in which new files will be made in by ruTorrent or the flask server
+    watch: "/home/rocia/Videos/NyaaV2"
+
+    # Where a copy of the mkv video will be made
+    mkv: "/home/rocia/Videos/NyaaKV"
+
+    # Where the hardsub mp4 will be made
+    mp4: "/home/rocia/Videos/Nyaa4"
+
+    # A temporary directory used to store a copy of the mkv.
+    # Necessary for file name safety
+    temp: "/home/rocia/Videos/.temp"
+
+sync:
+    # rclone folder to upload all show/ep.mkv to
+    mkv:
+        priority: ['sanka-kan:Airing']
+        regular: ['carmilla-wizo:Airing']
+    mp4:
+        priority: ['sanka-kan:Airing [Hardsub]']
+        regular: ['carmilla-wizo:Airing [Hardsub]']
+
+
