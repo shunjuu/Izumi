@@ -46,7 +46,7 @@ def fix_args(inote, conf):
     print("Arg: " + inote)
     print()
 
-    args = inote.split(',')
+    args = inote.split('||')
 
     # The most standard case: A new file is presented, devoid of folder
     if 'isdir' not in inote.lower():
@@ -78,7 +78,8 @@ def fix_args(inote, conf):
         # args[0] is the path up to the folder, args[3] is the name of the folder itself
         # folder name is args[3], not args[2], because extra comma is inserted between
         # CREATE,ISDIR, increasing the array length by 1
-        path = args[0] + args[3] + "/"
+        # Update: args[2] instead of args[3] due to changes in delimiting to ||
+        path = args[0] + args[2] + "/"
 
         # Get all the files in the new dir, there should only be a single .mkv softlink
         files = os.listdir(path)
@@ -89,7 +90,7 @@ def fix_args(inote, conf):
             print("Detected more than a single file in the directory.")
             sys.exit(1)
 
-        new_inote = path + ",CREATE," + files[0]
+        new_inote = path + "||CREATE||" + files[0]
         print("Returning: " + new_inote, end="\n\n")
         return new_inote
 
@@ -102,18 +103,14 @@ def convert_inote_to_list(inote):
     Note we need this method because if shows contain a "comma" in the name,
     str.split(',') will split on that too, in which case we need to reconnect
     the show names.
+
+    Update v3: Delimiter has been changed to ||. All we need to do is split and return it.
     """
 
-    args = inote.split(',')
+    args = inote.split('||')
+    return args
 
-    # Copy over the first two argument
-    new_args = [None] * 2
-    new_args[0] = args[0]
-    new_args[1] = args[1]
-
-
-
-def clean_filename(filename, ext):
+def create_clean_filename(filename, ext):
     """
     Returns a str, which is the new filename for a file,
     i.e., [HorribleSubs] Grand Blue - 01 [1080p].mkv returns
