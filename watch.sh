@@ -13,9 +13,20 @@ echo "yq executable: $yq"
 echo "watch dir: $watch_dir"
 '
 
+: '
 inotifywait -m -r -c \
 	"$watch_dir" \
 	-e create |
 	while read line; do
 		python3 main.py "$line"
 	done
+'
+
+inotifywait -m -r --format '%w||%e||%f' \
+	"$watch_dir" \
+	-e create |
+	while read line; do
+		echo "$line"
+	done
+
+
