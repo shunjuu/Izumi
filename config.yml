@@ -40,3 +40,5 @@ url:
             name: "Currently Airing [Hardsub]"
             urls: ['https://on.aeri.jp/post']
 
+sys:
+    delimiter: "||"

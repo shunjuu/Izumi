@@ -6,9 +6,25 @@ from time import sleep
 from shlex import quote
 
 import requests
-import json, yaml
+import json, yaml 
 
-import anitopy
+import anitopy 
+
+class colors:
+    """
+    Shell based colors for colored printing!
+    """
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    CYAN = '\033[0;36m'
+    ORANGE = '\033[0;33m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 
 def load_config():
     """
@@ -33,8 +49,7 @@ def fix_args(inote, conf):
         runtype: Either "downloader" or "encoder"
 
     Observe there are two types of inputs:
-    ...folder/,CREATE,file.mkv
-    ...path/,"CREATE,ISDIR",folder_name
+    ...folder/,CREATE,file.mkv ...path/,"CREATE,ISDIR",folder_name
 
     This method returns the first if given so, and alters the second to
     become the first. Note that the list of files array must be length 1.
@@ -43,43 +58,74 @@ def fix_args(inote, conf):
         2. Any other files should already have been deleted prior to invoke
     """
 
-    print("Arg: " + inote)
-    print()
-
-    args = inote.split('||')
+    # Get the delimiter for the inote string passed in
+    inote_delim = conf['sys']['delimiter']
+    args = inote.split(inote_delim)
 
     # The most standard case: A new file is presented, devoid of folder
     if 'isdir' not in inote.lower():
 
-        print("A regular file was detected.")
+        print(colors.CYAN + "INFO: " + colors.ENDC + 
+                colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
+                "Detected a regular, non-directory file object was created.")
+
+        # The name of the file that was JUST MADE.
+        # (We assume the delimiter is always working properly.)
         new_filename = args[2]
 
         try:
             if new_filename.endswith(".meta"):
-                print("Detected a meta file, ignoring...")
-                sys.exit(0)
-        except:
-            print("Error when scanning for meta file")
-            pass
+                print(colors.FAIL + "FAIL: " + colors.ENDC + 
+                        colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
+                        "The new file created was a meta file. Ignoring the file and exiting.")
+                sys.exit(1)
 
-        print("Not a meta file, returning the argument as is.")
+        except SystemExit:
+            print()
+            sys.exit(1)
+
+        print(colors.CYAN + "INFO: " + colors.ENDC +
+                colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
+                "New file is " + colors.OKGREEN + "not" + colors.ENDC + " " +
+                "a meta file.")
+        
+        print(colors.CYAN + "INFO: " + colors.ENDC + 
+                colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
+                "Returning unmodified inote: " + 
+                "\"" + colors.WARNING + inote + colors.ENDC + "\"")
+
+        print()
         return inote
 
     # A more common case, where the new directory is linked in.
-    elif 'isdir' in inote:
-        print("Detected a new directory was made.")
+    elif 'isdir' in inote.lower():
+        print(colors.CYAN + "INFO: " + colors.ENDC +
+                colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
+                "Detected a new directory was made.")
 
         # If we're running anything but a downloader, we need to ignore dirs.
         # Only the downloader needs to scan the dir (for ruTorrent)
         if conf['type'].lower() != "downloader":
-            print("Runtype is not a downloader. Exiting...")
+            print(colors.FAIL + "FAIL: " + colors.ENDC +
+                    colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
+                    "The runtype is not Downloader. Exiting the system...")
+            print()
             sys.exit(0)
+
+        else:
+            print(colors.CYAN + "INFO: " + colors.ENDC + 
+                    colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
+                    "The runtype is Downloader. Proceeding to scan the directory for file(s).")
         
         # args[0] is the path up to the folder, args[3] is the name of the folder itself
         # folder name is args[3], not args[2], because extra comma is inserted between
         # CREATE,ISDIR, increasing the array length by 1
         # Update: args[2] instead of args[3] due to changes in delimiting to ||
         path = args[0] + args[2] + "/"
+        print(colors.CYAN + "INFO: " + colors.ENDC + 
+                colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
+                "Scanning: " + 
+                colors.WARNING + "\"" + path + "\"" + colors.ENDC)
 
         # Get all the files in the new dir, there should only be a single .mkv softlink
         files = os.listdir(path)
@@ -87,15 +133,23 @@ def fix_args(inote, conf):
 
         # Make sure we only have one file
         if len(files) != 1:
-            print("Detected more than a single file in the directory.")
+            print(colors.FAIL + "FAIL: " + colors.ENDC +
+                    colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
+                    "Detected " + str(len(files)) + " files in the directory. Exiting..")
+            print()
             sys.exit(1)
 
-        new_inote = path + "||CREATE||" + files[0]
-        print("Returning: " + new_inote, end="\n\n")
+        new_inote = path + inote_delim + "CREATE" + inote_delim + files[0]
+        print(colors.CYAN + "INFO: " + colors.ENDC + 
+                colors.OKBLUE +"<fix_args>" + colors.ENDC + " " + 
+                "Returning new inote: " + 
+                colors.WARNING + new_inote + colors.ENDC)
+
+        print()
         return new_inote
 
 
-def convert_inote_to_list(inote):
+def convert_inote_to_list(inote, conf):
     """
     This converts the inotifywait string returned in fix_args()
     to an array for the rest of the program to use.
@@ -107,8 +161,23 @@ def convert_inote_to_list(inote):
     Update v3: Delimiter has been changed to ||. All we need to do is split and return it.
     """
 
-    args = inote.split('||')
+    # Get the delimiter
+    inote_delim = conf['sys']['delimiter']
+
+    print(colors.CYAN + "INFO: " + colors.ENDC +
+            colors.OKBLUE + "<convert_note_to_ilist>" + colors.ENDC + " " +
+            "Using delimiter: " + inote_delim)
+
+    args = inote.split(inote_delim)
+
+    print(colors.CYAN + "INFO: " + colors.ENDC +
+            colors.OKBLUE + "<convert_note_to_ilist>" + colors.ENDC + " " +
+            "Returning: " + 
+            colors.WARNING + str(args) + colors.ENDC)
+
+    print()
     return args
+
 
 def create_clean_filename(filename, ext):
     """
@@ -137,9 +206,19 @@ def create_clean_filename(filename, ext):
     new_file += ext
     return new_file
                 
+def convert(inote):
 
+    # Clear the terminal and print out the received argument
+    os.system('clear') if os.name != "nt" else os.system('cls')
+    print(colors.CYAN + "INFO: " + colors.ENDC +
+            colors.OKBLUE + "<convert>" + colors.ENDC + " " +  
+            "Received argument: \"" + 
+            colors.WARNING + inote + colors.ENDC + "\"", end="\n\n")
 
+    conf = load_config()
 
+    args = convert_inote_to_list(fix_args(inote, conf), conf)
 
-print(fix_args(sys.argv[1], load_config()))
+if __name__ == "__main__":
+    convert(sys.argv[1])
 
