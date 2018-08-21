@@ -1,5 +1,6 @@
 import sys, os
 import pprint as pp
+import re
 
 from subprocess import call
 from time import sleep
@@ -17,9 +18,12 @@ class colors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
+    GREEN = '\033[32m'
     WARNING = '\033[93m'
-    CYAN = '\033[0;36m'
+    LCYAN = '\033[0;96m'
     ORANGE = '\033[0;33m'
+    MAGENTA = '\033[35m'
+    LMAGENTA = '\033[95m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
@@ -65,7 +69,7 @@ def fix_args(inote, conf):
     # The most standard case: A new file is presented, devoid of folder
     if 'isdir' not in inote.lower():
 
-        print(colors.CYAN + "INFO: " + colors.ENDC + 
+        print(colors.LCYAN + "INFO: " + colors.ENDC + 
                 colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
                 "Detected a regular, non-directory file object was created.")
 
@@ -84,12 +88,12 @@ def fix_args(inote, conf):
             print()
             sys.exit(1)
 
-        print(colors.CYAN + "INFO: " + colors.ENDC +
+        print(colors.LCYAN + "INFO: " + colors.ENDC +
                 colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
                 "New file is " + colors.OKGREEN + "not" + colors.ENDC + " " +
                 "a meta file.")
         
-        print(colors.CYAN + "INFO: " + colors.ENDC + 
+        print(colors.LCYAN + "INFO: " + colors.ENDC + 
                 colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
                 "Returning unmodified inote: " + 
                 "\"" + colors.WARNING + inote + colors.ENDC + "\"")
@@ -99,7 +103,7 @@ def fix_args(inote, conf):
 
     # A more common case, where the new directory is linked in.
     elif 'isdir' in inote.lower():
-        print(colors.CYAN + "INFO: " + colors.ENDC +
+        print(colors.LCYAN + "INFO: " + colors.ENDC +
                 colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
                 "Detected a new directory was made.")
 
@@ -113,7 +117,7 @@ def fix_args(inote, conf):
             sys.exit(0)
 
         else:
-            print(colors.CYAN + "INFO: " + colors.ENDC + 
+            print(colors.LCYAN + "INFO: " + colors.ENDC + 
                     colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
                     "The runtype is Downloader. Proceeding to scan the directory for file(s).")
         
@@ -122,7 +126,7 @@ def fix_args(inote, conf):
         # CREATE,ISDIR, increasing the array length by 1
         # Update: args[2] instead of args[3] due to changes in delimiting to ||
         path = args[0] + args[2] + "/"
-        print(colors.CYAN + "INFO: " + colors.ENDC + 
+        print(colors.LCYAN + "INFO: " + colors.ENDC + 
                 colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
                 "Scanning: " + 
                 colors.WARNING + "\"" + path + "\"" + colors.ENDC)
@@ -140,7 +144,7 @@ def fix_args(inote, conf):
             sys.exit(1)
 
         new_inote = path + inote_delim + "CREATE" + inote_delim + files[0]
-        print(colors.CYAN + "INFO: " + colors.ENDC + 
+        print(colors.LCYAN + "INFO: " + colors.ENDC + 
                 colors.OKBLUE +"<fix_args>" + colors.ENDC + " " + 
                 "Returning new inote: " + 
                 colors.WARNING + new_inote + colors.ENDC)
@@ -164,13 +168,13 @@ def convert_inote_to_list(inote, conf):
     # Get the delimiter
     inote_delim = conf['sys']['delimiter']
 
-    print(colors.CYAN + "INFO: " + colors.ENDC +
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
             colors.OKBLUE + "<convert_note_to_ilist>" + colors.ENDC + " " +
-            "Using delimiter: " + inote_delim)
+            "Using delimiter: " + colors.WARNING + inote_delim + colors.ENDC)
 
     args = inote.split(inote_delim)
 
-    print(colors.CYAN + "INFO: " + colors.ENDC +
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
             colors.OKBLUE + "<convert_note_to_ilist>" + colors.ENDC + " " +
             "Returning: " + 
             colors.WARNING + str(args) + colors.ENDC)
@@ -179,8 +183,42 @@ def convert_inote_to_list(inote, conf):
     return args
 
 
-def create_clean_filename(filename, ext):
+def get_source_filenames(mkv, mp4, args):
     """
+    This method takes the MKV and MP4 name dicts and populates them with 
+    source filenames.
+    """
+
+    # The original filename is guaranteed to be the second argument
+    mkv['src_filename'] = args[2]
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "MKV source filename: " + 
+            colors.MAGENTA + mkv['src_filename'] + colors.ENDC)
+
+
+    # The MP4 would be the same, just with an mp4 extension
+    """
+    mp4['src_filename'] = str(args[2][:-4] + ".mp4")
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "MP4 source filename: " + 
+            colors.MAGENTA + mp4['src_filename'] + colors.ENDC)
+    """
+
+    # Generate the full path of the source MKV file here
+    mkv['src_file_path'] = args[0] + args[2]
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "MKV source filepath: " + 
+            colors.MAGENTA + mkv['src_file_path'] + colors.ENDC)
+
+    print()
+    return
+
+
+def clean_filename(filename, ext):
+    """
+    Helper method.
     Returns a str, which is the new filename for a file,
     i.e., [HorribleSubs] Grand Blue - 01 [1080p].mkv returns
     Grand Blue - 01 [1080p].mkv
@@ -205,20 +243,146 @@ def create_clean_filename(filename, ext):
 
     new_file += ext
     return new_file
-                
+
+def generate_new_filenames(mkv, mp4):
+    """
+    Populates the MKV and MP4 name dictionaries with new, "cleaned" names.
+    Uses anitopy clean_filenames()
+    """
+
+    # Use clean_filename to generate the new clean filename
+    mkv['new_filename'] = clean_filename(mkv['src_filename'], ".mkv")
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC + 
+            "MKV new filename: " +
+            colors.LMAGENTA + mkv['new_filename'] + colors.ENDC)
+
+    mp4['new_filename'] = clean_filename(mkv['src_filename'], ".mp4")
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC + 
+            "MP4 new filename: " +
+            colors.LMAGENTA + mp4['new_filename'] + colors.ENDC)
+
+    print()
+    return
+
+
+def load_new_file_folders(mkv, mp4, conf):
+    """
+    Pulls the folders in which the new MP4 file will be made.
+
+    This method also loads the temp folder into MKV.
+    Will throw an error if the temp folder contains a ' in it.
+
+    !! DEPRECATED: MKV file is not copied twice. 
+    !! Will use the temp folder for both.
+    """
+
+    # Load the folder for the MP4
+    mp4['folder'] = conf['folders']['mp4']
+
+    # If it doens't end with a "/", append it
+    if not mp4['folder'].endswith("/"):
+        mp4['folder'] += "/"
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "Hardsub base folder: " + 
+            colors.MAGENTA + mp4['folder'] + colors.ENDC)
+
+
+    # Load the temp folder
+    mkv['temp'] = conf['folders']['temp']
+
+    # If it doens't end with a "/", append it
+    if not mkv['temp'].endswith("/"):
+        mkv['temp'] += "/"
+
+    # We have to fail the system if ' appears in the temp folder, as it messes up
+    # ffmpeg's parsing.
+    if "'" in mkv['temp']:
+        print(colors.FAIL + "FAIL: " + colors.ENDC +
+                "Unexpected single quote was found in the temp folder path. The program will now exit.")
+        sys.exit(1)
+
+    # Print temp folder message
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "MKV temp. folder: " + 
+            colors.MAGENTA + mkv['temp'] + colors.ENDC)
+
+    # For safety, we need to literal quote every folder in the temp path
+    # Else ffmpeg may not properly load the folders
+    temp_path = mkv['temp'].split("/")
+    mkv['quoted_temp'] = str()
+    for folder in temp_path:
+        if folder:
+            # Forcibly quote everything - shlex will not capture commas
+            mkv['quoted_temp'] = mkv['quoted_temp'] + "/" + "'" + folder + "'"
+    mkv['quoted_temp'] += "/"
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "MKV quoted temp. folder: " +
+            colors.LMAGENTA + mkv['quoted_temp'] + colors.ENDC)
+
+    print()
+    return
+
+def get_show_name(mkv, mp4, args):
+
+    # Pull the absolute path of up to and including the directory
+    show_abs_path = args[0]
+
+    show = re.match('.*\/(.*)\/', show_abs_path)
+    show_name = show.group(1)
+
+    mkv['show_name'] = show_name
+    mp4['show_name'] = show_name
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "Show name: " + 
+            colors.LMAGENTA + show_name + colors.ENDC)
+
+    print()
+    return()
+
+
 def convert(inote):
 
     # Clear the terminal and print out the received argument
     os.system('clear') if os.name != "nt" else os.system('cls')
-    print(colors.CYAN + "INFO: " + colors.ENDC +
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
             colors.OKBLUE + "<convert>" + colors.ENDC + " " +  
             "Received argument: \"" + 
             colors.WARNING + inote + colors.ENDC + "\"", end="\n\n")
 
+    # Load the config file, must be named "config.yml"
     conf = load_config()
 
+    # Load a fixed inote string into an array
     args = convert_inote_to_list(fix_args(inote, conf), conf)
 
+
+    # -- GENERATE THE FILENAME STRINGS -- #
+    print(colors.GREEN + "NOTICE: " + colors.ENDC + 
+            "Now generating new filenames and filepaths..." + colors.ENDC,
+            end="\n\n")
+
+    # Create two dicts: One for MKV names and one for MP4 names
+    mkv = dict()
+    mp4 = dict()
+
+    # Get the base name of the MKV file, and its MP4 equivalent
+    get_source_filenames(mkv, mp4, args)
+
+    # Use Anitopy to get the new, cleaned filenames
+    generate_new_filenames(mkv, mp4)
+
+    # Get the folders where a copy of the MKV and the new MP4 will be put.
+    load_new_file_folders(mkv, mp4, conf)
+
+    # Get the show name
+    get_show_name(mkv, mp4, args)
+
+
+# Run convert if this file is invoked directly, which it will be
 if __name__ == "__main__":
     convert(sys.argv[1])
-
