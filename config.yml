@@ -14,11 +14,12 @@ folders:
     # mkv: "/home/rocia/Videos/NyaaKV"
 
     # Where the hardsub mp4 will be made
-    mp4: "/home/rocia/Videos/Nyaa4"
+    # mp4: "/home/rocia/Videos/Nyaa4"
+    mp4: "../../../Videos/Nyaa4"
 
     # A temporary directory used to store a copy of the mkv.
     # This temp directory may NOT contain the single quote.
-    temp: "/home/rocia/Inari,KonKon/.temp"
+    temp: "../../../Videos/Inari, KonKon/.temp"
 
 sync:
     # rclone folder to upload all show/ep.mkv to

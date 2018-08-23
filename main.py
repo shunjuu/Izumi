@@ -267,7 +267,7 @@ def generate_new_filenames(mkv, mp4):
     return
 
 
-def load_new_file_folders(mkv, mp4, conf):
+def load_hardsub_folder_and_paths(mkv, mp4, conf, args):
     """
     Pulls the folders in which the new MP4 file will be made.
 
@@ -278,20 +278,54 @@ def load_new_file_folders(mkv, mp4, conf):
     !! Will use the temp folder for both.
     """
 
+    # We need to run this safety method first, as the hardsub output file
+    # relies on the show name existing
+    if 'show_name' not in mkv or 'show_name' not in mp4:
+        print(colors.WARNING + "NOTICE: " + colors.ENDC +
+                colors.FAIL + "get_show_name()" + colors.ENDC + " " + 
+                "not invoked before" + " " + 
+                colors.FAIL + "load_hardsub_folder_and_paths()" + colors.ENDC + ", " +
+                "executing " +
+                colors.OKGREEN + "get_show_name()" + colors.ENDC + "...")
+        get_show_name(mkv, mp4, args)
+
     # Load the folder for the MP4
     mp4['folder'] = conf['folders']['mp4']
+
+    # Get the absolute path of the folder if it's not in abs
+    mp4['folder'] = os.path.abspath(mp4['folder'])
 
     # If it doens't end with a "/", append it
     if not mp4['folder'].endswith("/"):
         mp4['folder'] += "/"
+
 
     print(colors.LCYAN + "INFO: " + colors.ENDC +
             "Hardsub base folder: " + 
             colors.MAGENTA + mp4['folder'] + colors.ENDC)
 
 
+    # Generate the output MP4 file string/path
+    mp4['hardsubbed_file'] = mp4['folder'] + mp4['show_name'] + "/" + mp4['new_filename']
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC + 
+            "Hardsub destination filepath: " +
+            colors.LMAGENTA + mp4['hardsubbed_file'] + colors.ENDC)
+
+    print()
+    return
+
+def load_temp_folder_and_paths(mkv, mp4, conf):
+    """
+    Helper method that will load and generate the temp folder path and the temp file.
+    While mp4 is included, only the MKV dict is modified.
+    """
+
     # Load the temp folder
     mkv['temp'] = conf['folders']['temp']
+
+    # Get the absolute path of the folder if it's not in abs
+    mkv['temp'] = os.path.abspath(mkv['temp'])
 
     # If it doens't end with a "/", append it
     if not mkv['temp'].endswith("/"):
@@ -305,9 +339,11 @@ def load_new_file_folders(mkv, mp4, conf):
         sys.exit(1)
 
     # Print temp folder message
+    """
     print(colors.LCYAN + "INFO: " + colors.ENDC +
             "MKV temp. folder: " + 
             colors.MAGENTA + mkv['temp'] + colors.ENDC)
+    """
 
     # For safety, we need to literal quote every folder in the temp path
     # Else ffmpeg may not properly load the folders
@@ -323,10 +359,24 @@ def load_new_file_folders(mkv, mp4, conf):
             "MKV quoted temp. folder: " +
             colors.LMAGENTA + mkv['quoted_temp'] + colors.ENDC)
 
+    
+    # The temporary file is guaranteed to be named "temp.mkv" for safety.
+    # Get its path that can be used for -vf subtitles="path"
+    mkv['temp_file_path'] = mkv['quoted_temp'] + "temp.mkv"
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC + 
+            "Temp.mkv subtitles arg path: " + 
+            colors.LMAGENTA + mkv['temp_file_path'] + colors.ENDC)
+
     print()
     return
 
+
 def get_show_name(mkv, mp4, args):
+    """
+    Gets the show name from the args path and loads it into the two dictionaries.
+    Uses Python re to match the words between the last two /../
+    """
 
     # Pull the absolute path of up to and including the directory
     show_abs_path = args[0]
@@ -373,14 +423,16 @@ def convert(inote):
     # Get the base name of the MKV file, and its MP4 equivalent
     get_source_filenames(mkv, mp4, args)
 
+    # Get the show name, BE SURE TO RUN THIS BEFORE load_hardsub_folder_and_paths
+    # get_show_name(mkv, mp4, args)
+
     # Use Anitopy to get the new, cleaned filenames
     generate_new_filenames(mkv, mp4)
 
     # Get the folders where a copy of the MKV and the new MP4 will be put.
-    load_new_file_folders(mkv, mp4, conf)
+    load_hardsub_folder_and_paths(mkv, mp4, conf, args)
+    load_temp_folder_and_paths(mkv, mp4, conf)
 
-    # Get the show name
-    get_show_name(mkv, mp4, args)
 
 
 # Run convert if this file is invoked directly, which it will be
