@@ -90,8 +90,7 @@ def fix_args(inote, conf):
 
         print(colors.LCYAN + "INFO: " + colors.ENDC +
                 colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
-                "New file is " + colors.OKGREEN + "not" + colors.ENDC + " " +
-                "a meta file.")
+                "New file is not a meta file.")
         
         print(colors.LCYAN + "INFO: " + colors.ENDC + 
                 colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
@@ -304,6 +303,13 @@ def load_hardsub_folder_and_paths(mkv, mp4, conf, args):
             "Hardsub base folder: " + 
             colors.MAGENTA + mp4['folder'] + colors.ENDC)
 
+    # Generate the folder with the show name to place the new mp4 file in
+    mp4['new_hardsub_folder'] = mp4['folder'] + mp4['show_name'] + "/"
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "Hardsub destination folder: " +
+            colors.LMAGENTA + mp4['new_hardsub_folder'] + colors.ENDC)
+
 
     # Generate the output MP4 file string/path
     mp4['hardsubbed_file'] = mp4['folder'] + mp4['show_name'] + "/" + mp4['new_filename']
@@ -314,6 +320,7 @@ def load_hardsub_folder_and_paths(mkv, mp4, conf, args):
 
     print()
     return
+
 
 def load_temp_folder_and_paths(mkv, mp4, conf):
     """
@@ -395,7 +402,7 @@ def get_show_name(mkv, mp4, args):
     return()
 
 
-def convert(inote):
+def burn(inote):
 
     # Clear the terminal and print out the received argument
     os.system('clear') if os.name != "nt" else os.system('cls')
@@ -406,6 +413,15 @@ def convert(inote):
 
     # Load the config file, must be named "config.yml"
     conf = load_config()
+
+    # Detremine what type of Izumi we're running
+    izumi_type = conf['type']
+    print(colors.GREEN + "NOTICE: " + colors.ENDC +
+            "Using mode \"" +
+            colors.OKGREEN + izumi_type + colors.ENDC
+            + "\""
+            + ".")
+    print()
 
     # Load a fixed inote string into an array
     args = convert_inote_to_list(fix_args(inote, conf), conf)
@@ -424,7 +440,7 @@ def convert(inote):
     get_source_filenames(mkv, mp4, args)
 
     # Get the show name, BE SURE TO RUN THIS BEFORE load_hardsub_folder_and_paths
-    # get_show_name(mkv, mp4, args)
+    get_show_name(mkv, mp4, args)
 
     # Use Anitopy to get the new, cleaned filenames
     generate_new_filenames(mkv, mp4)
@@ -433,8 +449,30 @@ def convert(inote):
     load_hardsub_folder_and_paths(mkv, mp4, conf, args)
     load_temp_folder_and_paths(mkv, mp4, conf)
 
+    # We want to get the current working directory for reference
+    # WORK_DIR/bin/ffmpeg{-10bit,}
+    # Design note: The ffmpeg conversion script should not have to
+    # figure out where it is - pass in the full path of the executable
+    ffmpeg = dict()
+    ffmpeg['dir_path'] = os.path.dirname(os.path.realpath(__file__)) + "/bin/"
+    print(colors.LCYAN + "INFO: " + colors.ENDC + 
+            "Application \"bin/\" directory: " + 
+            colors.LMAGENTA + ffmpeg['dir_path'] + colors.ENDC)
+
+    # Add the other ffmpeg executables here
+    ffmpeg['ffmpeg'] = ffmpeg['dir_path'] + "ffmpeg"
+    ffmpeg['ffmpeg-10bit'] = ffmpeg['dir_path'] + "ffmpeg-10bit"
+    print()
+
+
+    # --------------------------------------------------------------------- #
+    # String generation is complete, start to run transfer process
+    # --------------------------------------------------------------------- #
+    
+     
+
 
 
 # Run convert if this file is invoked directly, which it will be
 if __name__ == "__main__":
-    convert(sys.argv[1])
+    burn(sys.argv[1])

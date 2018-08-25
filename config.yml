@@ -43,3 +43,6 @@ url:
 
 sys:
     delimiter: "||"
+
+    # A special setting that disables Izumi and only downloads shows
+    download-only: False
