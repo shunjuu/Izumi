@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, shutil
 import pprint as pp
 import re
 
@@ -182,6 +182,34 @@ def convert_inote_to_list(inote, conf):
     return args
 
 
+def get_runtype(input_type):
+    """
+    Takes the input_type string and gets the runtype from it.
+    Returns "downloader" or "encoder".
+
+    Method is mostly just to make sure that any similar-enough string 
+    in the "type" is loaded properly.
+    """
+
+    lower_type = input_type.lower()
+    rtype = str()
+    if lower_type.startswith("d"):
+        rtype = "downloader"
+    elif lower_type.startswith("e"):
+        rtype = "encoder"
+    else:
+        print()
+        raise Exception("No proper config type found in config.yml!")
+    
+    print(colors.GREEN + "NOTICE: " + colors.ENDC +
+            "Using mode \"" +
+            colors.OKGREEN + rtype + colors.ENDC
+            + "\""
+            + ".")
+    print()
+    return rtype
+
+
 def get_source_filenames(mkv, mp4, args):
     """
     This method takes the MKV and MP4 name dicts and populates them with 
@@ -193,6 +221,7 @@ def get_source_filenames(mkv, mp4, args):
 
     print(colors.LCYAN + "INFO: " + colors.ENDC +
             "MKV source filename: " + 
+            colors.OKBLUE + "< mkv['src_filename'] >" + colors.ENDC + " " +
             colors.MAGENTA + mkv['src_filename'] + colors.ENDC)
 
 
@@ -209,6 +238,7 @@ def get_source_filenames(mkv, mp4, args):
     mkv['src_file_path'] = args[0] + args[2]
     print(colors.LCYAN + "INFO: " + colors.ENDC +
             "MKV source filepath: " + 
+            colors.OKBLUE + "< mkv['src_file_path'] >" + colors.ENDC + " " +
             colors.MAGENTA + mkv['src_file_path'] + colors.ENDC)
 
     print()
@@ -254,27 +284,27 @@ def generate_new_filenames(mkv, mp4):
 
     print(colors.LCYAN + "INFO: " + colors.ENDC + 
             "MKV new filename: " +
+            colors.OKBLUE + "< mkv['new_filename'] >" + colors.ENDC + " " +
             colors.LMAGENTA + mkv['new_filename'] + colors.ENDC)
 
     mp4['new_filename'] = clean_filename(mkv['src_filename'], ".mp4")
 
     print(colors.LCYAN + "INFO: " + colors.ENDC + 
             "MP4 new filename: " +
+            colors.OKBLUE + "< mp4['new_filename'] >" + colors.ENDC + " " +
             colors.LMAGENTA + mp4['new_filename'] + colors.ENDC)
 
     print()
     return
 
 
-def load_hardsub_folder_and_paths(mkv, mp4, conf, args):
+def load_destination_folder_and_paths(mkv, mp4, conf, args):
     """
     Pulls the folders in which the new MP4 file will be made.
 
     This method also loads the temp folder into MKV.
     Will throw an error if the temp folder contains a ' in it.
 
-    !! DEPRECATED: MKV file is not copied twice. 
-    !! Will use the temp folder for both.
     """
 
     # We need to run this safety method first, as the hardsub output file
@@ -283,17 +313,47 @@ def load_hardsub_folder_and_paths(mkv, mp4, conf, args):
         print(colors.WARNING + "NOTICE: " + colors.ENDC +
                 colors.FAIL + "get_show_name()" + colors.ENDC + " " + 
                 "not invoked before" + " " + 
-                colors.FAIL + "load_hardsub_folder_and_paths()" + colors.ENDC + ", " +
+                colors.FAIL + "load_destination_folder_and_paths()" + colors.ENDC + ", " +
                 "executing " +
                 colors.OKGREEN + "get_show_name()" + colors.ENDC + "...")
         get_show_name(mkv, mp4, args)
 
+    # Load the folder for the MKV
+    mkv['folder'] = conf['folders']['mkv']
+    # Get the absolute path of the folder if it's not in abs
+    mkv['folder'] = os.path.abspath(mkv['folder'])
+    # If it doesn't end wiht a "/", append it
+    if not mkv['folder'].endswith("/"):
+        mkv['folder'] += "/"
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "MKV base folder: " + 
+            colors.OKBLUE + "< mkv['folder'] > " + colors.ENDC +
+            colors.MAGENTA + mkv['folder'] + colors.ENDC)
+
+    # Generate the folder with the show name to place the new MKV file in
+    mkv['new_hardsub_folder'] = mkv['folder'] + mkv['show_name'] + "/"
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "Hardsub destination folder: " +
+            colors.OKBLUE + "< mkv['new_hardsub_folder'] > " + colors.ENDC + 
+            colors.LMAGENTA + mkv['new_hardsub_folder'] + colors.ENDC)
+
+    # Generate the output MKV file string/path
+    mkv['hardsubbed_file'] = mkv['folder'] + mkv['show_name'] + "/" + mkv['new_filename']
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC + 
+            "Hardsub destination filepath: " +
+            colors.OKBLUE + "< mkv['hardsubbed_file'] > " + colors.ENDC + 
+            colors.LMAGENTA + mkv['hardsubbed_file'] + colors.ENDC)
+
+    print()
+
+
     # Load the folder for the MP4
     mp4['folder'] = conf['folders']['mp4']
-
     # Get the absolute path of the folder if it's not in abs
     mp4['folder'] = os.path.abspath(mp4['folder'])
-
     # If it doens't end with a "/", append it
     if not mp4['folder'].endswith("/"):
         mp4['folder'] += "/"
@@ -301,6 +361,7 @@ def load_hardsub_folder_and_paths(mkv, mp4, conf, args):
 
     print(colors.LCYAN + "INFO: " + colors.ENDC +
             "Hardsub base folder: " + 
+            colors.OKBLUE + "< mp4['folder'] > " + colors.ENDC + 
             colors.MAGENTA + mp4['folder'] + colors.ENDC)
 
     # Generate the folder with the show name to place the new mp4 file in
@@ -308,6 +369,7 @@ def load_hardsub_folder_and_paths(mkv, mp4, conf, args):
 
     print(colors.LCYAN + "INFO: " + colors.ENDC +
             "Hardsub destination folder: " +
+            colors.OKBLUE + "< mp4['new_hardsub_folder'] > " + colors.ENDC + 
             colors.LMAGENTA + mp4['new_hardsub_folder'] + colors.ENDC)
 
 
@@ -316,6 +378,7 @@ def load_hardsub_folder_and_paths(mkv, mp4, conf, args):
 
     print(colors.LCYAN + "INFO: " + colors.ENDC + 
             "Hardsub destination filepath: " +
+            colors.OKBLUE + "< mp4['hardsubbed_file'] > " + colors.ENDC + 
             colors.LMAGENTA + mp4['hardsubbed_file'] + colors.ENDC)
 
     print()
@@ -346,11 +409,10 @@ def load_temp_folder_and_paths(mkv, mp4, conf):
         sys.exit(1)
 
     # Print temp folder message
-    """
     print(colors.LCYAN + "INFO: " + colors.ENDC +
             "MKV temp. folder: " + 
+            colors.OKBLUE + "< mkv['temp'] > " + colors.ENDC +
             colors.MAGENTA + mkv['temp'] + colors.ENDC)
-    """
 
     # For safety, we need to literal quote every folder in the temp path
     # Else ffmpeg may not properly load the folders
@@ -364,16 +426,27 @@ def load_temp_folder_and_paths(mkv, mp4, conf):
 
     print(colors.LCYAN + "INFO: " + colors.ENDC +
             "MKV quoted temp. folder: " +
+            colors.OKBLUE + "< mkv['quoted_temp'] > " + colors.ENDC +
             colors.LMAGENTA + mkv['quoted_temp'] + colors.ENDC)
+
+    print()
+
+    # We'll need a regular, non-quoted version of the string for shutil.copy2() to use
+    mkv['temp_file_path'] = mkv['temp'] + "temp.mkv"
+    print(colors.LCYAN + "INFO: " + colors.ENDC + 
+            "temp.mkv regular file path: " +
+            colors.OKBLUE + "< mkv['temp_file_path'] > " + colors.ENDC + 
+            colors.LMAGENTA + mkv['temp_file_path'] + colors.ENDC)
 
     
     # The temporary file is guaranteed to be named "temp.mkv" for safety.
-    # Get its path that can be used for -vf subtitles="path"
-    mkv['temp_file_path'] = mkv['quoted_temp'] + "temp.mkv"
+    # Get its path that can be used for -vf subtitles="path", quoted version
+    mkv['quoted_temp_file_path'] = mkv['quoted_temp'] + "temp.mkv"
 
     print(colors.LCYAN + "INFO: " + colors.ENDC + 
             "Temp.mkv subtitles arg path: " + 
-            colors.LMAGENTA + mkv['temp_file_path'] + colors.ENDC)
+            colors.OKBLUE + "< mkv['quoted_temp_file_path'] > " + colors.ENDC + 
+            colors.LMAGENTA + mkv['quoted_temp_file_path'] + colors.ENDC)
 
     print()
     return
@@ -396,6 +469,7 @@ def get_show_name(mkv, mp4, args):
 
     print(colors.LCYAN + "INFO: " + colors.ENDC +
             "Show name: " + 
+            colors.OKBLUE + "< mkv/mp4['show_name'] >" + colors.ENDC + " " +
             colors.LMAGENTA + show_name + colors.ENDC)
 
     print()
@@ -415,13 +489,7 @@ def burn(inote):
     conf = load_config()
 
     # Detremine what type of Izumi we're running
-    izumi_type = conf['type']
-    print(colors.GREEN + "NOTICE: " + colors.ENDC +
-            "Using mode \"" +
-            colors.OKGREEN + izumi_type + colors.ENDC
-            + "\""
-            + ".")
-    print()
+    izumi_type = get_runtype(conf['type'])
 
     # Load a fixed inote string into an array
     args = convert_inote_to_list(fix_args(inote, conf), conf)
@@ -439,14 +507,14 @@ def burn(inote):
     # Get the base name of the MKV file, and its MP4 equivalent
     get_source_filenames(mkv, mp4, args)
 
-    # Get the show name, BE SURE TO RUN THIS BEFORE load_hardsub_folder_and_paths
+    # Get the show name, BE SURE TO RUN THIS BEFORE load_destination_folder_and_paths
     get_show_name(mkv, mp4, args)
 
     # Use Anitopy to get the new, cleaned filenames
     generate_new_filenames(mkv, mp4)
 
     # Get the folders where a copy of the MKV and the new MP4 will be put.
-    load_hardsub_folder_and_paths(mkv, mp4, conf, args)
+    load_destination_folder_and_paths(mkv, mp4, conf, args)
     load_temp_folder_and_paths(mkv, mp4, conf)
 
     # We want to get the current working directory for reference
@@ -457,19 +525,66 @@ def burn(inote):
     ffmpeg['dir_path'] = os.path.dirname(os.path.realpath(__file__)) + "/bin/"
     print(colors.LCYAN + "INFO: " + colors.ENDC + 
             "Application \"bin/\" directory: " + 
+            colors.OKBLUE + "< ffmpeg['dir_path'] >" + colors.ENDC + " " +  
             colors.LMAGENTA + ffmpeg['dir_path'] + colors.ENDC)
 
-    # Add the other ffmpeg executables here
+    # ffmpeg executable
     ffmpeg['ffmpeg'] = ffmpeg['dir_path'] + "ffmpeg"
+    print(colors.LCYAN + "INFO: " + colors.ENDC + 
+            "ffmpeg executable path: " +
+            colors.OKBLUE + "< ffmpeg['ffmpeg'] >" + colors.ENDC + " " +  
+            colors.MAGENTA + ffmpeg['ffmpeg'] + colors.ENDC)
+
     ffmpeg['ffmpeg-10bit'] = ffmpeg['dir_path'] + "ffmpeg-10bit"
+    print(colors.LCYAN + "INFO: " + colors.ENDC + 
+            "ffmpeg-10bit executable path: " +
+            colors.OKBLUE + "< ffmpeg['ffmpeg-10bit'] >" + colors.ENDC + " " +  
+            colors.MAGENTA + ffmpeg['ffmpeg-10bit'] + colors.ENDC)
+
     print()
 
 
     # --------------------------------------------------------------------- #
     # String generation is complete, start to run transfer process
+    # Note; izumi_type is the current type of downloader
     # --------------------------------------------------------------------- #
     
-     
+    """
+    pp.pprint(mkv)
+    print()
+    pp.pprint(mp4)
+    print()
+    """
+
+    # Step 1: We always want to copy the new file to a MKV: 
+    # Note: Deprecation since we're using a temp file, we technically only want
+    # to do this if we're in DOWNLAODER mode
+    if izumi_type == "downloader":
+        if not os.path.exists(mkv['new_hardsub_folder']):
+            os.makedirs(mkv['new_hardsub_folder'])
+        shutil.copy2(mkv['src_file_path'], mkv['hardsubbed_file'], follow_symlinks=True)
+
+    # Step 2: Upload the file online, but only if mode is downloader
+    # Step 2.5: If mode is downloader, only proceed from here if unsucessful call to proxies
+    # Step 2.5: If mode is encoder, continue
+    if izumi_type == "downloader":
+        pass
+        # Do sync
+        # Ping Izumi, if successful exit, if unsuccessful continue
+
+    # No more type checking needed as everything here must be encoder
+
+    # Step 3: Copy the file into a temp.mkv in temp for encoding
+    shutil.copy2(mkv['hardsubbed_file'], mkv['temp_file_path'], follow_symlinks=True)
+
+    # Step 4: Execute ffmpeg script to encode videos
+
+    # Step 5: Upload the new MP4 file (regardless of mode)
+
+    # step 6: Clear out all the new files
+    
+
+
 
 
 

@@ -8,21 +8,24 @@ type: "downloader"
 
 folders:
     # The directory in which new files will be made in by ruTorrent or the flask server
-    watch: "/home/rocia/Videos/"
+    watch: "/home/rocia/Videos/Incoming"
 
     # Where a copy of the mkv video will be made
-    # mkv: "/home/rocia/Videos/NyaaKV"
+    mkv: "/home/rocia/Videos/MKV"
 
     # Where the hardsub mp4 will be made
     # mp4: "/home/rocia/Videos/Nyaa4"
-    mp4: "../../../Videos/Nyaa4"
+    mp4: "../../../Videos/MP4"
 
     # A temporary directory used to store a copy of the mkv.
     # This temp directory may NOT contain the single quote.
-    temp: "../../../Videos/Inari, KonKon/.temp"
+    temp: "../../../Videos/temp"
 
 sync:
     # rclone folder to upload all show/ep.mkv to
+    # Note: We are going to assume that rclone is already installed on the host sytsem,
+    # as destinations are typically personal and should not be with the application
+    # ffmpeg and ffmpeg-10bit are included as they are standalone
     mkv:
         priority: ['sanka-kan:Airing']
         regular: ['carmilla-wizo:Airing']
