@@ -557,8 +557,7 @@ def notify_mkv_encode(conf, mkv, izumi_type):
                     "Sending x264 encode request to " + 
                     colors.OKBLUE + encoder + colors.ENDC + "... ", end="")
 
-            r = requests.post(encoder, json=body, timeout=5
-)
+            r = requests.post(encoder, json=body, timeout=5)
             # Continue onto the next one, as the current failed
             if r.status_code != conf['sync']['mkv']['encoders']['status_code']:
                 raise Exception("Bad status code!")
