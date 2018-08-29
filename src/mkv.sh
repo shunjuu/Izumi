@@ -28,6 +28,7 @@ config=$(eval realpath "config.yml")
 
 # Get the mkv directory from the config
 mkv_dir=$(eval "$yq" read "$config" folders.mkv)
+mkv_dir=$(eval realpath "$mkv_dir")
 # echo "Scanning from: $mkv_dir"
 # echo
 

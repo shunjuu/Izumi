@@ -521,6 +521,7 @@ def notify_mkv_upload(conf, mkv):
             print(colors.FAIL + "Failed" + colors.ENDC + ".")
 
     print()
+    return
 
 
 def notify_mkv_encode(conf, mkv, izumi_type):
@@ -610,6 +611,100 @@ def notify_mkv_encode(conf, mkv, izumi_type):
             "mode.")
     print()
     return izumi_type
+
+
+def upload_mp4():
+    """
+    Call the script that uploads the matroska files.
+    """
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC + 
+            "Now uploading MP4 files...")
+    print() # Add one for before the script
+
+    os.system("src/mp4.sh")
+
+    print()
+    return
+
+
+def notify_mp4_upload(conf, mp4):
+    """
+    Sends a POST request that will issue notifications about the new mp4.
+    We use Python to send the notification because curling in the bash shell
+        is unreliable, as discovered from convert.sh.
+    """
+
+    print()
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "Now sending MP4 upload notifications...")
+
+    # Create the body
+    body = dict()
+    body['json-type'] = 2
+    body['source'] = "Undefined"
+    body['show_name'] = mp4['show_name']
+    body['location'] = conf['url']['upload']['mp4']['name']
+    body['file'] = mp4['new_filename']
+    body['file_size'] = os.path.getsize(mp4['hardsubbed_file'])
+
+    for url in conf['url']['upload']['mp4']['urls']:
+        print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
+                "Sending notification to " +
+                colors.OKBLUE + url + colors.ENDC + "... ", end="")
+        try:
+            r = requests.post(url, json=body)
+            print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+        except:
+            print(colors.FAIL + "Failed" + colors.ENDC + ".")
+
+    print()
+    return
+
+
+def distribute_mp4(conf):
+    """
+    Makes a blank POST request to various destinations to notify them to distribute new MP4s
+    """
+    
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "Sending requests to distribute newly generate MP4 file(s)...")
+
+    print(colors.WARNING + "NOTICE: " + colors.ENDC +
+            "Now sending requests to "
+            + colors.WARNING + "ALWAYS" + colors.ENDC +
+            " destinations...")
+    # First, post all of the "always" destinations
+    for distributor in conf['sync']['mp4-distribution']['distributors']['always']:
+        print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
+                "Sending request to " + 
+                colors.OKBLUE + distributor + colors.ENDC +
+                "... ",end="")
+        try:
+            r = requests.post(distributor, timeout=5)
+            print(colors.OKGREEN + "Success." + colors.ENDC)
+        except:
+            print(colors.FAIL + "Failed." + colors.ENDC)
+
+    # Second, try the sequential ones until one passes or all fail
+    print(colors.WARNING + "NOTICE: " + colors.ENDC +
+            "Now sending requests to "
+            + colors.WARNING + "SEQUENTIAL" + colors.ENDC +
+            " destinations...")
+    for distributor in conf['sync']['mp4-distribution']['distributors']['sequential']:
+        print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
+                "Sending request to " + 
+                colors.OKBLUE + distributor + colors.ENDC +
+                "... ",end="")
+        try:
+            r = requests.post(distributor, timeout=60)
+            print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+            break
+        except:
+            print(colors.FAIL + "Failed" + colors.ENDC + ".")
+
+    print()
+    return
 
 
 def burn(inote):
@@ -708,16 +803,30 @@ def burn(inote):
         notify_mkv_upload(conf, mkv)
         izumi_type = notify_mkv_encode(conf, mkv, izumi_type)
         
+
     # Type check for encoder, as if encoder request succeeds, it will still continue 
     # to clear the files at the end
-
-    # Step 3: Copy the file into a temp.mkv in temp for encoding
     if izumi_type == "encoder":
+        # Step 3: Copy the file into a temp.mkv in temp for encoding
         shutil.copy2(mkv['hardsubbed_file'], mkv['temp_file_path'], follow_symlinks=True)
 
-    # Step 4: Execute ffmpeg script to encode videos
+        # Step 4: Execute ffmpeg script to encode videos
+        # Make the directory the new folder will be in
+        if not os.path.exists(mp4['new_hardsub_folder']):
+            os.makedirs(mp4['new_hardsub_folder'])
+        os.system("src/encode.sh %s %s"
+                % (mkv['quoted_temp_file_path'], quote(mp4['hardsubbed_file'])))
 
-    # Step 5: Upload the new MP4 file (regardless of mode)
+        # Step 5: Upload the new MP4 file 
+        upload_mp4()
+        notify_mp4_upload(conf, mp4)
+
+        # Step 5.1: If we're originally just an encoder, we need to post one of the heavy servers
+        # for file transferring, or fallback to just uploading everything
+        # Check conf, not izumi_type, to see if original runtype is encoder or downloader
+        if get_runtype(conf['type']) == "encoder"):
+            distribute_mp4(conf)
+        
 
     # step 6: Clear out all the new files
     
