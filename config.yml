@@ -32,7 +32,9 @@ sync:
         regular: ['carmilla-wizo:Airing', 'weebrary:Airing']
         encoders: 
                 x264: ['http://izumi.best.moe:1400']
-                x265: ['http://sakura.wizo.sh:9696']
+                x265: ['http://sakura.wizo.sh:9695']
+                status_code: 418
+                fallback: yes
     mp4:
         priority: ['sanka-kan:Airing [Hardsub]']
         regular: ['carmilla-wizo:Airing [Hardsub]']

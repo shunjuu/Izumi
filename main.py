@@ -490,7 +490,7 @@ def upload_mkv():
     print()
     return
 
-def notify_mkv(conf, mkv):
+def notify_mkv_upload(conf, mkv):
     """
     Sends a POST request that will issue notifications about the new mkv.
     We use Python to send the notification because curling in the bash shell
@@ -513,12 +513,103 @@ def notify_mkv(conf, mkv):
     for url in conf['url']['upload']['mkv']['urls']:
         print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
                 "Sending notification to " +
-                colors.LMAGENTA + url + colors.ENDC + "... ", end="")
+                colors.OKBLUE + url + colors.ENDC + "... ", end="")
         try:
             r = requests.post(url, json=body)
             print(colors.OKGREEN + "Success" + colors.ENDC + ".")
         except:
             print(colors.FAIL + "Failed" + colors.ENDC + ".")
+
+    print()
+
+
+def notify_mkv_encode(conf, mkv, izumi_type):
+    """
+    Attempts to send encoding information to the encoding servers in order, until one accepts.
+    If none accept, then the downloader itself will fallback (or cancel) by setting izumi_type
+    """
+
+    # Create the request JSON
+    body = dict()
+    body['show'] = mkv['show_name']
+    body['episode'] = mkv['new_filename']
+    
+    # Firstly, we attempt to do request an x264 encoding. We need to mark it for failure
+    # and fallback (if so), if so.
+    X264_SUCCEED = False
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "Now sending x264 job to encoding server(s)...")
+
+    for encoder in conf['sync']['mkv']['encoders']['x264']:
+
+        try:
+            print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
+                    "Sending x264 encode request to " + 
+                    colors.OKBLUE + encoder + colors.ENDC + "... ", end="")
+
+            r = requests.post(encoder, json=body, timeout=5
+)
+            # Continue onto the next one, as the current failed
+            if r.status_code != conf['sync']['mkv']['encoders']['status_code']:
+                raise Exception("Bad status code!")
+
+            # Else if succeeded, we mark it as passed and exit out
+            print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+            X264_SUCCEED = True
+            break # Break out of the for loop and proceed to x265
+
+        except:
+            print(colors.FAIL + "Failed" + colors.ENDC + ".")
+            continue
+
+    print()
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "Now sending x265 job to encoding server(s)...")
+
+    # Now, we try to notify x265 encoders.
+    # However, if it fails, we don't do anything and just continue
+    for encoder in conf['sync']['mkv']['encoders']['x265']:
+        try:
+            print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
+                    "Sending x265 encode request to " + 
+                    colors.OKBLUE + encoder + colors.ENDC + "... ", end="")
+            r = requests.post(encoder, json=body, timeout=5)
+            if r.status_code != conf['sync']['mkv']['encoders']['status_code']:
+                raise Exception("Bad status code!")
+
+            print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+            # Else if succeeded, just break and proceed
+            break
+
+        except:
+            print(colors.FAIL + "Failed" + colors.ENDC + ".")
+            continue
+
+    print()
+
+    # If all the encoders did not respond, then the downloader needs to fallback (if set so)
+    # and encode (if so)
+    if not X264_SUCCEED:
+        print(colors.WARNING + "INFO: " + colors.ENDC +
+                "None of the x264 encoders were successful.")
+        # We only fallback if if specified to do so. Otherwise, just leave as is and return
+        # to delete files.
+        if conf['sync']['mkv']['encoders']['fallback']:
+            print(colors.WARNING + "WARNING: " + colors.ENDC +
+                    "Fallback mode is activated. Now switching to " + 
+                    colors.WARNING + "encoder" + colors.ENDC + " " +
+                    "mode.")
+            print()
+            return "encoder"
+
+    print(colors.WARNING + "NOTICE: " + colors.ENDC + 
+            "Fallback mode is not activated. Continuing as " +
+            colors.WARNING + izumi_type + colors.ENDC + " " +
+            "mode.")
+    print()
+    return izumi_type
 
 
 def burn(inote):
@@ -614,17 +705,15 @@ def burn(inote):
     # Step 2.5: If mode is encoder, continue
     if izumi_type == "downloader":
         upload_mkv()
-        notify_mkv(conf, mkv)
-
-    if izumi_type == "downloader":
-        pass
-        # Do sync
-        # Ping Izumi, if successful exit, if unsuccessful continue
-
-    # No more type checking needed as everything here must be encoder
+        notify_mkv_upload(conf, mkv)
+        izumi_type = notify_mkv_encode(conf, mkv, izumi_type)
+        
+    # Type check for encoder, as if encoder request succeeds, it will still continue 
+    # to clear the files at the end
 
     # Step 3: Copy the file into a temp.mkv in temp for encoding
-    shutil.copy2(mkv['hardsubbed_file'], mkv['temp_file_path'], follow_symlinks=True)
+    if izumi_type == "encoder":
+        shutil.copy2(mkv['hardsubbed_file'], mkv['temp_file_path'], follow_symlinks=True)
 
     # Step 4: Execute ffmpeg script to encode videos
 
