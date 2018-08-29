@@ -473,7 +473,52 @@ def get_show_name(mkv, mp4, args):
             colors.LMAGENTA + show_name + colors.ENDC)
 
     print()
-    return()
+    return
+
+
+def upload_mkv():
+    """
+    Call the script that uploads the matroska files.
+    """
+
+    print(colors.LCYAN + "INFO: " + colors.ENDC + 
+            "Now uploading MKV files...")
+    print() # Add one for before the script
+
+    os.system("src/mkv.sh")
+
+    print()
+    return
+
+def notify_mkv(conf, mkv):
+    """
+    Sends a POST request that will issue notifications about the new mkv.
+    We use Python to send the notification because curling in the bash shell
+        is unreliable, as discovered from convert.sh.
+    """
+
+    print()
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "Now sending MKV upload notifications...")
+
+    # Create the body
+    body = dict()
+    body['json-type'] = 1
+    body['source'] = "Undefined"
+    body['show_name'] = mkv['show_name']
+    body['location'] = conf['url']['upload']['mkv']['name']
+    body['file'] = mkv['new_filename']
+    body['file_size'] = os.path.getsize(mkv['hardsubbed_file'])
+
+    for url in conf['url']['upload']['mkv']['urls']:
+        print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
+                "Sending notification to " +
+                colors.LMAGENTA + url + colors.ENDC + "... ", end="")
+        try:
+            r = requests.post(url, json=body)
+            print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+        except:
+            print(colors.FAIL + "Failed" + colors.ENDC + ".")
 
 
 def burn(inote):
@@ -558,7 +603,7 @@ def burn(inote):
 
     # Step 1: We always want to copy the new file to a MKV: 
     # Note: Deprecation since we're using a temp file, we technically only want
-    # to do this if we're in DOWNLAODER mode
+    # to do this if we're in DOWNLOADER mode
     if izumi_type == "downloader":
         if not os.path.exists(mkv['new_hardsub_folder']):
             os.makedirs(mkv['new_hardsub_folder'])
@@ -567,6 +612,10 @@ def burn(inote):
     # Step 2: Upload the file online, but only if mode is downloader
     # Step 2.5: If mode is downloader, only proceed from here if unsucessful call to proxies
     # Step 2.5: If mode is encoder, continue
+    if izumi_type == "downloader":
+        upload_mkv()
+        notify_mkv(conf, mkv)
+
     if izumi_type == "downloader":
         pass
         # Do sync

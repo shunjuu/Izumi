@@ -5,6 +5,7 @@
 
 # Type of Izumi running (downloader or encoder)
 type: "downloader"
+#type: "encoder"
 
 folders:
     # The directory in which new files will be made in by ruTorrent or the flask server
@@ -28,8 +29,10 @@ sync:
     # ffmpeg and ffmpeg-10bit are included as they are standalone
     mkv:
         priority: ['sanka-kan:Airing']
-        regular: ['carmilla-wizo:Airing']
-        encoders: ['http://izumi.best.moe:1400', 'http://sakura.wizo.sh:9696']
+        regular: ['carmilla-wizo:Airing', 'weebrary:Airing']
+        encoders: 
+                x264: ['http://izumi.best.moe:1400']
+                x265: ['http://sakura.wizo.sh:9696']
     mp4:
         priority: ['sanka-kan:Airing [Hardsub]']
         regular: ['carmilla-wizo:Airing [Hardsub]']
@@ -38,10 +41,10 @@ sync:
 url:
    upload:
         mkv:
-            name: "Currently Airing"
-            urls: ['https://on.aeri.jp/post']
+            name: "Airing"
+            urls: ['https://on.aeri.jp/post', 'https://badurl.asdfsa.com']
         mp4:
-            name: "Currently Airing [Hardsub]"
+            name: "Airing [Hardsub]"
             urls: ['https://on.aeri.jp/post']
 
 sys:
