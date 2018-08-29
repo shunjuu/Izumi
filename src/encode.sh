@@ -26,4 +26,14 @@ echo
 echo "$tempfile"
 echo "$hardsubfile"
 
+# Run standard 8-bit color encoding
 "$ffmpeg8" -i "$tempfile" -vf subtitles="$tempfile" -c:a copy -threads $THREADS -y -nostdin -strict -2 "$hardsubfile"
+
+# If 8-bit fails, the new video file may be 10-bit encoded
+newsize=$(wc -c < "$hardsubfile")
+if [[ "$newsize" == "0" ]]; then
+		echo "An error was detected using 8-bit encoding. Trying with 10-bit..."
+		"$ffmpeg10" -i "$tempfile" -vf subtitles="$tempfile" -c:a copy -threads $THREADS -y -nostdin -strict -2 "$hardsubfile"
+fi
+
+ 

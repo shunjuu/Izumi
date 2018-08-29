@@ -241,6 +241,13 @@ def get_source_filenames(mkv, mp4, args):
             colors.OKBLUE + "< mkv['src_file_path'] >" + colors.ENDC + " " +
             colors.MAGENTA + mkv['src_file_path'] + colors.ENDC)
 
+    # Get the full path of the source MKV folder here
+    mkv['src_folder_path'] = args[0]
+    print(colors.LCYAN + "INFO: " + colors.ENDC +
+            "MKV source folder path: " + 
+            colors.OKBLUE + "< mkv['src_folder_path'] >" + colors.ENDC + " " +
+            colors.MAGENTA + mkv['src_folder_path'] + colors.ENDC)
+
     print()
     return
 
@@ -272,6 +279,7 @@ def clean_filename(filename, ext):
 
     new_file += ext
     return new_file
+
 
 def generate_new_filenames(mkv, mp4):
     """
@@ -707,6 +715,105 @@ def distribute_mp4(conf):
     return
 
 
+def clear_files(mkv, mp4):
+    """
+    Delete all the files once we're done with them
+    """ 
+    # Try deleting the mkv folder and file created
+    # Do seperately instead of shutil.rmtree()
+    
+    # Delete the MKV folder and file created
+    print(colors.WARNING + "NOTICE: " + colors.ENDC +
+            "Now deleting: " + 
+            colors.WARNING + "mkv" + colors.ENDC + " " +
+            "files.")
+
+    print(colors.WARNING + "DELETING: " + colors.ENDC +
+        "MKV Hardsub File: " + colors.WARNING + mkv['hardsubbed_file'] +
+        colors.ENDC + "... ",end="")
+    try:
+        os.remove(mkv['hardsubbed_file'])
+        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+    except:
+        print(colors.FAIL + "Failed" + colors.ENDC + ".")
+
+    print(colors.WARNING + "DELETING: " + colors.ENDC +
+        "MKV Hardsub Folder: " + colors.WARNING + mkv['new_hardsub_folder'] +
+        colors.ENDC + "... ",end="")
+    try:
+        os.rmdir(mkv['new_hardsub_folder'])
+        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+    except:
+        print(colors.FAIL + "Failed" + colors.ENDC + ".")
+
+
+    # Try deleting the mp4 folder and the file created
+    print(colors.WARNING + "NOTICE: " + colors.ENDC +
+            "Now deleting: " + 
+            colors.WARNING + "mp4" + colors.ENDC + " " +
+            "files.")
+
+    print(colors.WARNING + "DELETING: " + colors.ENDC +
+        "MP4 Hardsub File: " + colors.WARNING + mp4['hardsubbed_file'] +
+        colors.ENDC + "... ",end="")
+    try:
+        os.remove(mp4['hardsubbed_file'])
+        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+    except:
+        print(colors.FAIL + "Failed" + colors.ENDC + ".")
+
+    print(colors.WARNING + "DELETING: " + colors.ENDC +
+        "MP4 Hardsub Folder: " + colors.WARNING + mp4['new_hardsub_folder'] +
+        colors.ENDC + "... ",end="")
+    try:
+        os.rmdir(mp4['new_hardsub_folder'])
+        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+    except:
+        print(colors.FAIL + "Failed" + colors.ENDC + ".")
+
+
+    # Try deleting the temp file
+    print(colors.WARNING + "NOTICE: " + colors.ENDC +
+            "Now deleting: " + 
+            colors.WARNING + "temp" + colors.ENDC + " " +
+            "files.")
+
+    print(colors.WARNING + "DELETING: " + colors.ENDC +
+        "Temp file: " + colors.WARNING + mkv['temp_file_path'] +
+        colors.ENDC + "... ",end="")
+    try:
+        os.remove(mkv['temp_file_path'])
+        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+    except:
+        print(colors.FAIL + "Failed" + colors.ENDC + ".")
+
+    # Try deleting the source files
+    print(colors.WARNING + "NOTICE: " + colors.ENDC +
+            "Now deleting: " + 
+            colors.WARNING + "source" + colors.ENDC + " " +
+            "files.")
+
+    print(colors.WARNING + "DELETING: " + colors.ENDC +
+        "Source file: " + colors.WARNING + mkv['src_file_path'] +
+        colors.ENDC + "... ",end="")
+    try:
+        os.remove(mkv['src_file_path'])
+        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+    except:
+        print(colors.FAIL + "Failed" + colors.ENDC + ".")
+
+    print(colors.WARNING + "DELETING: " + colors.ENDC +
+        "Source folder: " + colors.WARNING + mkv['src_folder_path'] +
+        colors.ENDC + "... ",end="")
+    try:
+        os.rmdir(mkv['src_folder_path'])
+        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+    except:
+        print(colors.FAIL + "Failed" + colors.ENDC + ".")
+
+    print()
+
+
 def burn(inote):
 
     # Clear the terminal and print out the received argument
@@ -824,16 +931,16 @@ def burn(inote):
         # Step 5.1: If we're originally just an encoder, we need to post one of the heavy servers
         # for file transferring, or fallback to just uploading everything
         # Check conf, not izumi_type, to see if original runtype is encoder or downloader
-        if get_runtype(conf['type']) == "encoder"):
+        if get_runtype(conf['type']) == "encoder":
             distribute_mp4(conf)
-        
 
     # step 6: Clear out all the new files
-    
+    clear_files(mkv, mp4) 
 
-
-
-
+    print(colors.OKGREEN + "Completed job for: " + colors.ENDC + 
+            mkv['src_filename'] + ".")
+    print()
+    sys.exit(0)
 
 # Run convert if this file is invoked directly, which it will be
 if __name__ == "__main__":
