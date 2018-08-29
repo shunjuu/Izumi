@@ -514,11 +514,11 @@ def notify_mkv_upload(conf, mkv):
     body['json-type'] = 1
     body['source'] = "Undefined"
     body['show_name'] = mkv['show_name']
-    body['location'] = conf['url']['upload']['mkv']['name']
+    body['location'] = conf['notifications']['upload']['mkv']['name']
     body['file'] = mkv['new_filename']
     body['file_size'] = os.path.getsize(mkv['hardsubbed_file'])
 
-    for url in conf['url']['upload']['mkv']['urls']:
+    for url in conf['notifications']['upload']['mkv']['urls']:
         print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
                 "Sending notification to " +
                 colors.OKBLUE + url + colors.ENDC + "... ", end="")
@@ -651,11 +651,11 @@ def notify_mp4_upload(conf, mp4):
     body['json-type'] = 2
     body['source'] = "Undefined"
     body['show_name'] = mp4['show_name']
-    body['location'] = conf['url']['upload']['mp4']['name']
+    body['location'] = conf['notifications']['upload']['mp4']['name']
     body['file'] = mp4['new_filename']
     body['file_size'] = os.path.getsize(mp4['hardsubbed_file'])
 
-    for url in conf['url']['upload']['mp4']['urls']:
+    for url in conf['notifications']['upload']['mp4']['urls']:
         print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
                 "Sending notification to " +
                 colors.OKBLUE + url + colors.ENDC + "... ", end="")
@@ -914,7 +914,7 @@ def burn(inote):
     # to clear the files at the end
     if izumi_type == "encoder":
         # Step 3: Copy the file into a temp.mkv in temp for encoding
-        shutil.copy2(mkv['hardsubbed_file'], mkv['temp_file_path'], follow_symlinks=True)
+        shutil.copy2(mkv['src_file_path'], mkv['temp_file_path'], follow_symlinks=True)
 
         # Step 4: Execute ffmpeg script to encode videos
         # Make the directory the new folder will be in

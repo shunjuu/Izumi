@@ -20,11 +20,13 @@ ffmpeg10=$(eval realpath "$curr_dir/bin/ffmpeg-10bit")
 tempfile="$1"
 hardsubfile="$2"
 
+: '
 echo "$ffmpeg8"
 echo "$ffmpeg10"
 echo
 echo "$tempfile"
 echo "$hardsubfile"
+'
 
 # Run standard 8-bit color encoding
 "$ffmpeg8" -i "$tempfile" -vf subtitles="$tempfile" -c:a copy -threads $THREADS -y -nostdin -strict -2 "$hardsubfile"

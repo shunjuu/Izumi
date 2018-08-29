@@ -4,8 +4,8 @@
 # IMPORTANT: IZUMI WILL NOT VALIDATE THIS YAML FILE
 
 # Type of Izumi running (downloader or encoder)
-type: "downloader"
-#type: "encoder"
+#type: "downloader"
+type: "encoder"
 
 folders:
     # The directory in which new files will be made in by ruTorrent or the flask server
@@ -16,11 +16,16 @@ folders:
 
     # Where the hardsub mp4 will be made
     # mp4: "/home/rocia/Videos/Nyaa4"
-    mp4: "../../../Videos/MP4"
+    mp4: "/home/rocia/Videos/MP4"
 
     # A temporary directory used to store a copy of the mkv.
     # This temp directory may NOT contain the single quote.
-    temp: "../../../Videos/temp"
+    temp: "../../Videos/temp"
+
+    # A temporary "hard" directory used by the encoders to temporarily store the new file
+    # before hardlinking it to the watch directory. We do this because the system assumes
+    # the file is already done downloading
+    hard: "/home/rocia/Videos/hard"
 
 sync:
     # rclone folder to upload all show/ep.mkv to
@@ -33,7 +38,7 @@ sync:
         encoders: 
                 x264: ['http://izumi.best.moe:1400']
                 x265: ['http://sakura.wizo.sh:9695']
-                status_code: 418
+                status_code: 209
                 fallback: yes
     mp4:
         # If this is encoder, be careful to only add the destinations you want
@@ -48,12 +53,20 @@ sync:
             sequential: ['http://ananke.feralhosting.com:5932']
             # For always distributors, these will always be notified regardless
             always: []
-        # Settings for if am a distributor
-        source: 'sanka-kan:Airing [Hardsub]'
-        destinations: ['carmilla-wizo:Airing [Hardsub]']
 
+        # While the others are for specifying where to send distribution requests
+        # This species for the distributor where to source and where to target
+        distribution:
+                # Element 0: Source, element n >= 1: All destinations to target
+                - ["sanka-kan:Airing [Hardsub]", "carmilla-wizo:Airing [Hardsub]"]
+                - ["carmilla-wizo:Airing [Hardsub]", "weebrary:Airing [Hardsub]", "badclone:Airing [Hardsub]"]
 
-url:
+        # Settings for if am an encoder
+        encoder:
+            port: 1400
+            source: 'kan:Anime/Airing'
+
+notifications:
    upload:
         mkv:
             name: "Airing"
@@ -67,6 +80,3 @@ ffmpeg:
 
 sys:
     delimiter: "||"
-
-    # A special setting that disables Izumi and only downloads shows
-    download-only: False
