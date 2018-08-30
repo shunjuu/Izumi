@@ -45,7 +45,7 @@ def load_config():
 # set the flask name and load the config
 app = Flask(__name__)
 
-def handle(req):
+def do_encode(req):
 
     # Double read, so it loads the new config everytime
     conf = load_config()
@@ -111,10 +111,20 @@ def handle(req):
     # Once it's linked, delete the file in hard/
     os.remove(rclone_dest_file)
 
+def do_distribute():
+    time.sleep(1)
+    os.system("src/distribute.sh")
+    return
+
 @app.route("/encode", methods=['POST'])
 def encode():
-    Thread(target=handle, args=(request.get_json(),)).start()
+    Thread(target=do_encode, args=(request.get_json(),)).start()
     return "Received encode request", conf['sync']['mkv']['encoders']['status_code']
+
+@app.route("/distribute", methods=['POST'])
+def distribute():
+    Thread(target=do_distribute).start()
+    return "Received distribution request", conf['sync']['mkv']['encoders']['status_code']
 
 if __name__ == "__main__":
     conf = load_config()
