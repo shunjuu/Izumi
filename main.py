@@ -899,7 +899,14 @@ def burn(inote):
     if izumi_type == "downloader":
         if not os.path.exists(mkv['new_hardsub_folder']):
             os.makedirs(mkv['new_hardsub_folder'])
-        shutil.copy2(mkv['src_file_path'], mkv['hardsubbed_file'], follow_symlinks=True)
+        try:
+            shutil.copy2(mkv['src_file_path'], mkv['hardsubbed_file'], follow_symlinks=True)
+        except:
+            print(colors.FAIL + "WARNING: " + colors.ENDC + 
+                    "Shutil was unable to copy into the temp file.")
+            print(colors.WARNING + "NOTE: " + colors.ENDC +
+                    "This is probably just a duplicate autotools inotify notification.")
+            sys.exit(2)
 
     # Step 2: Upload the file online, but only if mode is downloader
     # Step 2.5: If mode is downloader, only proceed from here if unsucessful call to proxies
