@@ -18,9 +18,6 @@ from shlex import quote
 import urllib.request
 import json
 
-# Import raw ripper
-import raw
-
 # Import the anime name parser
 import anitopy
 
@@ -47,12 +44,6 @@ def parse_args(inotifywatch_str):
 
     print("Arg: " + inotifywatch_str)
     print()
-
-    # Special case, we want to check for raws submodule 
-    if "ReinForce" in inotifywatch_str:
-        print("Reinforce RAW detected, switching modes...")
-        raw.handle_raw(inotifywatch_str)
-        sys.exit(0)
 
     args = inotifywatch_str.split(',')
 
