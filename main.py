@@ -613,7 +613,7 @@ def notify_mkv_encode(conf, mkv, izumi_type):
             return "encoder"
 
     print(colors.WARNING + "NOTICE: " + colors.ENDC + 
-            "Fallback mode is not activated. Continuing as " +
+            "An x264 encoder request was successful. Continuing as " +
             colors.WARNING + izumi_type + colors.ENDC + " " +
             "mode.")
     print()
@@ -727,7 +727,7 @@ def clear_files(mkv, mp4):
             colors.WARNING + "mkv" + colors.ENDC + " " +
             "files.")
 
-    print(colors.WARNING + "DELETING: " + colors.ENDC +
+    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
         "MKV Hardsub File: " + colors.WARNING + mkv['hardsubbed_file'] +
         colors.ENDC + "... ",end="")
     try:
@@ -736,7 +736,7 @@ def clear_files(mkv, mp4):
     except:
         print(colors.FAIL + "Failed" + colors.ENDC + ".")
 
-    print(colors.WARNING + "DELETING: " + colors.ENDC +
+    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
         "MKV Hardsub Folder: " + colors.WARNING + mkv['new_hardsub_folder'] +
         colors.ENDC + "... ",end="")
     try:
@@ -752,7 +752,7 @@ def clear_files(mkv, mp4):
             colors.WARNING + "mp4" + colors.ENDC + " " +
             "files.")
 
-    print(colors.WARNING + "DELETING: " + colors.ENDC +
+    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
         "MP4 Hardsub File: " + colors.WARNING + mp4['hardsubbed_file'] +
         colors.ENDC + "... ",end="")
     try:
@@ -761,7 +761,7 @@ def clear_files(mkv, mp4):
     except:
         print(colors.FAIL + "Failed" + colors.ENDC + ".")
 
-    print(colors.WARNING + "DELETING: " + colors.ENDC +
+    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
         "MP4 Hardsub Folder: " + colors.WARNING + mp4['new_hardsub_folder'] +
         colors.ENDC + "... ",end="")
     try:
@@ -777,7 +777,7 @@ def clear_files(mkv, mp4):
             colors.WARNING + "temp" + colors.ENDC + " " +
             "files.")
 
-    print(colors.WARNING + "DELETING: " + colors.ENDC +
+    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
         "Temp file: " + colors.WARNING + mkv['temp_file_path'] +
         colors.ENDC + "... ",end="")
     try:
@@ -792,7 +792,7 @@ def clear_files(mkv, mp4):
             colors.WARNING + "source" + colors.ENDC + " " +
             "files.")
 
-    print(colors.WARNING + "DELETING: " + colors.ENDC +
+    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
         "Source file: " + colors.WARNING + mkv['src_file_path'] +
         colors.ENDC + "... ",end="")
     try:
@@ -801,7 +801,7 @@ def clear_files(mkv, mp4):
     except:
         print(colors.FAIL + "Failed" + colors.ENDC + ".")
 
-    print(colors.WARNING + "DELETING: " + colors.ENDC +
+    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
         "Source folder: " + colors.WARNING + mkv['src_folder_path'] +
         colors.ENDC + "... ",end="")
     try:
