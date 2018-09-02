@@ -44,7 +44,6 @@ sync:
         # If this is encoder, be careful to only add the destinations you want
         priority: [] #rclone
         regular: [] #rclone
-	# downloaders: [] Deprecated?
 
     mp4-distribution:
         # Distributors are URLs that will be posted
