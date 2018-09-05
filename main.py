@@ -646,7 +646,7 @@ def notify_mkv_encode(conf, mkv, izumi_type):
             return "encoder"
 
     print(colors.WARNING + "NOTICE: " + colors.ENDC + 
-            "A primary encoder request was successful. Continuing as " +
+            "A primary encoder request was successful or Fallback is deactivated. Continuing as " +
             colors.WARNING + izumi_type + colors.ENDC + " " +
             "mode.")
     print()
