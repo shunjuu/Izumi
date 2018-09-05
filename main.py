@@ -11,6 +11,9 @@ import json, yaml
 
 import anitopy 
 
+# For finding show names intelligently
+from src import hisha
+
 class colors:
     """
     Shell based colors for colored printing!
@@ -460,17 +463,45 @@ def load_temp_folder_and_paths(mkv, mp4, conf):
     return
 
 
-def get_show_name(mkv, mp4, args):
+def get_show_name(conf, mkv, mp4, args):
     """
     Gets the show name from the args path and loads it into the two dictionaries.
     Uses Python re to match the words between the last two /../
     """
 
-    # Pull the absolute path of up to and including the directory
-    show_abs_path = args[0]
+    # v3.1:
+    """
+    Two cases: 1. Show is in conf['watch'](/)[show_name]/[episode_file]
+               2. Show is in conf['watch'](/)[episode_file]
 
-    show = re.match('.*\/(.*)\/', show_abs_path)
-    show_name = show.group(1)
+    Determining which: Use r/(.*/)(.*), group 1 should or should not match conf['watch'](/)
+    
+    Case 1: Use old logic
+    Case 2: Use hisha
+    """
+    # parent_path = re.match('(.*/)(.*)',
+    parent_path = mkv['src_folder_path'] # Note: as args[0], this should always end in a '/'
+    parent_path = parent_path if parent_path.endswith('/') else (parent_path + '/')
+    parent_path = os.path.abspath(parent_path)
+
+    # conf watch is just from config.yml, append / if necessary
+    conf_watch_path = conf['folders']['watch']
+    conf_watch_path = conf_watch_path if conf_watch_path.endswith('/') else (conf_watch_path + '/')
+    conf_watch_path = os.path.abspath(conf_watch_path)
+
+    # If the configuration watch folder path is the same as the parent path up to the file, this means
+    # the file was placed in the root of watch, so we need to find the show name using Hisha.
+    if parent_path == conf_watch_path:
+        print(colors.GREEN + "NOTICE: " + colors.ENDC +
+                "Episode was added to root of watch directory, using HISHA to find show name.")
+        show_name = hisha.hisha(mkv['src_filename'])
+    # Else, this means the show was placed in a folder with a predetermined name, so we use that instead
+    else:
+        print(colors.GREEN + "NOTICE: " + colors.ENDC +
+                "Episode was added into a folder that already contains the show name, not using HISHA.")
+        show_abs_path = args[0]
+        show = re.match('.*\/(.*)\/', show_abs_path)
+        show_name = show.group(1)
 
     mkv['show_name'] = show_name
     mp4['show_name'] = show_name
@@ -543,18 +574,18 @@ def notify_mkv_encode(conf, mkv, izumi_type):
     body['show'] = mkv['show_name']
     body['episode'] = mkv['new_filename']
     
-    # Firstly, we attempt to do request an x264 encoding. We need to mark it for failure
+    # Firstly, we attempt to do request a primary encoding. We need to mark it for failure
     # and fallback (if so), if so.
-    X264_SUCCEED = False
+    PRIMARY_SUCCEED = False
 
     print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "Now sending x264 job to encoding server(s)...")
+            "Now sending requests to encoding server(s)...")
 
-    for encoder in conf['sync']['mkv']['encoders']['x264']:
+    for encoder in conf['sync']['mkv']['encoders']['primary']:
 
         try:
             print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
-                    "Sending x264 encode request to " + 
+                    "Sending primary encode request to " + 
                     colors.OKBLUE + encoder + colors.ENDC + "... ", end="")
 
             r = requests.post(encoder, json=body, timeout=5)
@@ -564,7 +595,7 @@ def notify_mkv_encode(conf, mkv, izumi_type):
 
             # Else if succeeded, we mark it as passed and exit out
             print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-            X264_SUCCEED = True
+            PRIMARY_SUCCEED = True
             break # Break out of the for loop and proceed to x265
 
         except:
@@ -574,22 +605,24 @@ def notify_mkv_encode(conf, mkv, izumi_type):
     print()
 
     print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "Now sending x265 job to encoding server(s)...")
+            "Now sending request to other encoding server(s)...")
 
-    # Now, we try to notify x265 encoders.
+    # Now, we try to notify extra encoders.
     # However, if it fails, we don't do anything and just continue
-    for encoder in conf['sync']['mkv']['encoders']['x265']:
+    for encoder in conf['sync']['mkv']['encoders']['other']:
         try:
             print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
-                    "Sending x265 encode request to " + 
+                    "Sending encode request to " + 
                     colors.OKBLUE + encoder + colors.ENDC + "... ", end="")
             r = requests.post(encoder, json=body, timeout=5)
+
             if r.status_code != conf['sync']['mkv']['encoders']['status_code']:
+                # We just raise exception, since an error could be thrown while requesting
                 raise Exception("Bad status code!")
 
+            # Else if succeeded, just continue - we don't care
             print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-            # Else if succeeded, just break and proceed
-            break
+            continue
 
         except:
             print(colors.FAIL + "Failed" + colors.ENDC + ".")
@@ -599,9 +632,9 @@ def notify_mkv_encode(conf, mkv, izumi_type):
 
     # If all the encoders did not respond, then the downloader needs to fallback (if set so)
     # and encode (if so)
-    if not X264_SUCCEED:
+    if not PRIMARY_SUCCEED:
         print(colors.WARNING + "INFO: " + colors.ENDC +
-                "None of the x264 encoders were successful.")
+                "None of the primary encoders were successful.")
         # We only fallback if if specified to do so. Otherwise, just leave as is and return
         # to delete files.
         if conf['sync']['mkv']['encoders']['fallback']:
@@ -613,7 +646,7 @@ def notify_mkv_encode(conf, mkv, izumi_type):
             return "encoder"
 
     print(colors.WARNING + "NOTICE: " + colors.ENDC + 
-            "An x264 encoder request was successful or Fallback mode is deactivated. Continuing as " +
+            "A primary encoder request was successful or Fallback is deactivated. Continuing as " +
             colors.WARNING + izumi_type + colors.ENDC + " " +
             "mode.")
     print()
@@ -714,7 +747,7 @@ def distribute_mp4(conf):
     return
 
 
-def clear_files(mkv, mp4):
+def clear_files(conf, mkv, mp4):
     """
     Delete all the files once we're done with them
     """ 
@@ -727,7 +760,7 @@ def clear_files(mkv, mp4):
             colors.WARNING + "mkv" + colors.ENDC + " " +
             "files.")
 
-    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
+    print(colors.FAIL + "DELETING: " + colors.ENDC +
         "MKV Hardsub File: " + colors.WARNING + mkv['hardsubbed_file'] +
         colors.ENDC + "... ",end="")
     try:
@@ -736,7 +769,7 @@ def clear_files(mkv, mp4):
     except:
         print(colors.FAIL + "Failed" + colors.ENDC + ".")
 
-    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
+    print(colors.FAIL + "DELETING: " + colors.ENDC +
         "MKV Hardsub Folder: " + colors.WARNING + mkv['new_hardsub_folder'] +
         colors.ENDC + "... ",end="")
     try:
@@ -752,7 +785,7 @@ def clear_files(mkv, mp4):
             colors.WARNING + "mp4" + colors.ENDC + " " +
             "files.")
 
-    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
+    print(colors.FAIL + "DELETING: " + colors.ENDC +
         "MP4 Hardsub File: " + colors.WARNING + mp4['hardsubbed_file'] +
         colors.ENDC + "... ",end="")
     try:
@@ -761,7 +794,7 @@ def clear_files(mkv, mp4):
     except:
         print(colors.FAIL + "Failed" + colors.ENDC + ".")
 
-    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
+    print(colors.FAIL + "DELETING: " + colors.ENDC +
         "MP4 Hardsub Folder: " + colors.WARNING + mp4['new_hardsub_folder'] +
         colors.ENDC + "... ",end="")
     try:
@@ -777,7 +810,7 @@ def clear_files(mkv, mp4):
             colors.WARNING + "temp" + colors.ENDC + " " +
             "files.")
 
-    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
+    print(colors.FAIL + "DELETING: " + colors.ENDC +
         "Temp file: " + colors.WARNING + mkv['temp_file_path'] +
         colors.ENDC + "... ",end="")
     try:
@@ -792,7 +825,7 @@ def clear_files(mkv, mp4):
             colors.WARNING + "source" + colors.ENDC + " " +
             "files.")
 
-    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
+    print(colors.FAIL + "DELETING: " + colors.ENDC +
         "Source file: " + colors.WARNING + mkv['src_file_path'] +
         colors.ENDC + "... ",end="")
     try:
@@ -801,12 +834,21 @@ def clear_files(mkv, mp4):
     except:
         print(colors.FAIL + "Failed" + colors.ENDC + ".")
 
-    print(colors.MAGENTA + "DELETING: " + colors.ENDC +
+    print(colors.FAIL + "DELETING: " + colors.ENDC +
         "Source folder: " + colors.WARNING + mkv['src_folder_path'] +
         colors.ENDC + "... ",end="")
     try:
-        os.rmdir(mkv['src_folder_path'])
-        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
+        watch_folder = conf['folders']['watch']
+        watch_folder = watch_folder if watch_folder.endswith("/") else (watch_folder + '/')
+
+        mkv_src_fdr_path = mkv['src_folder_path']
+        mkv_src_fdr_path = mkv_src_fdr_path if mkv_src_fdr_path.endswith("/") else (mkv_src_fdr_path + '/')
+
+        if watch_folder == mkv_src_fdr_path:
+            print(colors.OKGREEN + "Ignored, used HISHA" + colors.ENDC + ".")
+        else:
+            os.rmdir(mkv['src_folder_path'])
+            print(colors.OKGREEN + "Success" + colors.ENDC + ".")
     except:
         print(colors.FAIL + "Failed" + colors.ENDC + ".")
 
@@ -845,7 +887,7 @@ def burn(inote):
     get_source_filenames(mkv, mp4, args)
 
     # Get the show name, BE SURE TO RUN THIS BEFORE load_destination_folder_and_paths
-    get_show_name(mkv, mp4, args)
+    get_show_name(conf, mkv, mp4, args)
 
     # Use Anitopy to get the new, cleaned filenames
     generate_new_filenames(mkv, mp4)
@@ -941,7 +983,7 @@ def burn(inote):
             distribute_mp4(conf)
 
     # step 6: Clear out all the new files
-    clear_files(mkv, mp4) 
+    clear_files(conf, mkv, mp4) 
 
     print(colors.OKGREEN + "Completed job for: " + colors.ENDC + 
             mkv['src_filename'] + ".")

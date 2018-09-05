@@ -4,13 +4,13 @@
 # IMPORTANT: IZUMI WILL NOT VALIDATE THIS YAML FILE
 
 # Type of Izumi running (downloader or encoder)
-#type: "downloader"
-type: "encoder"
+type: "downloader"
+#type: "encoder"
 
 folders:
     # The directory in which new files will watched for
     # Can use absolute or local path
-    watch: "" 
+    watch: ""
 
     # Where a copy of the mkv video will be made
     mkv: ""
@@ -36,8 +36,8 @@ sync:
         priority: [] #rclone
         regular: [] #rclone
         encoders: 
-                x264: [] #url
-                x265: [] #url
+                primary: [] #url
+                other: [] #url
                 status_code: 209
                 fallback: yes
     mp4:
