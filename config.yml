@@ -25,7 +25,7 @@ folders:
     # A temporary "hard" directory used by the encoders to temporarily store the new file
     # before hardlinking it to the watch directory. We do this because the system assumes
     # the file is already done downloading
-    hard: ""
+    hard: "/home/rocia/Videos/hard"
 
 sync:
     # rclone folder to upload all show/ep.mkv to
@@ -36,8 +36,8 @@ sync:
         priority: [] #rclone
         regular: [] #rclone
         encoders: 
-                x264: [] #url
-                x265: [] #url
+                primary: [] #url
+                other: [] #url
                 status_code: 209
                 fallback: yes
     mp4:

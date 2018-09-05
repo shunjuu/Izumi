@@ -574,18 +574,18 @@ def notify_mkv_encode(conf, mkv, izumi_type):
     body['show'] = mkv['show_name']
     body['episode'] = mkv['new_filename']
     
-    # Firstly, we attempt to do request an x264 encoding. We need to mark it for failure
+    # Firstly, we attempt to do request a primary encoding. We need to mark it for failure
     # and fallback (if so), if so.
-    X264_SUCCEED = False
+    PRIMARY_SUCCEED = False
 
     print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "Now sending x264 job to encoding server(s)...")
+            "Now sending requests to encoding server(s)...")
 
-    for encoder in conf['sync']['mkv']['encoders']['x264']:
+    for encoder in conf['sync']['mkv']['encoders']['primary']:
 
         try:
             print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
-                    "Sending x264 encode request to " + 
+                    "Sending primary encode request to " + 
                     colors.OKBLUE + encoder + colors.ENDC + "... ", end="")
 
             r = requests.post(encoder, json=body, timeout=5)
@@ -595,7 +595,7 @@ def notify_mkv_encode(conf, mkv, izumi_type):
 
             # Else if succeeded, we mark it as passed and exit out
             print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-            X264_SUCCEED = True
+            PRIMARY_SUCCEED = True
             break # Break out of the for loop and proceed to x265
 
         except:
@@ -605,22 +605,24 @@ def notify_mkv_encode(conf, mkv, izumi_type):
     print()
 
     print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "Now sending x265 job to encoding server(s)...")
+            "Now sending request to other encoding server(s)...")
 
-    # Now, we try to notify x265 encoders.
+    # Now, we try to notify extra encoders.
     # However, if it fails, we don't do anything and just continue
-    for encoder in conf['sync']['mkv']['encoders']['x265']:
+    for encoder in conf['sync']['mkv']['encoders']['other']:
         try:
             print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
-                    "Sending x265 encode request to " + 
+                    "Sending encode request to " + 
                     colors.OKBLUE + encoder + colors.ENDC + "... ", end="")
             r = requests.post(encoder, json=body, timeout=5)
+
             if r.status_code != conf['sync']['mkv']['encoders']['status_code']:
+                # We just raise exception, since an error could be thrown while requesting
                 raise Exception("Bad status code!")
 
+            # Else if succeeded, just continue - we don't care
             print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-            # Else if succeeded, just break and proceed
-            break
+            continue
 
         except:
             print(colors.FAIL + "Failed" + colors.ENDC + ".")
@@ -630,9 +632,9 @@ def notify_mkv_encode(conf, mkv, izumi_type):
 
     # If all the encoders did not respond, then the downloader needs to fallback (if set so)
     # and encode (if so)
-    if not X264_SUCCEED:
+    if not PRIMARY_SUCCEED:
         print(colors.WARNING + "INFO: " + colors.ENDC +
-                "None of the x264 encoders were successful.")
+                "None of the primary encoders were successful.")
         # We only fallback if if specified to do so. Otherwise, just leave as is and return
         # to delete files.
         if conf['sync']['mkv']['encoders']['fallback']:
@@ -644,7 +646,7 @@ def notify_mkv_encode(conf, mkv, izumi_type):
             return "encoder"
 
     print(colors.WARNING + "NOTICE: " + colors.ENDC + 
-            "An x264 encoder request was successful. Continuing as " +
+            "A primary encoder request was successful. Continuing as " +
             colors.WARNING + izumi_type + colors.ENDC + " " +
             "mode.")
     print()
