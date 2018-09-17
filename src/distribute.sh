@@ -43,8 +43,8 @@ do
 	for i in $(seq 1 $CURR_DIST_DEST_COUNT);
 	do
 		CURR_DEST_TO_SYNC=$(eval "$yq" read "$config" "$DIST_PATH.$d.$i")
-		echo -e "${GREEN}NOTICE: ${NC}Syncing from ${CYAN}$CURR_DIST_SRC${NC} to ${CYAN}$CURR_DEST_TO_SYNC${NC}."
-		rclone sync "$CURR_DIST_SRC" "$CURR_DEST_TO_SYNC" -v &
+		echo -e "${GREEN}NOTICE: ${NC}Copying from ${CYAN}$CURR_DIST_SRC${NC} to ${CYAN}$CURR_DEST_TO_SYNC${NC}."
+		rclone copy "$CURR_DIST_SRC" "$CURR_DEST_TO_SYNC" -v &
 	done
 
 	wait
