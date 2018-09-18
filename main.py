@@ -12,7 +12,10 @@ import json, yaml
 import anitopy 
 
 # For finding show names intelligently
-from src import hisha
+from lib import hisha
+
+# Modules!
+from src import filenames
 
 class colors:
     """
@@ -213,54 +216,10 @@ def get_runtype(input_type):
     return rtype
 
 
-def get_source_filenames(mkv, mp4, args):
-    """
-    This method takes the MKV and MP4 name dicts and populates them with 
-    source filenames.
-    """
-
-    # The original filename is guaranteed to be the second argument
-    mkv['src_filename'] = args[2]
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "MKV source filename: " + 
-            colors.OKBLUE + "< mkv['src_filename'] >" + colors.ENDC + " " +
-            colors.MAGENTA + mkv['src_filename'] + colors.ENDC)
-
-
-    # The MP4 would be the same, just with an mp4 extension
-    """
-    mp4['src_filename'] = str(args[2][:-4] + ".mp4")
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "MP4 source filename: " + 
-            colors.MAGENTA + mp4['src_filename'] + colors.ENDC)
-    """
-
-    # Generate the full path of the source MKV file here
-    mkv['src_file_path'] = args[0] + args[2]
-    print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "MKV source filepath: " + 
-            colors.OKBLUE + "< mkv['src_file_path'] >" + colors.ENDC + " " +
-            colors.MAGENTA + mkv['src_file_path'] + colors.ENDC)
-
-    # Get the full path of the source MKV folder here
-    mkv['src_folder_path'] = args[0]
-    print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "MKV source folder path: " + 
-            colors.OKBLUE + "< mkv['src_folder_path'] >" + colors.ENDC + " " +
-            colors.MAGENTA + mkv['src_folder_path'] + colors.ENDC)
-
-    print()
-    return
-
-
 def clean_filename(filename, ext):
     """
     Helper method.
     Returns a str, which is the new filename for a file,
-    i.e., [HorribleSubs] Grand Blue - 01 [1080p].mkv returns
-    Grand Blue - 01 [1080p].mkv
 
     Requires anitopy to parse.
 
@@ -884,7 +843,7 @@ def burn(inote):
     mp4 = dict()
 
     # Get the base name of the MKV file, and its MP4 equivalent
-    get_source_filenames(mkv, mp4, args)
+    filenames.get_source_filenames(mkv, mp4, args, True)
 
     # Get the show name, BE SURE TO RUN THIS BEFORE load_destination_folder_and_paths
     get_show_name(conf, mkv, mp4, args)
@@ -953,6 +912,7 @@ def burn(inote):
     # Step 2: Upload the file online, but only if mode is downloader
     # Step 2.5: If mode is downloader, only proceed from here if unsucessful call to proxies
     # Step 2.5: If mode is encoder, continue
+    """
     if izumi_type == "downloader":
         upload_mkv()
         notify_mkv_upload(conf, mkv)
@@ -981,7 +941,7 @@ def burn(inote):
         # Check conf, not izumi_type, to see if original runtype is encoder or downloader
         if get_runtype(conf['type']) == "encoder":
             distribute_mp4(conf)
-
+    """
     # step 6: Clear out all the new files
     clear_files(conf, mkv, mp4) 
 
