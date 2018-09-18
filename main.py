@@ -216,58 +216,6 @@ def get_runtype(input_type):
     return rtype
 
 
-def clean_filename(filename, ext):
-    """
-    Helper method.
-    Returns a str, which is the new filename for a file,
-
-    Requires anitopy to parse.
-
-    Params:
-    - filename: The original video's filename
-    - ext: The new extension of the cleaned filename
-    """
-
-    p = anitopy.parse(filename)
-    new_file = p['anime_title'] + " - " + p['episode_number']
-
-    # If it's uncensored, we want to mark it
-    if 'other' in p and 'uncensored' in p['other'].lower():
-        new_file += " (Uncensored)"
-
-    # There may be no video resolution
-    if 'video_resolution' in p:
-        new_file = new_file + " [" + p['video_resolution'] + "]"
-
-    new_file += ext
-    return new_file
-
-
-def generate_new_filenames(mkv, mp4):
-    """
-    Populates the MKV and MP4 name dictionaries with new, "cleaned" names.
-    Uses anitopy clean_filenames()
-    """
-
-    # Use clean_filename to generate the new clean filename
-    mkv['new_filename'] = clean_filename(mkv['src_filename'], ".mkv")
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC + 
-            "MKV new filename: " +
-            colors.OKBLUE + "< mkv['new_filename'] >" + colors.ENDC + " " +
-            colors.LMAGENTA + mkv['new_filename'] + colors.ENDC)
-
-    mp4['new_filename'] = clean_filename(mkv['src_filename'], ".mp4")
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC + 
-            "MP4 new filename: " +
-            colors.OKBLUE + "< mp4['new_filename'] >" + colors.ENDC + " " +
-            colors.LMAGENTA + mp4['new_filename'] + colors.ENDC)
-
-    print()
-    return
-
-
 def load_destination_folder_and_paths(mkv, mp4, conf, args):
     """
     Pulls the folders in which the new MP4 file will be made.
@@ -849,7 +797,7 @@ def burn(inote):
     get_show_name(conf, mkv, mp4, args)
 
     # Use Anitopy to get the new, cleaned filenames
-    generate_new_filenames(mkv, mp4)
+    filenames.generate_new_filenames(mkv, mp4, True)
 
     # Get the folders where a copy of the MKV and the new MP4 will be put.
     load_destination_folder_and_paths(mkv, mp4, conf, args)

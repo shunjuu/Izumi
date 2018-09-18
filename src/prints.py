@@ -60,6 +60,8 @@ class printouts:
 		# If this is the end of a group, we print an extra newline
 		if endgroup:
 			print()
+			
+		return
 
 if __name__ == "__main__":
 	p = printouts()
