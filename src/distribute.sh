@@ -26,8 +26,7 @@ config=$(eval realpath "config.yml")
 # "- -.*" is a regex that returns all of the top level elements, as it is a list of lists
 TOTAL_DISTRIBUTION_COUNT=$(eval "$yq" read "$config" "$DIST_PATH" | grep -e "- -.*" | wc -l)
 
-echo -e "${CYAN}INFO:${NC} Detected ${CYAN}$TOTAL_DISTRIBUTION_COUNT${NC} distribution configurations."
-echo
+echo -e "${GREEN}INFO:${NC} Detected ${CYAN}$TOTAL_DISTRIBUTION_COUNT${NC} distribution configurations."
 
 for d in $(seq 0 $(($TOTAL_DISTRIBUTION_COUNT-1)));
 do
@@ -53,4 +52,4 @@ do
 done
 
 echo -e "${GREEN}NOTICE: ${NC}Completed MP4 distribution."
-
+echo
