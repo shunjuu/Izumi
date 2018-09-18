@@ -15,7 +15,7 @@ import anitopy
 from lib import hisha
 
 # Modules!
-from src import filenames
+from src import filenames, paths
 
 class colors:
     """
@@ -214,213 +214,6 @@ def get_runtype(input_type):
             + ".")
     print()
     return rtype
-
-
-def load_destination_folder_and_paths(mkv, mp4, conf, args):
-    """
-    Pulls the folders in which the new MP4 file will be made.
-
-    This method also loads the temp folder into MKV.
-    Will throw an error if the temp folder contains a ' in it.
-
-    """
-
-    # We need to run this safety method first, as the hardsub output file
-    # relies on the show name existing
-    if 'show_name' not in mkv or 'show_name' not in mp4:
-        print(colors.WARNING + "NOTICE: " + colors.ENDC +
-                colors.FAIL + "get_show_name()" + colors.ENDC + " " + 
-                "not invoked before" + " " + 
-                colors.FAIL + "load_destination_folder_and_paths()" + colors.ENDC + ", " +
-                "executing " +
-                colors.OKGREEN + "get_show_name()" + colors.ENDC + "...")
-        get_show_name(mkv, mp4, args)
-
-    # Load the folder for the MKV
-    mkv['folder'] = conf['folders']['mkv']
-    # Get the absolute path of the folder if it's not in abs
-    mkv['folder'] = os.path.abspath(mkv['folder'])
-    # If it doesn't end wiht a "/", append it
-    if not mkv['folder'].endswith("/"):
-        mkv['folder'] += "/"
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "MKV base folder: " + 
-            colors.OKBLUE + "< mkv['folder'] > " + colors.ENDC +
-            colors.MAGENTA + mkv['folder'] + colors.ENDC)
-
-    # Generate the folder with the show name to place the new MKV file in
-    mkv['new_hardsub_folder'] = mkv['folder'] + mkv['show_name'] + "/"
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "Hardsub destination folder: " +
-            colors.OKBLUE + "< mkv['new_hardsub_folder'] > " + colors.ENDC + 
-            colors.LMAGENTA + mkv['new_hardsub_folder'] + colors.ENDC)
-
-    # Generate the output MKV file string/path
-    mkv['hardsubbed_file'] = mkv['folder'] + mkv['show_name'] + "/" + mkv['new_filename']
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC + 
-            "Hardsub destination filepath: " +
-            colors.OKBLUE + "< mkv['hardsubbed_file'] > " + colors.ENDC + 
-            colors.LMAGENTA + mkv['hardsubbed_file'] + colors.ENDC)
-
-    print()
-
-
-    # Load the folder for the MP4
-    mp4['folder'] = conf['folders']['mp4']
-    # Get the absolute path of the folder if it's not in abs
-    mp4['folder'] = os.path.abspath(mp4['folder'])
-    # If it doens't end with a "/", append it
-    if not mp4['folder'].endswith("/"):
-        mp4['folder'] += "/"
-
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "Hardsub base folder: " + 
-            colors.OKBLUE + "< mp4['folder'] > " + colors.ENDC + 
-            colors.MAGENTA + mp4['folder'] + colors.ENDC)
-
-    # Generate the folder with the show name to place the new mp4 file in
-    mp4['new_hardsub_folder'] = mp4['folder'] + mp4['show_name'] + "/"
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "Hardsub destination folder: " +
-            colors.OKBLUE + "< mp4['new_hardsub_folder'] > " + colors.ENDC + 
-            colors.LMAGENTA + mp4['new_hardsub_folder'] + colors.ENDC)
-
-
-    # Generate the output MP4 file string/path
-    mp4['hardsubbed_file'] = mp4['folder'] + mp4['show_name'] + "/" + mp4['new_filename']
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC + 
-            "Hardsub destination filepath: " +
-            colors.OKBLUE + "< mp4['hardsubbed_file'] > " + colors.ENDC + 
-            colors.LMAGENTA + mp4['hardsubbed_file'] + colors.ENDC)
-
-    print()
-    return
-
-
-def load_temp_folder_and_paths(mkv, mp4, conf):
-    """
-    Helper method that will load and generate the temp folder path and the temp file.
-    While mp4 is included, only the MKV dict is modified.
-    """
-
-    # Load the temp folder
-    mkv['temp'] = conf['folders']['temp']
-
-    # Get the absolute path of the folder if it's not in abs
-    mkv['temp'] = os.path.abspath(mkv['temp'])
-
-    # If it doens't end with a "/", append it
-    if not mkv['temp'].endswith("/"):
-        mkv['temp'] += "/"
-
-    # We have to fail the system if ' appears in the temp folder, as it messes up
-    # ffmpeg's parsing.
-    if "'" in mkv['temp']:
-        print(colors.FAIL + "FAIL: " + colors.ENDC +
-                "Unexpected single quote was found in the temp folder path. The program will now exit.")
-        sys.exit(1)
-
-    # Print temp folder message
-    print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "MKV temp. folder: " + 
-            colors.OKBLUE + "< mkv['temp'] > " + colors.ENDC +
-            colors.MAGENTA + mkv['temp'] + colors.ENDC)
-
-    # For safety, we need to literal quote every folder in the temp path
-    # Else ffmpeg may not properly load the folders
-    temp_path = mkv['temp'].split("/")
-    mkv['quoted_temp'] = str()
-    for folder in temp_path:
-        if folder:
-            # Forcibly quote everything - shlex will not capture commas
-            mkv['quoted_temp'] = mkv['quoted_temp'] + "/" + "'" + folder + "'"
-    mkv['quoted_temp'] += "/"
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "MKV quoted temp. folder: " +
-            colors.OKBLUE + "< mkv['quoted_temp'] > " + colors.ENDC +
-            colors.LMAGENTA + mkv['quoted_temp'] + colors.ENDC)
-
-    print()
-
-    # We'll need a regular, non-quoted version of the string for shutil.copy2() to use
-    mkv['temp_file_path'] = mkv['temp'] + "temp.mkv"
-    print(colors.LCYAN + "INFO: " + colors.ENDC + 
-            "temp.mkv regular file path: " +
-            colors.OKBLUE + "< mkv['temp_file_path'] > " + colors.ENDC + 
-            colors.LMAGENTA + mkv['temp_file_path'] + colors.ENDC)
-
-    
-    # The temporary file is guaranteed to be named "temp.mkv" for safety.
-    # Get its path that can be used for -vf subtitles="path", quoted version
-    mkv['quoted_temp_file_path'] = mkv['quoted_temp'] + "temp.mkv"
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC + 
-            "Temp.mkv subtitles arg path: " + 
-            colors.OKBLUE + "< mkv['quoted_temp_file_path'] > " + colors.ENDC + 
-            colors.LMAGENTA + mkv['quoted_temp_file_path'] + colors.ENDC)
-
-    print()
-    return
-
-
-def get_show_name(conf, mkv, mp4, args):
-    """
-    Gets the show name from the args path and loads it into the two dictionaries.
-    Uses Python re to match the words between the last two /../
-    """
-
-    # v3.1:
-    """
-    Two cases: 1. Show is in conf['watch'](/)[show_name]/[episode_file]
-               2. Show is in conf['watch'](/)[episode_file]
-
-    Determining which: Use r/(.*/)(.*), group 1 should or should not match conf['watch'](/)
-    
-    Case 1: Use old logic
-    Case 2: Use hisha
-    """
-    # parent_path = re.match('(.*/)(.*)',
-    parent_path = mkv['src_folder_path'] # Note: as args[0], this should always end in a '/'
-    parent_path = parent_path if parent_path.endswith('/') else (parent_path + '/')
-    parent_path = os.path.abspath(parent_path)
-
-    # conf watch is just from config.yml, append / if necessary
-    conf_watch_path = conf['folders']['watch']
-    conf_watch_path = conf_watch_path if conf_watch_path.endswith('/') else (conf_watch_path + '/')
-    conf_watch_path = os.path.abspath(conf_watch_path)
-
-    # If the configuration watch folder path is the same as the parent path up to the file, this means
-    # the file was placed in the root of watch, so we need to find the show name using Hisha.
-    if parent_path == conf_watch_path:
-        print(colors.GREEN + "NOTICE: " + colors.ENDC +
-                "Episode was added to root of watch directory, using HISHA to find show name.")
-        show_name = hisha.hisha(mkv['src_filename'])
-    # Else, this means the show was placed in a folder with a predetermined name, so we use that instead
-    else:
-        print(colors.GREEN + "NOTICE: " + colors.ENDC +
-                "Episode was added into a folder that already contains the show name, not using HISHA.")
-        show_abs_path = args[0]
-        show = re.match('.*\/(.*)\/', show_abs_path)
-        show_name = show.group(1)
-
-    mkv['show_name'] = show_name
-    mp4['show_name'] = show_name
-
-    print(colors.LCYAN + "INFO: " + colors.ENDC +
-            "Show name: " + 
-            colors.OKBLUE + "< mkv/mp4['show_name'] >" + colors.ENDC + " " +
-            colors.LMAGENTA + show_name + colors.ENDC)
-
-    print()
-    return
-
 
 def upload_mkv():
     """
@@ -794,14 +587,14 @@ def burn(inote):
     filenames.get_source_filenames(mkv, mp4, args, True)
 
     # Get the show name, BE SURE TO RUN THIS BEFORE load_destination_folder_and_paths
-    get_show_name(conf, mkv, mp4, args)
+    filenames.get_show_name(conf, mkv, mp4, args, True)
 
     # Use Anitopy to get the new, cleaned filenames
     filenames.generate_new_filenames(mkv, mp4, True)
 
     # Get the folders where a copy of the MKV and the new MP4 will be put.
-    load_destination_folder_and_paths(mkv, mp4, conf, args)
-    load_temp_folder_and_paths(mkv, mp4, conf)
+    paths.load_destination_folder_and_paths(mkv, mp4, conf, args, True)
+    paths.load_temp_folder_and_paths(mkv, mp4, conf, True)
 
     # We want to get the current working directory for reference
     # WORK_DIR/bin/ffmpeg{-10bit,}

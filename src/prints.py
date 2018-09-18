@@ -30,7 +30,7 @@ class printouts:
 	def __init__(self):	
 		self.c = colors()
 
-	def p_gen_path(self, name, sys_name, sys_value, light, endgroup):
+	def p_gen_path(self, name, sys_name, sys_value, light=False, endgroup=False):
 		"""
 		At the beginning of Izumi, all the paths are generated. This method removes
 		us having to write each print statement, instead just calling this method. 
@@ -60,8 +60,34 @@ class printouts:
 		# If this is the end of a group, we print an extra newline
 		if endgroup:
 			print()
-			
+
 		return
+
+	def p_hisha_usage(self, used):
+		"""
+		Print statements for if Hisha was used or not
+		"""
+		if used:
+			print("%sNOTICE:%s %s %s" % (
+				self.c.GREEN, self.c.ENDC,
+				"A show name was not specified in the path of the new episode.",
+				"Using Hisha to determine the show name.",))
+		else:
+			print("%sNOTICE:%s %s %s" % (
+				self.c.GREEN, self.c.ENDC,
+				"A show name was specified in the path of the new episode.",
+				"Not using Hisha",))
+
+	def p_warn_no_shownames(self):
+		print("%sNOTICE:%s get_show_name()%s not yet invoked. Invoking..." % (
+				self.c.WARNING, self.c.FAIL, self.c.ENDC,))
+
+	def p_fail_bad_temp_path(self):
+		print("%sFAIL:%s %s %s" % (
+			self.c.FAIL, self.c.ENDC,
+			"Unexpected single quote was found in the temp folder path.",
+			"The program will now exit."))
+
 
 if __name__ == "__main__":
 	p = printouts()
