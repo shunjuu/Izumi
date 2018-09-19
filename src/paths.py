@@ -19,7 +19,7 @@ c = prints.colors()
 p = prints.printouts()
 
 
-def load_destination_folder_and_paths(mkv, mp4, conf, args, verbose):
+def load_destination_folder_and_paths(mkv, mp4, conf, args, verbose=False):
 	"""
 	Generates all the various folder paths that the system will neeed.
 	Also loads the temp folder into MKV.
@@ -78,7 +78,7 @@ def load_destination_folder_and_paths(mkv, mp4, conf, args, verbose):
 
 	return
 
-def load_temp_folder_and_paths(mkv, mp4, conf, verbose):
+def load_temp_folder_and_paths(mkv, mp4, conf, verbose=False):
 	"""
 	Helper method that generates the paths needed for the temp folder.
 	While the MP4 dict is included for robustness, only MKV is modified.

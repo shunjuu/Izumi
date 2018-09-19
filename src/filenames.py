@@ -23,7 +23,7 @@ except:
 c = prints.colors()
 p = prints.printouts()
 
-def get_source_filenames(mkv, mp4, args, verbose):
+def get_source_filenames(mkv, mp4, args, verbose=False):
 	"""
 	This method takes the orignal filenames, and populates
 	the MKV and MP4 dicts with the correct filenames.
@@ -84,7 +84,7 @@ def clean_filename(filename, ext):
 	return new_file
 
 
-def generate_new_filenames(mkv, mp4, verbose):
+def generate_new_filenames(mkv, mp4, verbose=False):
 	"""
 	Populates MKV and MP4 dicts with new cleaned names.
 	Requires anitopy as ad ependency
@@ -106,7 +106,7 @@ def generate_new_filenames(mkv, mp4, verbose):
 					 mp4['new_filename'], True, True)
 
 
-def get_show_name(conf, mkv, mp4, args, verbose):
+def get_show_name(conf, mkv, mp4, args, verbose=False):
 	"""
 	Gets the show name from the args path and loads it into two dictionaries.
 
@@ -151,5 +151,4 @@ def get_show_name(conf, mkv, mp4, args, verbose):
 	if verbose:
 		p.p_gen_path("Show Name", "mkv/mp4['show_name']", show_name, True, True)
 
-	print()
 	return

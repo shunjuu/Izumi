@@ -30,6 +30,71 @@ class printouts:
 	def __init__(self):	
 		self.c = colors()
 
+	def p_initialize(self, inote, func_name, endgroup=True):
+		"""
+		Print the initial print statement
+		"""
+		print("%sINFO: %s<%s>%s Received Argument: \"%s%s%s\"" % (
+			self.c.LCYAN, self.c.OKBLUE, func_name, self.c.ENDC,
+			self.c.WARNING, inote, self.c.ENDC))
+		if endgroup:
+			print()
+
+	def p_bad_config(self, conf_name):
+		"""
+		Print statement for bad config files...
+		"""
+		print("%sFAIL:%s An exception has occured while loading: %s" % (
+			self.c.FAIL, self.c.ENDC, conf_name))
+
+
+	def p_fix_args(self, func_name, details, quote_details, 
+					additional_details, endgroup=False):
+		"""
+		Params:
+			func_name: Name of the invoking function (str)
+			details: (Something): (str)
+			quote_details: Whether or not to encapsulate details in " (bool)
+			additional_details: if quote_details, what quote? (str)
+			endgroup: extra print (bool)
+		"""
+		if not quote_details:
+			print("%sINFO: %s<%s>%s %s" % (
+				self.c.LCYAN, self.c.OKBLUE, func_name, self.c.ENDC,
+				details))
+
+		elif quote_details:
+			print("%sINFO: %s<%s>%s %s: %s\"%s\"%s" % (
+				self.c.LCYAN, self.c.OKBLUE, func_name, self.c.ENDC,
+				details, self.c.WARNING, str(additional_details),
+				self.c.ENDC))
+
+		if endgroup:
+			print()
+
+	def p_fix_args_fail(self, func_name, details, endgroup=True):
+		print("%sFAIL: %s<%s>%s %s" % (
+			self.c.FAIL, self.c.OKBLUE, func_name, self.c.ENDC,
+			details))
+
+		if endgroup:
+			print()
+
+	def p_runtype(self, mode, endgroup=True):
+		print("%sNOTICE:%s Using mode \"%s%s%s\"." % (
+			self.c.GREEN, self.c.ENDC, self.c.OKGREEN, mode, self.c.ENDC))
+		if endgroup:
+			print()
+
+	def p_inote_details(self, func_name, note, note_details, endgroup=True):
+		print("%sINFO:%s <%s>%s %s: %s%s%s" % (
+			self.c.LCYAN, self.c.OKBLUE, func_name, self.c.ENDC,
+			note, self.c.WARNING, note_details, self.c.ENDC))
+
+		if endgroup:
+			print()
+
+
 	def p_gen_path(self, name, sys_name, sys_value, light=False, endgroup=False):
 		"""
 		At the beginning of Izumi, all the paths are generated. This method removes
