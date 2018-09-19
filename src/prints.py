@@ -88,6 +88,41 @@ class printouts:
 			"Unexpected single quote was found in the temp folder path.",
 			"The program will now exit."))
 
+	def p_clear_notice(self, name):
+		"""
+		Prints out the notice statemnet for file deletion
+		"""
+		print("%sNOTICE:%s Now deleting: %s%s%s files." % (
+			self.c.WARNING, self.c.ENDC, self.c.WARNING, name, self.c.ENDC))
+
+	def p_clear_before(self, name, sys_name):
+		"""
+		Print statement for before something is attempted to be deleted.
+		"""
+		print("%sDELETING:%s %s: %s%s%s..." % (
+			self.c.FAIL, self.c.ENDC, name, self.c.WARNING, 
+			sys_name, self.c.ENDC), end="")
+
+	def p_clear_after(self, success, endgroup=False):
+		"""
+		Print statement for deletion attempt status.
+		"""
+		if success:
+			print("%sSuccess%s." % (self.c.OKGREEN, self.c.ENDC))
+		else:
+			print("%sFailed%s." % (self.c.FAIL, self.c.ENDC))
+
+		# If this is the end, we want to print an extra space afterwards.
+		if endgroup:
+			print()
+
+	def p_clear_after_hisha(self):
+		"""
+		Specifically for deleting source folder with hisha
+		"""
+		print("%sIgnored, used Hisha%s." % (self.c.OKGREEN, self.c.ENDC))
+		print()
+
 
 if __name__ == "__main__":
 	p = printouts()

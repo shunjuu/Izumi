@@ -16,6 +16,7 @@ from lib import hisha
 
 # Modules!
 from src import filenames, paths
+from src import cleanup
 
 class colors:
     """
@@ -447,114 +448,6 @@ def distribute_mp4(conf):
     return
 
 
-def clear_files(conf, mkv, mp4):
-    """
-    Delete all the files once we're done with them
-    """ 
-    # Try deleting the mkv folder and file created
-    # Do seperately instead of shutil.rmtree()
-    
-    # Delete the MKV folder and file created
-    print(colors.WARNING + "NOTICE: " + colors.ENDC +
-            "Now deleting: " + 
-            colors.WARNING + "mkv" + colors.ENDC + " " +
-            "files.")
-
-    print(colors.FAIL + "DELETING: " + colors.ENDC +
-        "MKV Hardsub File: " + colors.WARNING + mkv['hardsubbed_file'] +
-        colors.ENDC + "... ",end="")
-    try:
-        os.remove(mkv['hardsubbed_file'])
-        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-    except:
-        print(colors.FAIL + "Failed" + colors.ENDC + ".")
-
-    print(colors.FAIL + "DELETING: " + colors.ENDC +
-        "MKV Hardsub Folder: " + colors.WARNING + mkv['new_hardsub_folder'] +
-        colors.ENDC + "... ",end="")
-    try:
-        os.rmdir(mkv['new_hardsub_folder'])
-        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-    except:
-        print(colors.FAIL + "Failed" + colors.ENDC + ".")
-
-
-    # Try deleting the mp4 folder and the file created
-    print(colors.WARNING + "NOTICE: " + colors.ENDC +
-            "Now deleting: " + 
-            colors.WARNING + "mp4" + colors.ENDC + " " +
-            "files.")
-
-    print(colors.FAIL + "DELETING: " + colors.ENDC +
-        "MP4 Hardsub File: " + colors.WARNING + mp4['hardsubbed_file'] +
-        colors.ENDC + "... ",end="")
-    try:
-        os.remove(mp4['hardsubbed_file'])
-        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-    except:
-        print(colors.FAIL + "Failed" + colors.ENDC + ".")
-
-    print(colors.FAIL + "DELETING: " + colors.ENDC +
-        "MP4 Hardsub Folder: " + colors.WARNING + mp4['new_hardsub_folder'] +
-        colors.ENDC + "... ",end="")
-    try:
-        os.rmdir(mp4['new_hardsub_folder'])
-        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-    except:
-        print(colors.FAIL + "Failed" + colors.ENDC + ".")
-
-
-    # Try deleting the temp file
-    print(colors.WARNING + "NOTICE: " + colors.ENDC +
-            "Now deleting: " + 
-            colors.WARNING + "temp" + colors.ENDC + " " +
-            "files.")
-
-    print(colors.FAIL + "DELETING: " + colors.ENDC +
-        "Temp file: " + colors.WARNING + mkv['temp_file_path'] +
-        colors.ENDC + "... ",end="")
-    try:
-        os.remove(mkv['temp_file_path'])
-        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-    except:
-        print(colors.FAIL + "Failed" + colors.ENDC + ".")
-
-    # Try deleting the source files
-    print(colors.WARNING + "NOTICE: " + colors.ENDC +
-            "Now deleting: " + 
-            colors.WARNING + "source" + colors.ENDC + " " +
-            "files.")
-
-    print(colors.FAIL + "DELETING: " + colors.ENDC +
-        "Source file: " + colors.WARNING + mkv['src_file_path'] +
-        colors.ENDC + "... ",end="")
-    try:
-        os.remove(mkv['src_file_path'])
-        print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-    except:
-        print(colors.FAIL + "Failed" + colors.ENDC + ".")
-
-    print(colors.FAIL + "DELETING: " + colors.ENDC +
-        "Source folder: " + colors.WARNING + mkv['src_folder_path'] +
-        colors.ENDC + "... ",end="")
-    try:
-        watch_folder = conf['folders']['watch']
-        watch_folder = watch_folder if watch_folder.endswith("/") else (watch_folder + '/')
-
-        mkv_src_fdr_path = mkv['src_folder_path']
-        mkv_src_fdr_path = mkv_src_fdr_path if mkv_src_fdr_path.endswith("/") else (mkv_src_fdr_path + '/')
-
-        if watch_folder == mkv_src_fdr_path:
-            print(colors.OKGREEN + "Ignored, used HISHA" + colors.ENDC + ".")
-        else:
-            os.rmdir(mkv['src_folder_path'])
-            print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-    except:
-        print(colors.FAIL + "Failed" + colors.ENDC + ".")
-
-    print()
-
-
 def burn(inote):
 
     # Clear the terminal and print out the received argument
@@ -684,7 +577,7 @@ def burn(inote):
             distribute_mp4(conf)
     """
     # step 6: Clear out all the new files
-    clear_files(conf, mkv, mp4) 
+    cleanup.clear_files(conf, mkv, mp4, True)
 
     print(colors.OKGREEN + "Completed job for: " + colors.ENDC + 
             mkv['src_filename'] + ".")
