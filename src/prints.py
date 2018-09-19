@@ -261,3 +261,59 @@ class printouts:
 		
 		if endgroup:
 			print()
+
+	def p_start_distribute(self, endgroup=False):
+		print("%sINFO:%s Sending requests to distribute newly generated MP$ file(s)..." %
+			(self.c.LCYAN, self.c.ENDC))
+
+		if endgroup:
+			print()
+
+	def p_distribute_notice(self, note_type, endgroup=False):
+		"""
+		Prints "NOTICE: Now sending request to <SEQUENTIAL/ALWAYS>...""
+		"""
+		print("%sNOTICE: %sNow sending requests to %s%s%s destinations..." % (
+			self.c.WARNING, self.c.ENDC, self.c.WARNING, note_type, self.c.ENDC))
+
+		if endgroup:
+			print()
+
+	def p_distribute_sending_request(self, distributor, endgroup=False)
+		"""	
+		Sends a post request to distribution servers for MP4 distribution.
+		"""
+		print("%sNOTIFICATION: %sSending request to %s%s%s... " % (
+			self.c.LCYAN, self.c.ENDC, self.c.OKBLUE, distributor, self.c.ENDC),
+			end="")
+
+	def p_distribute_notice_sent(self, success, endgroup=False):
+		"""
+		Print statement for deletion attempt status.
+		"""
+		if success:
+			print("%sSuccess%s." % (self.c.OKGREEN, self.c.ENDC))
+		else:
+			print("%sFailed%s." % (self.c.FAIL, self.c.ENDC))
+
+		# If this is the end, we want to print an extra space afterwards.
+		if endgroup:
+			print()
+
+	def p_double_shutil(self):
+		print("%sWARNING:%s%s\n%sNOTE:%s %s." % (
+			self.c.FAIL, self.c.ENDC,
+			"Shutil was unable to copy into the temp file.",
+			self.c.WARNING, self.c.ENDC,
+			"This is likely a duplicate notification triggered by inotify."))
+
+	def p_job_completed(self, filename, endgroup=True):
+		"""
+		The final print statement to clear it all up.
+		"""
+		print("%sCompleted job for: %s%s." % (
+			self.c.OKGREEN, filename, self.c.ENDC))
+
+		if endgroup:
+			print(end="\n\n\n")
+

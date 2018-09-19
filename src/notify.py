@@ -101,3 +101,64 @@ def notify_mp4_upload(conf, mp4, verbose=False):
 
 	print()
 	return
+
+
+def distribute_mp4(conf, mp4, verbose=False):
+	"""
+	Makes a blank POST request to various destinations to notify them to distribute new MP4s
+	"""
+
+	body = dict()
+	body['show'] = mp4['show_name']
+	body['episode'] = mp4['new_filename']
+
+	headers = dict()
+	headers['Content-Type'] = "application/json"
+
+	if verbose:
+		p.p_start_distribute(True)	
+		p.p_distribute_notice("ALWAYS")
+
+	# First, post all of the "always" destinations
+	for distributor in conf['sync']['mp4-distribution']['distributors']['always']:
+		if verbose:
+			p.p_distribute_sending_request(distributor[0])
+
+		try:
+			headers.pop("Authorization", None)
+			headers['Authorization'] = distributor[1]
+		except:
+			pass
+
+		try:
+			r = requests.post(distributor[0], json=body, headers=headers, timeout=5)
+			if verbose:
+				p.p_distribute_notice_sent(True)
+		except:
+			if verbose:
+				p.p_distribute_notice_sent(False)
+
+
+	# Second, try the sequential ones until one passes or all fail
+	if verbose:
+		p.p_distribute_notice("SEQUENTIAL")
+
+	for distributor in conf['sync']['mp4-distribution']['distributors']['sequential']:
+		p.p_distribute_sending_request(distributor[0])
+
+		try:
+			headers.pop("Authorization", None)
+			headers['Authorization'] = distributor[1]
+		except:
+			pass
+
+		try:
+			r = requests.post(distributor[0], json=body, headers=headers, timeout=60)
+			if verbose:
+				p.p_distribute_notice_sent(True, True)
+			break
+		except:
+			if verbose:
+				p.p_distribute_notice_sent(False, True)
+
+	return
