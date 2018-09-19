@@ -36,8 +36,10 @@ sync:
         priority: [] #rclone
         regular: [] #rclone
         encoders: 
-                primary: [] #url
-                other: [] #url
+                primary: 
+                    - [] # list of list[url, auth key if exists]
+                other: 
+                    - [] # list of lists[url, auth key if exists]
                 status_code: 209
                 fallback: yes
     mp4:
@@ -49,9 +51,11 @@ sync:
         # Distributors are URLs that will be posted
         distributors:
             # For sequential distributors, they will be tried until one succeeds
-            sequential: [] #url
+            sequential: # list of lists[url, auth key if exists]
+                - []
             # For always distributors, these will always be notified regardless
-            always: [] #url
+            always: # list of lists[url, auth key if exists]
+                - []
 
         # While the others are for specifying where to send distribution requests
         # This species for the distributor where to source and where to target
@@ -69,13 +73,17 @@ notifications:
    upload:
         mkv:
             name: "MKV"
-            urls: [] #url
+            urls:
+                - []
+                - []
         mp4:
             name: "MP4"
-            urls: [] #url
+            urls:
+                - [] # list of lists[url, auth key if exists]
 
 ffmpeg:
     threads: 6 # ffmpeg threads to use
 
 sys:
     delimiter: "||"
+    verbose: No

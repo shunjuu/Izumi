@@ -197,6 +197,45 @@ class printouts:
 		print("%sIgnored, used Hisha%s." % (self.c.OKGREEN, self.c.ENDC))
 		print()
 
+	def p_upload(self, upload_type, endgroup=True):
+		"""
+		Print statement to shell for notifying a MKV file
+		"""
+		print("%sINFO:%s Now uploading %s files..." % (
+			self.c.LCYAN, self.c.ENDC, upload_type))
+
+		if endgroup:
+			print()
+
+	def p_upload_notify(self, upload_type):
+		"""
+		Print statement for sending upload notifications (to Aleytia)
+		"""
+		print("%sINFO:%s Now sending %s upload notifications..." % (
+			self.c.LCYAN, self.c.ENDC, upload_type))
+
+	def p_upload_notify_sending(self, url):
+		"""
+		"Sending notification to ..."
+		"""
+		print("%sNOTIFICATION:%s Sending notification to %s%s%s... " % (
+			self.c.LCYAN, self.c.ENDC, self.c.OKBLUE, url, self.c.ENDC),
+			end="")
+
+	def p_notify_sent(self, success, endgroup=False):
+		"""
+		Print statement for deletion attempt status.
+		"""
+		if success:
+			print("%sSuccess%s." % (self.c.OKGREEN, self.c.ENDC))
+		else:
+			print("%sFailed%s." % (self.c.FAIL, self.c.ENDC))
+
+		# If this is the end, we want to print an extra space afterwards.
+		if endgroup:
+			print()
+
+
 
 if __name__ == "__main__":
 	p = printouts()

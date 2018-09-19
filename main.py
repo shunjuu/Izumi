@@ -15,11 +15,14 @@ import anitopy
 from lib import hisha
 
 # Modules!
-from src import initialize as init
-from src import filenames
-from src import paths
 from src import cleanup
+from src import encode
+from src import filenames
+from src import initialize as init
+from src import notify
+from src import paths
 from src import prints
+from src import upload
 
 class colors:
 	"""
@@ -38,54 +41,6 @@ class colors:
 	ENDC = '\033[0m'
 	BOLD = '\033[1m'
 	UNDERLINE = '\033[4m'
-
-
-def upload_mkv():
-	"""
-	Call the script that uploads the matroska files.
-	"""
-
-	print(colors.LCYAN + "INFO: " + colors.ENDC + 
-			"Now uploading MKV files...")
-	print() # Add one for before the script
-
-	os.system("src/mkv.sh")
-
-	print()
-	return
-
-def notify_mkv_upload(conf, mkv):
-	"""
-	Sends a POST request that will issue notifications about the new mkv.
-	We use Python to send the notification because curling in the bash shell
-		is unreliable, as discovered from convert.sh.
-	"""
-
-	print()
-	print(colors.LCYAN + "INFO: " + colors.ENDC +
-			"Now sending MKV upload notifications...")
-
-	# Create the body
-	body = dict()
-	body['json-type'] = 1
-	body['source'] = "Undefined"
-	body['show_name'] = mkv['show_name']
-	body['location'] = conf['notifications']['upload']['mkv']['name']
-	body['file'] = mkv['new_filename']
-	body['file_size'] = os.path.getsize(mkv['hardsubbed_file'])
-
-	for url in conf['notifications']['upload']['mkv']['urls']:
-		print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
-				"Sending notification to " +
-				colors.OKBLUE + url + colors.ENDC + "... ", end="")
-		try:
-			r = requests.post(url, json=body)
-			print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-		except:
-			print(colors.FAIL + "Failed" + colors.ENDC + ".")
-
-	print()
-	return
 
 
 def notify_mkv_encode(conf, mkv, izumi_type):
@@ -177,56 +132,6 @@ def notify_mkv_encode(conf, mkv, izumi_type):
 	print()
 	return izumi_type
 
-
-def upload_mp4():
-	"""
-	Call the script that uploads the matroska files.
-	"""
-
-	print(colors.LCYAN + "INFO: " + colors.ENDC + 
-			"Now uploading MP4 files...")
-	print() # Add one for before the script
-
-	os.system("src/mp4.sh")
-
-	print()
-	return
-
-
-def notify_mp4_upload(conf, mp4):
-	"""
-	Sends a POST request that will issue notifications about the new mp4.
-	We use Python to send the notification because curling in the bash shell
-		is unreliable, as discovered from convert.sh.
-	"""
-
-	print()
-	print(colors.LCYAN + "INFO: " + colors.ENDC +
-			"Now sending MP4 upload notifications...")
-
-	# Create the body
-	body = dict()
-	body['json-type'] = 2
-	body['source'] = "Undefined"
-	body['show_name'] = mp4['show_name']
-	body['location'] = conf['notifications']['upload']['mp4']['name']
-	body['file'] = mp4['new_filename']
-	body['file_size'] = os.path.getsize(mp4['hardsubbed_file'])
-
-	for url in conf['notifications']['upload']['mp4']['urls']:
-		print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
-				"Sending notification to " +
-				colors.OKBLUE + url + colors.ENDC + "... ", end="")
-		try:
-			r = requests.post(url, json=body)
-			print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-		except:
-			print(colors.FAIL + "Failed" + colors.ENDC + ".")
-
-	print()
-	return
-
-
 def distribute_mp4(conf):
 	"""
 	Makes a blank POST request to various destinations to notify them to distribute new MP4s
@@ -302,7 +207,7 @@ def burn(inote):
 	filenames.get_source_filenames(mkv, mp4, args, False)
 
 	# Get the show name, BE SURE TO RUN THIS BEFORE load_destination_folder_and_paths
-	filenames.get_show_name(conf, mkv, mp4, args, True)
+	filenames.get_show_name(conf, mkv, mp4, args, False)
 
 	# Use Anitopy to get the new, cleaned filenames
 	filenames.generate_new_filenames(mkv, mp4, False)
@@ -311,33 +216,10 @@ def burn(inote):
 	paths.load_destination_folder_and_paths(mkv, mp4, conf, args, False)
 	paths.load_temp_folder_and_paths(mkv, mp4, conf, False)
 
-	# We want to get the current working directory for reference
-	# WORK_DIR/bin/ffmpeg{-10bit,}
-	# Design note: The ffmpeg conversion script should not have to
-	# figure out where it is - pass in the full path of the executable
+	# Get ffmpeg executable information
 	ffmpeg = dict()
-	ffmpeg['dir_path'] = os.path.dirname(os.path.realpath(__file__)) + "/bin/"
-	print(colors.LCYAN + "INFO: " + colors.ENDC + 
-			"Application \"bin/\" directory: " + 
-			colors.OKBLUE + "< ffmpeg['dir_path'] >" + colors.ENDC + " " +  
-			colors.LMAGENTA + ffmpeg['dir_path'] + colors.ENDC)
-
-	# ffmpeg executable
-	ffmpeg['ffmpeg'] = ffmpeg['dir_path'] + "ffmpeg"
-	print(colors.LCYAN + "INFO: " + colors.ENDC + 
-			"ffmpeg executable path: " +
-			colors.OKBLUE + "< ffmpeg['ffmpeg'] >" + colors.ENDC + " " +  
-			colors.MAGENTA + ffmpeg['ffmpeg'] + colors.ENDC)
-
-	ffmpeg['ffmpeg-10bit'] = ffmpeg['dir_path'] + "ffmpeg-10bit"
-	print(colors.LCYAN + "INFO: " + colors.ENDC + 
-			"ffmpeg-10bit executable path: " +
-			colors.OKBLUE + "< ffmpeg['ffmpeg-10bit'] >" + colors.ENDC + " " +  
-			colors.MAGENTA + ffmpeg['ffmpeg-10bit'] + colors.ENDC)
-
-	print()
-
-
+	encode.load_ffmpeg_paths(ffmpeg, os.path.dirname(os.path.realpath(__file__)), False)
+	
 	# --------------------------------------------------------------------- #
 	# String generation is complete, start to run transfer process
 	# Note; izumi_type is the current type of downloader
@@ -361,12 +243,12 @@ def burn(inote):
 	# Step 2: Upload the file online, but only if mode is downloader
 	# Step 2.5: If mode is downloader, only proceed from here if unsucessful call to proxies
 	# Step 2.5: If mode is encoder, continue
-	"""
 	if izumi_type == "downloader":
-		upload_mkv()
-		notify_mkv_upload(conf, mkv)
+		upload.upload_mkv()
+		notify.notify_mkv_upload(conf, mkv, True)
 		izumi_type = notify_mkv_encode(conf, mkv, izumi_type)
 		
+	"""
 
 	# Type check for encoder, as if encoder request succeeds, it will still continue 
 	# to clear the files at the end
@@ -382,8 +264,8 @@ def burn(inote):
 				% (mkv['quoted_temp_file_path'], quote(mp4['hardsubbed_file'])))
 
 		# Step 5: Upload the new MP4 file 
-		upload_mp4()
-		notify_mp4_upload(conf, mp4)
+		upload.upload_mp4()
+		notify.notify_mp4_upload(conf, mp4, False)
 
 		# Step 5.1: If we're originally just an encoder, we need to post one of the heavy servers
 		# for file transferring, or fallback to just uploading everything
