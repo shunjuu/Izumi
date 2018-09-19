@@ -37,7 +37,10 @@ def notify_mkv_upload(conf, mkv, verbose=False):
 
 	for g in conf['notifications']['upload']['mkv']['urls']:
 		if verbose:
-			p.p_upload_notify_sending(g[0])
+			try:
+				p.p_upload_notify_sending(g[0])
+			except:
+				p.p_upload_notify_error()
 
 		# Add the header into the request, but only if it exists
 		try:
@@ -82,7 +85,10 @@ def notify_mp4_upload(conf, mp4, verbose=False):
 
 	for g in conf['notifications']['upload']['mp4']['urls']:
 		if verbose:
-			p.p_upload_notify_sending(g[0])
+			try:
+				p.p_upload_notify_sending(g[0])
+			except:
+				p.p_upload_notify_error()
 
 		# Add the header into the request, but only if it exists
 		try:

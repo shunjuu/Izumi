@@ -235,6 +235,15 @@ class printouts:
 		if endgroup:
 			print()
 
+	def p_upload_notify_error(self):
+		"""
+		Used for p_upload_notify, which may error if there is no url provided.
+		"""
+		print("%sWARNING: %s%s %s." % (
+			self.c.WARNING, self.c.ENDC,
+			"An attempt was made to POST a notification to an endpoint, but it failed.",
+			"It seems that a URL was not provided for this config, skipping..."))
+
 	def p_request_encode_sending(self, encoder):
 		"""
 		Print statement when attempting to send an encode request
@@ -248,7 +257,7 @@ class printouts:
 			self.c.WARNING, self.c.ENDC))
 
 	def p_fallback_active(self, endgroup=True):
-		print("%sWARNING: %sFallback mode is activated. Now switching to %sencoder%smode." % (
+		print("%sWARNING: %sFallback mode is activated. Now switching to %sencoder%s mode." % (
 			self.c.WARNING, self.c.ENDC, self.c.WARNING, self.c.ENDC))
 		if endgroup:
 			print()
@@ -279,7 +288,7 @@ class printouts:
 		if endgroup:
 			print()
 
-	def p_distribute_sending_request(self, distributor, endgroup=False)
+	def p_distribute_sending_request(self, distributor, endgroup=False):
 		"""	
 		Sends a post request to distribution servers for MP4 distribution.
 		"""

@@ -112,7 +112,7 @@ def burn(inote):
 		# Step 5.1: If we're originally just an encoder, we need to post one of the heavy servers
 		# for file transferring, or fallback to just uploading everything
 		# Check conf, not izumi_type, to see if original runtype is encoder or downloader
-		if get_runtype(conf['type']) == "encoder":
+		if init.get_runtype(conf['type']) == "encoder":
 			notify.distribute_mp4(conf)
 
 	# step 6: Clear out all the new files
