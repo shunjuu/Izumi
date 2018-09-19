@@ -153,6 +153,15 @@ class printouts:
 			"Unexpected single quote was found in the temp folder path.",
 			"The program will now exit."))
 
+	def p_notice(self, note, endgroup=True):
+		"""
+		General notice staetment printout
+		"""
+		print("%sNOTICE: %s%s" % (self.c.GREEN, self.c.ENDC, note))
+
+		if endgroup:
+			print()
+
 	def p_clear_notice(self, name):
 		"""
 		Prints out the notice statemnet for file deletion

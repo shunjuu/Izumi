@@ -80,7 +80,7 @@ def convert_inote_to_list(inote, conf, verbose=False):
 	return args
 
 
-def fix_args(inote, conf):
+def fix_args(inote, conf, verbose=False):
 	"""
 	Function that will parse the inotifywatch strings sent to the machine.
 	If new arg is a directory, it will "fix" the argument and return it.
@@ -106,14 +106,10 @@ def fix_args(inote, conf):
 	# The most standard case: A new file is presented, devoid of folder
 	if 'isdir' not in inote.lower():
 
-		p.p_fix_args("fix_args", 
-			"Detected a regular, non-directory file object was created.",
-			False, None, False)
-		"""
-		print(colors.LCYAN + "INFO: " + colors.ENDC + 
-				colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
-				"Detected a regular, non-directory file object was created.")
-		"""
+		if verbose:
+			p.p_fix_args("fix_args", 
+				"Detected a regular, non-directory file object was created.",
+				False, None, False)
 
 		# The name of the file that was JUST MADE.
 		# (We assume the delimiter is always working properly.)
@@ -121,59 +117,43 @@ def fix_args(inote, conf):
 
 		try:
 			if new_filename.endswith(".meta"):
-				print(colors.FAIL + "FAIL: " + colors.ENDC + 
-						colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
-						"The new file created was a meta file. Ignoring the file and exiting.")
+				if verbose:
+					p.p_fix_args_fail("fix_args", 
+						"The new file created was a meta file. Ignoring and exiting.")
 				sys.exit(1)
-
 		except SystemExit:
-			print()
 			sys.exit(1)
 
-		"""
-		print(colors.LCYAN + "INFO: " + colors.ENDC +
-				colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
-				"New file is not a meta file.")
-		"""
-		p.p_fix_args("fix_args", "New file is not a meta file.", False, None, False)
+		if verbose:	
+			p.p_fix_args("fix_args", "New file is not a meta file.", False, None, False)
+			p.p_fix_args("fix_args", "Returning unmodified inote", True, inote, True)
 		
-		print(colors.LCYAN + "INFO: " + colors.ENDC + 
-				colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
-				"Returning unmodified inote: " + 
-				"\"" + colors.WARNING + inote + colors.ENDC + "\"")
-
-		print()
 		return inote
 
 	# A more common case, where the new directory is linked in.
 	elif 'isdir' in inote.lower():
-		print(colors.LCYAN + "INFO: " + colors.ENDC +
-				colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
-				"Detected a new directory was made.")
+		if verbose:
+			p.p_fix_args("fix_args", "Detected a new directory was made.", False, None)
 
 		# If we're running anything but a downloader, we need to ignore dirs.
 		# Only the downloader needs to scan the dir (for ruTorrent)
 		if conf['type'].lower() != "downloader":
-			print(colors.FAIL + "FAIL: " + colors.ENDC +
-					colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
-					"The runtype is not Downloader. Exiting the system...")
-			print()
+			if verbose:
+				p.p_fix_args_fail("fix_args", "The runtype is not Downloader. Exiting...", True)
 			sys.exit(0)
 
 		else:
-			print(colors.LCYAN + "INFO: " + colors.ENDC + 
-					colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
-					"The runtype is Downloader. Proceeding to scan the directory for file(s).")
+			if verbose:
+				p.p_fix_args("fix_args", "The runtype is downloader. Proceeding...",
+							False, None, False)
 		
 		# args[0] is the path up to the folder, args[3] is the name of the folder itself
 		# folder name is args[3], not args[2], because extra comma is inserted between
 		# CREATE,ISDIR, increasing the array length by 1
 		# Update: args[2] instead of args[3] due to changes in delimiting to ||
 		path = args[0] + args[2] + "/"
-		print(colors.LCYAN + "INFO: " + colors.ENDC + 
-				colors.OKBLUE + "<fix_args>" + colors.ENDC + " " + 
-				"Scanning: " + 
-				colors.WARNING + "\"" + path + "\"" + colors.ENDC)
+		if verbose:
+			p.p_fix_args("fix_args", "Scanning", True, path, False)
 
 		# Get all the files in the new dir, there should only be a single .mkv softlink
 		files = os.listdir(path)
@@ -181,17 +161,14 @@ def fix_args(inote, conf):
 
 		# Make sure we only have one file
 		if len(files) != 1:
-			print(colors.FAIL + "FAIL: " + colors.ENDC +
-					colors.OKBLUE + "<fix_args>" + colors.ENDC + " " +
-					"Detected " + str(len(files)) + " files in the directory. Exiting..")
-			print()
+			statement = "Detected " + str(len(files)) + " files in the directory. Exiting..."
+			if verbose:
+				p.p_fix_args_fail("fix_args", statement, True)
 			sys.exit(1)
 
 		new_inote = path + inote_delim + "CREATE" + inote_delim + files[0]
-		print(colors.LCYAN + "INFO: " + colors.ENDC + 
-				colors.OKBLUE +"<fix_args>" + colors.ENDC + " " + 
-				"Returning new inote: " + 
-				colors.WARNING + new_inote + colors.ENDC)
-
-		print()
+		
+		if verbose:
+			p.p_fix_args("fix_args", "Returning new inote", True, new_inote, True)
+		
 		return new_inote

@@ -40,92 +40,6 @@ class colors:
 	UNDERLINE = '\033[4m'
 
 
-def fix_args(inote, conf):
-	"""
-	Function that will parse the inotifywatch strings sent to the machine.
-	If new arg is a directory, it will "fix" the argument and return it.
-
-	Params:
-		inote: An inotifywait/wait style string
-		runtype: Either "downloader" or "encoder"
-
-	Observe there are two types of inputs:
-	...folder/,CREATE,file.mkv ...path/,"CREATE,ISDIR",folder_name
-
-	This method returns the first if given so, and alters the second to
-	become the first. Note that the list of files array must be length 1.
-	This is becase:
-		1. If the folder already exists, the new dir will not be invoked
-		2. Any other files should already have been deleted prior to invoke
-	"""
-
-	c = prints.colors()
-	p = prints.printouts()
-
-	# Get the delimiter for the inote string passed in
-	inote_delim = conf['sys']['delimiter']
-	args = inote.split(inote_delim)
-
-	# The most standard case: A new file is presented, devoid of folder
-	if 'isdir' not in inote.lower():
-
-		p.p_fix_args("fix_args", 
-			"Detected a regular, non-directory file object was created.",
-			False, None, False)
-
-		# The name of the file that was JUST MADE.
-		# (We assume the delimiter is always working properly.)
-		new_filename = args[2]
-
-		try:
-			if new_filename.endswith(".meta"):
-				p.p_fix_args_fail("fix_args", 
-					"The new file created was a meta file. Ignoring and exiting.")
-				sys.exit(1)
-		except SystemExit:
-			sys.exit(1)
-
-		p.p_fix_args("fix_args", "New file is not a meta file.", False, None, False)
-		p.p_fix_args("fix_args", "Returning unmodified inote", True, inote, True)
-		
-		return inote
-
-	# A more common case, where the new directory is linked in.
-	elif 'isdir' in inote.lower():
-		p.p_fix_args("fix_args", "Detected a new directory was made.", False, None)
-
-		# If we're running anything but a downloader, we need to ignore dirs.
-		# Only the downloader needs to scan the dir (for ruTorrent)
-		if conf['type'].lower() != "downloader":
-			p.p_fix_args_fail("fix_args", "The runtype is not Downloader. Exiting...", True)
-			sys.exit(0)
-
-		else:
-			p.p_fix_args("fix_args", "The runtype is downloader. Proceeding...",
-						False, None, False)
-		
-		# args[0] is the path up to the folder, args[3] is the name of the folder itself
-		# folder name is args[3], not args[2], because extra comma is inserted between
-		# CREATE,ISDIR, increasing the array length by 1
-		# Update: args[2] instead of args[3] due to changes in delimiting to ||
-		path = args[0] + args[2] + "/"
-		p.p_fix_args("fix_args", "Scanning", True, path, False)
-
-		# Get all the files in the new dir, there should only be a single .mkv softlink
-		files = os.listdir(path)
-		files = [f for f in files if f.endswith(".mkv")]
-
-		# Make sure we only have one file
-		if len(files) != 1:
-			statement = "Detected " + str(len(files)) + " files in the directory. Exiting..."
-			p.p_fix_args_fail("fix_args", statement, True)
-			sys.exit(1)
-
-		new_inote = path + inote_delim + "CREATE" + inote_delim + files[0]
-		p.p_fix_args("fix_args", "Returning new inote", True, new_inote, True)
-		
-		return new_inote
-
 def upload_mkv():
 	"""
 	Call the script that uploads the matroska files.
@@ -375,12 +289,10 @@ def burn(inote):
 
 	# Load a fixed inote string into an array
 	# args = convert_inote_to_list(fix_args(inote, conf), conf)
-	args = init.convert_inote_to_list(fix_args(inote, conf), conf, False)
+	args = init.convert_inote_to_list(init.fix_args(inote, conf, False), conf, False)
 
 	# -- GENERATE THE FILENAME STRINGS -- #
-	print(colors.GREEN + "NOTICE: " + colors.ENDC + 
-			"Now generating new filenames and filepaths..." + colors.ENDC,
-			end="\n\n")
+	p.p_notice("Now generating new filenames and filepaths...")
 
 	# Create two dicts: One for MKV names and one for MP4 names
 	mkv = dict()
@@ -390,7 +302,7 @@ def burn(inote):
 	filenames.get_source_filenames(mkv, mp4, args, False)
 
 	# Get the show name, BE SURE TO RUN THIS BEFORE load_destination_folder_and_paths
-	filenames.get_show_name(conf, mkv, mp4, args, False)
+	filenames.get_show_name(conf, mkv, mp4, args, True)
 
 	# Use Anitopy to get the new, cleaned filenames
 	filenames.generate_new_filenames(mkv, mp4, False)
