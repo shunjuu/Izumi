@@ -235,9 +235,29 @@ class printouts:
 		if endgroup:
 			print()
 
+	def p_request_encode_sending(self, encoder):
+		"""
+		Print statement when attempting to send an encode request
+		"""
+		print("%sNOTIFICATION: %sSending encode request to %s%s%s... " % (
+			self.c.LCYAN, self.c.ENDC, self.c.OKBLUE, encoder, self.c.ENDC),
+			end="")
 
+	def p_all_primary_enc_fail(self):
+		print("%sINFO:%s None of the primary encoders were successful." % (
+			self.c.WARNING, self.c.ENDC))
 
-if __name__ == "__main__":
-	p = printouts()
-	p.p_gen_path("mkv source filename", "mkv[src_filename']", "value", True, False)
-	p.p_gen_path("mkv source filename", "mkv[src_filename']", "value", False, True)
+	def p_fallback_active(self, endgroup=True):
+		print("%sWARNING: %sFallback mode is activated. Now switching to %sencoder%smode." % (
+			self.c.WARNING, self.c.ENDC, self.c.WARNING, self.c.ENDC))
+		if endgroup:
+			print()
+
+	def p_primary_enc_success_or_no_fallback(self, izumi_type, endgroup=True):
+		print("%sNOTICE:%s %s %s %s %s %s mode." % (
+			self.c.WARNING, self.c.ENDC,
+			"A primary encoder request was successful or fallback is deactivated.",
+			"Continuing as", self.c.WARNING, izumi_type, self.c.ENDC))
+		
+		if endgroup:
+			print()

@@ -75,7 +75,6 @@ notifications:
             name: "MKV"
             urls:
                 - []
-                - []
         mp4:
             name: "MP4"
             urls:

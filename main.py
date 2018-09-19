@@ -42,96 +42,6 @@ class colors:
 	BOLD = '\033[1m'
 	UNDERLINE = '\033[4m'
 
-
-def notify_mkv_encode(conf, mkv, izumi_type):
-	"""
-	Attempts to send encoding information to the encoding servers in order, until one accepts.
-	If none accept, then the downloader itself will fallback (or cancel) by setting izumi_type
-	"""
-
-	# Create the request JSON
-	body = dict()
-	body['show'] = mkv['show_name']
-	body['episode'] = mkv['new_filename']
-	
-	# Firstly, we attempt to do request a primary encoding. We need to mark it for failure
-	# and fallback (if so), if so.
-	PRIMARY_SUCCEED = False
-
-	print(colors.LCYAN + "INFO: " + colors.ENDC +
-			"Now sending requests to encoding server(s)...")
-
-	for encoder in conf['sync']['mkv']['encoders']['primary']:
-
-		try:
-			print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
-					"Sending primary encode request to " + 
-					colors.OKBLUE + encoder + colors.ENDC + "... ", end="")
-
-			r = requests.post(encoder, json=body, timeout=5)
-			# Continue onto the next one, as the current failed
-			if r.status_code != conf['sync']['mkv']['encoders']['status_code']:
-				raise Exception("Bad status code!")
-
-			# Else if succeeded, we mark it as passed and exit out
-			print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-			PRIMARY_SUCCEED = True
-			break # Break out of the for loop and proceed to x265
-
-		except:
-			print(colors.FAIL + "Failed" + colors.ENDC + ".")
-			continue
-
-	print()
-
-	print(colors.LCYAN + "INFO: " + colors.ENDC +
-			"Now sending request to other encoding server(s)...")
-
-	# Now, we try to notify extra encoders.
-	# However, if it fails, we don't do anything and just continue
-	for encoder in conf['sync']['mkv']['encoders']['other']:
-		try:
-			print(colors.LCYAN + "NOTIFICATION: " + colors.ENDC +
-					"Sending encode request to " + 
-					colors.OKBLUE + encoder + colors.ENDC + "... ", end="")
-			r = requests.post(encoder, json=body, timeout=5)
-
-			if r.status_code != conf['sync']['mkv']['encoders']['status_code']:
-				# We just raise exception, since an error could be thrown while requesting
-				raise Exception("Bad status code!")
-
-			# Else if succeeded, just continue - we don't care
-			print(colors.OKGREEN + "Success" + colors.ENDC + ".")
-			continue
-
-		except:
-			print(colors.FAIL + "Failed" + colors.ENDC + ".")
-			continue
-
-	print()
-
-	# If all the encoders did not respond, then the downloader needs to fallback (if set so)
-	# and encode (if so)
-	if not PRIMARY_SUCCEED:
-		print(colors.WARNING + "INFO: " + colors.ENDC +
-				"None of the primary encoders were successful.")
-		# We only fallback if if specified to do so. Otherwise, just leave as is and return
-		# to delete files.
-		if conf['sync']['mkv']['encoders']['fallback']:
-			print(colors.WARNING + "WARNING: " + colors.ENDC +
-					"Fallback mode is activated. Now switching to " + 
-					colors.WARNING + "encoder" + colors.ENDC + " " +
-					"mode.")
-			print()
-			return "encoder"
-
-	print(colors.WARNING + "NOTICE: " + colors.ENDC + 
-			"A primary encoder request was successful or Fallback is deactivated. Continuing as " +
-			colors.WARNING + izumi_type + colors.ENDC + " " +
-			"mode.")
-	print()
-	return izumi_type
-
 def distribute_mp4(conf):
 	"""
 	Makes a blank POST request to various destinations to notify them to distribute new MP4s
@@ -244,9 +154,9 @@ def burn(inote):
 	# Step 2.5: If mode is downloader, only proceed from here if unsucessful call to proxies
 	# Step 2.5: If mode is encoder, continue
 	if izumi_type == "downloader":
-		upload.upload_mkv()
+		upload.upload_mkv(False)
 		notify.notify_mkv_upload(conf, mkv, True)
-		izumi_type = notify_mkv_encode(conf, mkv, izumi_type)
+		izumi_type = upload.notify_mkv_encode(conf, mkv, izumi_type, True)
 		
 	"""
 
@@ -264,7 +174,7 @@ def burn(inote):
 				% (mkv['quoted_temp_file_path'], quote(mp4['hardsubbed_file'])))
 
 		# Step 5: Upload the new MP4 file 
-		upload.upload_mp4()
+		upload.upload_mp4(False)
 		notify.notify_mp4_upload(conf, mp4, False)
 
 		# Step 5.1: If we're originally just an encoder, we need to post one of the heavy servers

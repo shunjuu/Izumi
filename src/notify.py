@@ -41,6 +41,7 @@ def notify_mkv_upload(conf, mkv, verbose=False):
 
 		# Add the header into the request, but only if it exists
 		try:
+			headers.pop("Authorization", None)
 			headers['Authorization'] = g[1] # g[1] is the key, if it exists
 		except:
 			pass
@@ -85,6 +86,7 @@ def notify_mp4_upload(conf, mp4, verbose=False):
 
 		# Add the header into the request, but only if it exists
 		try:
+			headers.pop("Authorization", None)
 			headers['Authorization'] = g[1] # g[1] is the key, if it exists
 		except:
 			pass
