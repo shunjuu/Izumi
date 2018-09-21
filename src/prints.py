@@ -263,7 +263,7 @@ class Printouts:
 			print()
 
 	def p_primary_enc_success_or_no_fallback(self, izumi_type, endgroup=True):
-		print("%sNOTICE:%s %s %s %s %s %s mode." % (
+		print("%sNOTICE:%s %s %s %s%s%s mode." % (
 			self.c.WARNING, self.c.ENDC,
 			"A primary encoder request was successful or fallback is deactivated.",
 			"Continuing as", self.c.WARNING, izumi_type, self.c.ENDC))

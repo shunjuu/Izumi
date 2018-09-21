@@ -28,6 +28,7 @@ def burn(inote):
 
 	c = prints.Colors()
 	p = prints.Printouts()
+	verbose = conf['sys']['verbose']
 
 	# Clear the terminal and print out the received argument
 	os.system('clear') if os.name != "nt" else os.system('cls')
@@ -41,7 +42,7 @@ def burn(inote):
 
 	# Load a fixed inote string into an array
 	# args = convert_inote_to_list(fix_args(inote, conf), conf)
-	args = init.convert_inote_to_list(init.fix_args(inote, conf, False), conf, False)
+	args = init.convert_inote_to_list(init.fix_args(inote, conf, verbose), conf, verbose)
 
 	# -- GENERATE THE FILENAME STRINGS -- #
 	p.p_notice("Now generating new filenames and filepaths...")
@@ -51,21 +52,21 @@ def burn(inote):
 	mp4 = dict()
 
 	# Get the base name of the MKV file, and its MP4 equivalent
-	filenames.get_source_filenames(mkv, mp4, args, False)
+	filenames.get_source_filenames(mkv, mp4, args, verbose)
 
 	# Get the show name, BE SURE TO RUN THIS BEFORE load_destination_folder_and_paths
-	filenames.get_show_name(conf, mkv, mp4, args, False)
+	filenames.get_show_name(conf, mkv, mp4, args, verbose)
 
 	# Use Anitopy to get the new, cleaned filenames
-	filenames.generate_new_filenames(mkv, mp4, False)
+	filenames.generate_new_filenames(mkv, mp4, verbose)
 
 	# Get the folders where a copy of the MKV and the new MP4 will be put.
-	paths.load_destination_folder_and_paths(mkv, mp4, conf, args, False)
-	paths.load_temp_folder_and_paths(mkv, mp4, conf, False)
+	paths.load_destination_folder_and_paths(mkv, mp4, conf, args, verbose)
+	paths.load_temp_folder_and_paths(mkv, mp4, conf, verbose)
 
 	# Get ffmpeg executable information
 	ffmpeg = dict()
-	encode.load_ffmpeg_paths(ffmpeg, os.path.dirname(os.path.realpath(__file__)), False)
+	encode.load_ffmpeg_paths(ffmpeg, os.path.dirname(os.path.realpath(__file__)), verbose)
 	
 	# --------------------------------------------------------------------- #
 	# String generation is complete, start to run transfer process
@@ -88,9 +89,9 @@ def burn(inote):
 	# Step 2.5: If mode is downloader, only proceed from here if unsucessful call to proxies
 	# Step 2.5: If mode is encoder, continue
 	if izumi_type == "downloader":
-		upload.upload_mkv(False)
-		notify.notify_mkv_upload(conf, mkv, True)
-		izumi_type = upload.notify_mkv_encode(conf, mkv, izumi_type, True)
+		upload.upload_mkv(verbose)
+		notify.notify_mkv_upload(conf, mkv, verbose)
+		izumi_type = upload.notify_mkv_encode(conf, mkv, izumi_type, verbose)
 
 	# Type check for encoder, as if encoder request succeeds, it will still continue 
 	# to clear the files at the end
@@ -106,8 +107,8 @@ def burn(inote):
 				% (mkv['quoted_temp_file_path'], quote(mp4['hardsubbed_file'])))
 
 		# Step 5: Upload the new MP4 file 
-		upload.upload_mp4(False)
-		notify.notify_mp4_upload(conf, mp4, False)
+		upload.upload_mp4(verbose)
+		notify.notify_mp4_upload(conf, mp4, verbose)
 
 		# Step 5.1: If we're originally just an encoder, we need to post one of the heavy servers
 		# for file transferring, or fallback to just uploading everything
@@ -116,7 +117,7 @@ def burn(inote):
 			notify.distribute_mp4(conf)
 
 	# step 6: Clear out all the new files
-	cleanup.clear_files(conf, mkv, mp4, False)
+	cleanup.clear_files(conf, mkv, mp4, verbose)
 
 	p.p_job_completed(mkv['src_filename'], True)
 	sys.exit(0)
