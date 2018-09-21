@@ -26,8 +26,8 @@ from src import upload
 
 def burn(inote):
 
-	c = prints.colors()
-	p = prints.printouts()
+	c = prints.Colors()
+	p = prints.Printouts()
 
 	# Clear the terminal and print out the received argument
 	os.system('clear') if os.name != "nt" else os.system('cls')

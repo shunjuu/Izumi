@@ -15,8 +15,8 @@ except:
 	import filenames
 
 # Initialize our print statements and colors
-c = prints.colors()
-p = prints.printouts()
+c = prints.Colors()
+p = prints.Printouts()
 
 
 def load_destination_folder_and_paths(mkv, mp4, conf, args, verbose=False):

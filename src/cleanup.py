@@ -12,8 +12,8 @@ try:
 except:
 	import prints
 
-c = prints.colors()
-p = prints.printouts()
+c = prints.Colors()
+p = prints.Printouts()
 
 	
 def rmfile(name, path, verbose, endgroup=False):

@@ -11,6 +11,13 @@ from threading import Thread
 
 from flask import Flask, request
 
+# For somem printing statements
+from src import initialize
+from src import prints_server as prints
+
+c = prints.Colors()
+p = prints.Printouts()
+
 class colors:
     """
     Shell based colors for colored printing!
@@ -31,16 +38,16 @@ class colors:
 
 
 # Load the configuration file
-def load_config():
+#def load_config():
     """
     Loads the config.yml file into ad ict
     """
-    with open("config.yml", 'r') as conf:
-        try:
-            return yaml.load(conf)
-        except:
-            print("An exception occured while loading the config.")
-            sys.exit(-1)
+ #   with open("config.yml", 'r') as conf:
+  #      try:
+   #         return yaml.load(conf)
+    #    except:
+     #       print("An exception occured while loading the config.")
+      #      sys.exit(-1)
 
 # set the flask name and load the config
 app = Flask(__name__)
@@ -48,15 +55,20 @@ app = Flask(__name__)
 def do_encode(req):
 
     # Double read, so it loads the new config everytime
-    conf = load_config()
+    conf = initialize.load_config()
+    verbose = conf['sys']['verbose']
 
     # I prefer a quick sleep so the response code always prints first
     time.sleep(1)
 
+    """
     print()
     print(colors.LCYAN + "INFO: " + colors.ENDC +
             "Received an encoding request for: " + 
             colors.WARNING + req['episode'] + colors.ENDC + ".")
+    """
+
+    p.p_encode_start()
 
     # The new path will simply be the watch folder + the new show folder,
     # as the show folder is guaranteed to be correct
@@ -65,17 +77,28 @@ def do_encode(req):
     watch_folder = conf['folders']['watch']
     watch_folder = os.path.abspath(watch_folder)
     watch_folder = watch_folder if watch_folder.endswith("/") else (watch_folder + "/")
+
+    if verbose:
+        p.p_encode_watch_detect(watch_folder)
+    """
     print(colors.LCYAN + "INFO: " + colors.ENDC +
             "Detected watch folder located at: " + 
             colors.WARNING + watch_folder + colors.ENDC + ".")
+    """
     
+    # Note: We always just create the folder in this case, because Hisha may not
+    # return the custom specified folders
     new_show_folder = watch_folder + req['show']
     if not os.path.exists(new_show_folder):
+        if verbose:
+            p.p_encode_show_folder_create(new_show_folder)
+        """
         print(colors.LCYAN + "INFO: " + colors.ENDC +
                 "Created show folder at " + 
                 colors.WARNING + new_show_folder + colors.ENDC + ".")
+        """
         os.makedirs(new_show_folder)
-    print()
+    #print()
 
     # Now download the new show into the hard folder
 
@@ -83,8 +106,10 @@ def do_encode(req):
     rclone_source = conf['sync']['mp4-distribution']['encoder']['source']
     rclone_source = rclone_source if rclone_source.endswith("/") else (rclone_source + "/")
     rclone_source = rclone_source + quote(req['show']) + "/" + quote(req['episode'])
-    print(colors.WARNING + "NOTICE: " + colors.ENDC +
-            "Sourcing from: \"" + colors.WARNING + rclone_source + colors.ENDC + "\".")
+    if verbose:
+        p.p_encode_rclone_source(rclone_source)
+    #print(colors.WARNING + "NOTICE: " + colors.ENDC +
+    #        "Sourcing from: \"" + colors.WARNING + rclone_source + colors.ENDC + "\".")
 
     # Get the destination folder, and quote where necessary
     dest_folder_unclean = conf['folders']['hard'].split("/")
@@ -92,14 +117,20 @@ def do_encode(req):
     for folder in dest_folder_unclean:
         if folder:
             rclone_dest = rclone_dest + "/" + quote(folder)
+    if verbose:
+        p.p_encode_rclone_saving_dest(rclone_dest)
+    """
     print(colors.WARNING + "NOTICE: " + colors.ENDC + 
-            "Saving to: \"" + colors.WARNING + rclone_dest + colors.ENDC + "\".")
+            "Saving to:  + colors.WARNING + rclone_dest + colors.ENDC + ".")
     print()
+    """
 
     # Download the file
-    print(colors.WARNING + "NOTICE: " + colors.ENDC + 
-            "Downloading new episode...")
-    os.system("rclone copy " + rclone_source + " " + rclone_dest + " -v")
+    if verbose:
+        p_encode_download_new_ep()
+    #print(colors.WARNING + "NOTICE: " + colors.ENDC + 
+    #       "Downloading new episode...")
+    #os.system("rclone copy " + rclone_source + " " + rclone_dest + " -v")
 
     # Hard link the file into the new directory
     rclone_dest_file = rclone_dest if rclone_dest.endswith("/") else (rclone_dest + "/")
@@ -110,6 +141,9 @@ def do_encode(req):
 
     # Once it's linked, delete the file in hard/
     os.remove(rclone_dest_file)
+
+    # Print some kind of done statement
+    p.p_encode_completed(req['episode'])
 
 def do_distribute():
     time.sleep(1)
@@ -127,5 +161,5 @@ def distribute():
     return "Received distribution request", conf['sync']['mkv']['encoders']['status_code']
 
 if __name__ == "__main__":
-    conf = load_config()
+    conf = initialize.load_config()
     app.run(host='0.0.0.0', port=conf['sync']['mp4-distribution']['encoder']['port'])

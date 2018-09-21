@@ -3,7 +3,7 @@ colors.py contains a single class that defines print colors
 that can be used in print statements for Unix.
 """
 
-class colors:
+class Colors:
     """
     Shell based colors for colored printing!
     """
@@ -22,13 +22,13 @@ class colors:
     UNDERLINE = '\033[4m'
 
 
-class printouts:
+class Printouts:
 	"""
 	Statements to be printed out to the terminal.
 	Use these functions to make less repetitive.
 	"""
 	def __init__(self):	
-		self.c = colors()
+		self.c = Colors()
 
 	def p_initialize(self, inote, func_name, endgroup=True):
 		"""
@@ -324,5 +324,5 @@ class printouts:
 			self.c.OKGREEN, filename, self.c.ENDC))
 
 		if endgroup:
-			print(end="\n\n\n")
+			print("\n\n")
 

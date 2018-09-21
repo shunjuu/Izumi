@@ -20,8 +20,8 @@ except:
 	import prints
 
 # Initialize our print statements and colors
-c = prints.colors()
-p = prints.printouts()
+c = prints.Colors()
+p = prints.Printouts()
 
 def get_source_filenames(mkv, mp4, args, verbose=False):
 	"""

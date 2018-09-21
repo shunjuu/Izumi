@@ -10,22 +10,22 @@ type: "downloader"
 folders:
     # The directory in which new files will watched for
     # Can use absolute or local path
-    watch: "/home/rocia/Videos/Incoming"
+    watch: ""
 
     # Where a copy of the mkv video will be made
-    mkv: "/home/rocia/Videos/MKV"
+    mkv: ""
 
     # Where the hardsub mp4 will be made
-    mp4: "/home/rocia/Videos/MP4"
+    mp4: ""
 
     # A temporary directory used to store a copy of the mkv.
     # This temp directory may NOT contain the single quote.
-    temp: "/home/rocia/Videos/temp"
+    temp: ""
 
     # A temporary "hard" directory used by the encoders to temporarily store the new file
     # before hardlinking it to the watch directory. We do this because the system assumes
     # the file is already done downloading
-    hard: "/home/rocia/Videos/hard"
+    hard: ""
 
 sync:
     # rclone folder to upload all show/ep.mkv to

@@ -10,8 +10,8 @@ try:
 except:
 	import prints
 
-c = prints.colors()
-p = prints.printouts()
+c = prints.Colors()
+p = prints.Printouts()
 
 def notify_mkv_upload(conf, mkv, verbose=False):
 	"""

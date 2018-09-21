@@ -13,8 +13,8 @@ except:
 	import prints
 
 # Initialize our print statements and colors
-c = prints.colors()
-p = prints.printouts()
+c = prints.Colors()
+p = prints.Printouts()
 
 def load_ffmpeg_paths(ffmpeg, home, verbose=False):
 	"""
