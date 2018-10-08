@@ -68,7 +68,7 @@ def do_encode(req):
             colors.WARNING + req['episode'] + colors.ENDC + ".")
     """
 
-    p.p_encode_start()
+    p.p_encode_start(req['episode'])
 
     # The new path will simply be the watch folder + the new show folder,
     # as the show folder is guaranteed to be correct

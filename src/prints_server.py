@@ -79,7 +79,7 @@ class Printouts:
 
 	def p_encode_completed(self, episode, endgroup=True):
 		print("%sCompleted job for: %s%s" % (
-			self.c.OKGREEN, self.c.ENDC, self.c.episode))
+			self.c.OKGREEN, self.c.ENDC, episode))
 
 		if endgroup:
 			print("\n\n")

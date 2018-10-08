@@ -150,7 +150,8 @@ def distribute_mp4(conf, mp4, verbose=False):
 		p.p_distribute_notice("SEQUENTIAL")
 
 	for distributor in conf['sync']['mp4-distribution']['distributors']['sequential']:
-		p.p_distribute_sending_request(distributor[0])
+		if verbose:
+			p.p_distribute_sending_request(distributor[0])
 
 		try:
 			headers.pop("Authorization", None)

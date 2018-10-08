@@ -28,7 +28,6 @@ def burn(inote):
 
 	c = prints.Colors()
 	p = prints.Printouts()
-	verbose = conf['sys']['verbose']
 
 	# Clear the terminal and print out the received argument
 	os.system('clear') if os.name != "nt" else os.system('cls')
@@ -36,6 +35,7 @@ def burn(inote):
 
 	# Load the config file, must be named "config.yml"
 	conf = init.load_config()
+	verbose = conf['sys']['verbose']
 
 	# Determine what type of Izumi we're running
 	izumi_type = init.get_runtype(conf['type'])
@@ -114,7 +114,7 @@ def burn(inote):
 		# for file transferring, or fallback to just uploading everything
 		# Check conf, not izumi_type, to see if original runtype is encoder or downloader
 		if init.get_runtype(conf['type']) == "encoder":
-			notify.distribute_mp4(conf)
+			notify.distribute_mp4(conf, mp4)
 
 	# step 6: Clear out all the new files
 	cleanup.clear_files(conf, mkv, mp4, verbose)
