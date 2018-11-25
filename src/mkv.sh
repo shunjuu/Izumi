@@ -47,7 +47,7 @@ for i in $(seq 0 $(($MKV_UPLOAD_PRIORITY_DESTINATION_COUNT-1)));
 do
 	p_dest=$(eval "$yq" read "$config" "$MKV_CONF_PRIORITY.$i")
 	#echo "rclone copy "$mkv_dir" "$p_dest" -v"
-	rclone copy "$mkv_dir" "$p_dest" -v
+	rclone copy "$mkv_dir" "$p_dest" --progress --stats 1s --stats-one-line -v
 done
 
 echo
@@ -57,7 +57,7 @@ for i in $(seq 0 $(($MKV_UPLOAD_REGULAR_DESTINATION_COUNT-1)));
 do
 	r_dest=$(eval "$yq" read "$config" "$MKV_CONF_REGULAR.$i")
 	# echo "rclone copy "$mkv_dir" "$r_dest" -v &"
-	rclone copy "$mkv_dir" "$r_dest" -v &
+	rclone copy "$mkv_dir" "$r_dest" --progress --stats 1s --stats-one-line -v &
 done
 
 wait

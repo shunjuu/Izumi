@@ -26,7 +26,9 @@ config=$(eval realpath "config.yml")
 # "- -.*" is a regex that returns all of the top level elements, as it is a list of lists
 TOTAL_DISTRIBUTION_COUNT=$(eval "$yq" read "$config" "$DIST_PATH" | grep -e "- -.*" | wc -l)
 
-echo -e "${GREEN}INFO:${NC} Detected ${CYAN}$TOTAL_DISTRIBUTION_COUNT${NC} distribution configurations."
+echo
+echo -e "${GREEN}INFO:${NC} Detected ${CYAN}$TOTAL_DISTRIBUTION_COUNT${NC} distribution configuration(s)."
+echo
 
 for d in $(seq 0 $(($TOTAL_DISTRIBUTION_COUNT-1)));
 do
@@ -43,7 +45,7 @@ do
 	do
 		CURR_DEST_TO_SYNC=$(eval "$yq" read "$config" "$DIST_PATH.$d.$i")
 		echo -e "${GREEN}NOTICE: ${NC}Copying from ${CYAN}$CURR_DIST_SRC${NC} to ${CYAN}$CURR_DEST_TO_SYNC${NC}."
-		rclone copy "$CURR_DIST_SRC" "$CURR_DEST_TO_SYNC" -v &
+		rclone copy "$CURR_DIST_SRC" "$CURR_DEST_TO_SYNC" --progress --stats 1s --stats-one-line -v &
 	done
 
 	wait
