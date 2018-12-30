@@ -1,0 +1,9 @@
+# The list of endpoints is done in a list of lists
+# First is always rclone default path + :, second is the Airing folder name, third is Premiered
+- - "kan:Anime"
+  - "Airing"
+  - "Premiered"
+
+# - - "kan:Anime"
+# - "Airing [Hardsub]"
+# - "Premiered [Hardsub]"
