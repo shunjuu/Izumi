@@ -5,7 +5,7 @@ import pprint as pp
 
 import anitopy
 
-LIST = 'rclone lsjson -R %s/"%s"/"%s"'
+LIST = 'rclone lsjson -R %s/"%s"/"%s" 2>/dev/null'
 #       rclone lsjson -R kan:/"Premiered"/"SHOW_NAME"
 
 RENAME ='rclone moveto %s/"%s"/"%s"/"%s" %s/"%s"/"%s"/"%s"'
@@ -108,6 +108,7 @@ def rename(config):
         if len(res) == 0:
             print("%sNOTICE%s: Path under %s%s%s is empty, skipping..." 
                     %(Colors.WARNING, Colors.ENDC, Colors.OKBLUE, r[0], Colors.ENDC))
+            continue
 
         print("\nNow checking %s%s%s (%s%s%s):"
                 % (Colors.WARNING, r[0], Colors.ENDC,

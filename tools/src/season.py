@@ -3,7 +3,7 @@ import sys
 
 import json
 
-LIST = 'rclone lsjson -R %s/"%s"/"%s"'
+LIST = 'rclone lsjson -R %s/"%s"/"%s" 2>/dev/null'
 
 MKDIR = 'rclone mkdir %s/"%s"/"%s"'
 MOVE1 = 'rclone move %s/"%s"/"%s" %s/"%s"/"%s"'
@@ -53,6 +53,7 @@ def season(config):
             print("%sNOTICE%s: Path under %s%s/%s/%s%s does not exist, skipping..." 
                     % (Colors.WARNING, Colors.ENDC,
                         Colors.FAIL, r[0], r[2], path, Colors.ENDC))
+            continue
 
         # Move the files first to a temporary directory, append " - temp" to parent path
         if path.endswith("/"): 

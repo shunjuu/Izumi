@@ -1,12 +1,16 @@
 import sys
 import os
 
+import json
+
 from lib import hisha2
 import pprint as pp
 
 FLAGS = "--delete-empty-src-dirs --progress --stats 1s --stats-one-line -v"
 MOVE = 'rclone move %s/"%s"/"%s" %s/"%s"/"%s" %s'
 # Example: rclone move toshokan:/Airing/SHOW_NAME toshokan:/Premiered/SHOW_NAME $FLAGS
+
+LIST = 'rclone lsjson -R %s/"%s"/"%s" 2>/dev/null'
 
 class Colors:
     HEADER = '\033[95m'
@@ -57,5 +61,15 @@ def move(config):
         print("%sNOTICE:%s Moving files in %s%s%s..." 
                 % (Colors.WARNING, Colors.ENDC, Colors.OKBLUE, r[0], Colors.ENDC), end=" ")
         sys.stdout.flush()
+
+        # If rclone fails it will use 3 requests. Amortize to 2 just by checking first:
+        # Check if the path itself exists
+        exist = os.popen(LIST % (r[0], r[1], show)).read()
+        exist = json.loads(exist)
+        if len(exist) == 0:
+            print("Path not found, skipping.")
+            continue
+
+        # If it is found, then move the files.
         os.system(MOVE % (rclone, src, show, rclone, dest, new_folder_name, ""))
         print("Done")

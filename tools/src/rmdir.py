@@ -33,6 +33,8 @@ def rmdir(config):
         print("%sNOTICE%s: Removing from %s%s%s..." 
                 % (Colors.WARNING, Colors.ENDC, Colors.OKBLUE, r[0], Colors.ENDC), end=" ")
         sys.stdout.flush()
+
+        # We don't need to check for empty folders, cause rmdir doesn't do anything
         os.system(RMDIR %(r[0], r[option]))
         print("Done")
 
