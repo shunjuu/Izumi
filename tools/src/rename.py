@@ -71,7 +71,11 @@ def rename_single(config):
                 % (Colors.WARNING, r[0], Colors.ENDC,
                     Colors.OKBLUE, r[option], Colors.ENDC))
 
+        print("%Renaming to %s%s%s..." %(Colors.OKBLUE, new_folder, Colors.ENDC), end=" ")
+        sys.stdout.flush()
         os.system(RENAME_SINGLE % (r[0], r[option], folder, r[0], r[option], new_folder))
+
+        print("Done")
 
 
 
