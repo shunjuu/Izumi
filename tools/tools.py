@@ -17,8 +17,9 @@ from src import season # Mode 4, moving existing files into a subdirectory for S
 OPTIONS = """
     1. Move Airing shows to Premiered
     2. Remove empty directories
-    3. Rename existing episodes to the general style.
-    4. Move an existing folder into a seasonal subdirectory.
+    3. Rename existing episodes to the general style
+    4. Move an existing folder into a seasonal subdirectory
+    5. Rename a single folder
 
 Choice: """
 
@@ -42,7 +43,7 @@ def main():
         except:
             print("Error: Please enter a number.")
 
-        if mode not in range(1, 5):
+        if mode not in range(1, 6):
             print("Error: Please input a valid number.")
 
         # Load the config
@@ -54,9 +55,11 @@ def main():
         elif mode is 2:
             rmdir.rmdir(conf)
         elif mode is 3:
-            rename.rename(conf)
+            rename.rename_mass(conf)
         elif mode is 4:
             season.season(conf)
+        elif mode is 5:
+            rename.rename_single(conf)
             
 
 
