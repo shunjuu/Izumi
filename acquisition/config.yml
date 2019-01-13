@@ -1,11 +1,12 @@
 # You can optionally load a global config from a web source.
+# This is the folder the application will watch for new files. 
+# [type: String-URL]
+# This MUST be included in this config, and not the web-config.
+watch-folder: "/home/rocia/Desktop"
+
 # If you do not, leave this as an empty string.
 # [type: String-URL]
 web-config: ""
-
-# This is the folder the application will watch for new files. 
-# [type: String-URL]
-watch-folder: ""
 
 # Grouping body to list endpoints for other Izumi modules for this app to talk to.
 endpoints:

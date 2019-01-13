@@ -189,7 +189,7 @@ class ConfigHandler:
             web: A boolean value which indicates if the web conf
                 is being used (default: local)
 
-        Returns: The watch folder string.
+        Returns: The watch folder string, which ends with a "/"
         """
 
         # TODO: Return if web
@@ -197,7 +197,11 @@ class ConfigHandler:
             pass
 
         # Return the local, since we're not using the web conf
-        return conf['watch-folder']
+        folder = conf['watch-folder']
+        # And append a "/" if it's not added in by the user
+        folder = folder if folder.endswith("/") else folder + "/"
+
+        return folder
 
 
     def _load_endpoints_encoders_always(self, conf, web):

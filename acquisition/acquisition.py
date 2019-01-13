@@ -2,9 +2,14 @@ import sys
 import os
 
 from src.config import ConfigHandler
+from src.argument import ArgumentHandler
 
 def main():
+
     c = ConfigHandler()
+    a = ArgumentHandler(c)
+    a.load_inote(sys.argv[1])
+    print()
 
 
 if __name__ == "__main__":
