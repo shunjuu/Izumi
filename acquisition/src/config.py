@@ -68,6 +68,9 @@ class ConfigHandler:
         # ---------------- #
         self.watch_folder = self._load_watch_folder(self._conf, self._web_conf_use)
 
+        self.destinations = self._load_destinations(self._conf, self._web_conf_use)
+        self.airing_folder = self._load_airing_folder(self._conf, self._web_conf_use)
+
         self.encoders_always = self._load_endpoints_encoders_always(self._conf, self._web_conf_use)
         self.encoders_sequential = self._load_endpoints_encoders_sequential(self._conf, self._web_conf_use)
         self.notifiers_always = self._load_endpoints_notifiers_always(self._conf, self._web_conf_use)
@@ -200,6 +203,66 @@ class ConfigHandler:
         folder = conf['watch-folder']
         # And append a "/" if it's not added in by the user
         folder = folder if folder.endswith("/") else folder + "/"
+
+        return folder
+
+
+    def _load_airing_folder(self, conf, web):
+        """
+        Gets the name of "Airing" folder for new shows, and appends a "/" at the end
+        if there isn't one already. Otherwise, if it's a blank string, simply 
+        gets the Airing folder as is. (ending with / is for ease of building strings later.) 
+
+        Params:
+            conf: self._conf, which represents a dict object 
+                of the loaded conf
+            web: A boolean value which indicates if the web conf 
+                is being used (default: local)
+
+        Returns: The airnig folder string ending with "/", or an empty string
+        """
+        # TODO: Return if web
+        if web:
+            pass
+
+        # Return the local, since we're not using the web conf
+        airing = conf['destinations']['airing-folder-name']
+        # Make sure it ends with a "/" if there's anything in airing
+        if airing:
+            if not airing.endswith("/"):
+                airing = airing + "/"
+
+        return airing
+
+
+    def _load_destinations(self, conf, web):
+        """
+        Determines the rclone endpoints for files to be uploaded to.
+
+        Params:
+            conf: self._conf, which represents a dict object 
+                of the loaded conf
+            web: A boolean value which indicates if the web conf 
+                is being used (default: local)
+
+        Returns: A list of (watch folder) strings
+        """
+        if web:
+            pass
+
+        # Return the local, since we're not using the web conf
+        folder = conf['destinations']['upload-destinations']
+
+        # The length of the destinations list must be at least 1
+        # Or else the uploader config is bad
+        if len(folder) < 1:
+            # TODO: print an error and exit
+            sys.exit(1)
+
+        # Make sure each destination ends with a "/"
+        for dest in folder:
+            if not dest.endswith("/"):
+                dest = dest + "/"
 
         return folder
 

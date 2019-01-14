@@ -8,6 +8,21 @@ watch-folder: "/home/rocia/Desktop"
 # [type: String-URL]
 web-config: ""
 
+# Grouping body to specify the names used when uploading files
+destinations:
+
+  # A list of rclone strings for Acqusition to upload the file to
+  # There must be at least one destination listed, because Acquisition
+  # doesn't touch original files. Usually this is just a list of 1 element.
+  # [type: A list of strings]
+  upload-destinations: []
+
+  # This is an optional parameter which allows you to specify the name of an 
+  # "Airing" folder for shows. It's recommend you use the Airing folder because
+  # if switching to a web config, the Airing folder will be tacked on.
+  # To not use it, simply leave it as an empty string.
+  airing-folder-name: ""
+
 # Grouping body to list endpoints for other Izumi modules for this app to talk to.
 endpoints:
 

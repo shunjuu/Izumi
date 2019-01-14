@@ -79,6 +79,7 @@ class ArgumentHandler:
         # a new episode without a show specified. Thus, return None
         return None
 
+
     def _load_episode(self, inote):
         """
         From the inote, determines the name of episode if it's included.

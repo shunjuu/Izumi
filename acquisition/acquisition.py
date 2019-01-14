@@ -8,8 +8,7 @@ def main():
 
     c = ConfigHandler()
     a = ArgumentHandler(c)
-    a.load_inote(sys.argv[1])
-    print()
+    #a.load_inote(sys.argv[1])
 
 
 if __name__ == "__main__":
