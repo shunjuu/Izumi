@@ -64,6 +64,8 @@ class ArgumentHandler:
         # argument (index 2) is the new folder
         # Isdir could be in the show name, so we only check the event log
         if "isdir" in args[1].lower(): 
+            if args[2].endswith("/"): 
+                return args[2][:-1]
             return args[2]
 
         # Isdir wasn't in the event, wihch means the episode file was created
@@ -72,7 +74,9 @@ class ArgumentHandler:
         # string and see if the string isn't length 0
         removed_watch_path = args[0].replace(self._conf.get_watch_folder(), "")
         if len(removed_watch_path) != 0:
-            # sometihng besides the watch folder is there, so this is the show folder
+            # something besides the watch folder is there, so this is the show folder
+            if removed_watch_path.endswith("/"):
+                return removed_watch_path[:-1]
             return removed_watch_path
 
         # Not a ISDIR and no show folder was in the watch folder, so this event is just
@@ -116,8 +120,9 @@ class ArgumentHandler:
         """
         A getter method to return the show for the provided inote
 
-        Returns;
+        Returns:
             The show name as a string, or None if there wasn't a show
+            If there is a show, it will not have a "/" at the end.
         """
         return self.show
 

@@ -80,6 +80,7 @@ class ConfigHandler:
 
         self.delimiter = self._load_system_delimiter(self._conf, self._web_conf_use)
         self.verbose = self._load_system_verbose(self._conf, self._web_conf_use)
+        
 
     def _load_local_config(self, cpath_abs):
         """
@@ -226,7 +227,7 @@ class ConfigHandler:
             pass
 
         # Return the local, since we're not using the web conf
-        airing = conf['destinations']['airing-folder-name']
+        airing = conf['uploading']['airing-folder-name']
         # Make sure it ends with a "/" if there's anything in airing
         if airing:
             if not airing.endswith("/"):
@@ -251,7 +252,7 @@ class ConfigHandler:
             pass
 
         # Return the local, since we're not using the web conf
-        folder = conf['destinations']['upload-destinations']
+        folder = conf['uploading']['upload-destinations']
 
         # The length of the destinations list must be at least 1
         # Or else the uploader config is bad
@@ -430,8 +431,21 @@ class ConfigHandler:
     def get_watch_folder(self):
         """
         Returns the watch folder, as a string
+        The path will end with a "/"
         """
         return self.watch_folder
+
+    def get_destinations(self):
+        """
+        Returns the upload destinations, as a list of strings
+        """
+        return self.destinations
+
+    def get_airing_folder_name(self):
+        """
+        Returns the airing folder name as a String
+        """
+        return self.airing_folder
 
     def get_encoders(self):
         """
@@ -498,3 +512,5 @@ class ConfigHandler:
         Returns a boolean representing whether or not to verbose print
         """
         return self.verbose
+
+
