@@ -4,6 +4,7 @@ import os
 import json
 
 from lib import hisha2
+
 import pprint as pp
 
 FLAGS = "--delete-empty-src-dirs --progress --stats 1s --stats-one-line -v"

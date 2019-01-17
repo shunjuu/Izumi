@@ -68,7 +68,7 @@ def season(config):
         os.system(MKDIR % (r[0], r[2], temp_path))
         print("Done")
 
-        print("%sNOTICE:%sMoving files to temporary directory..." 
+        print("%sNOTICE:%s Moving files to temporary directory..." 
                 % (Colors.WARNING, Colors.ENDC), end=" ")
         sys.stdout.flush()
         os.system(MOVE1 % (r[0], r[2], path, r[0], r[2], temp_path))

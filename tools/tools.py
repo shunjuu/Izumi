@@ -12,6 +12,7 @@ from src import move # Mode 1, for moving shows
 from src import rmdir # Mode 2, for removing empty directories
 from src import rename # Mode 3, for renaming files in directories recursively
 from src import season # Mode 4, moving existing files into a subdirectory for Season
+from src import delete # Mode 5, delete an existing show from the system
 
 # Options text
 OPTIONS = """
@@ -20,6 +21,7 @@ OPTIONS = """
     3. Rename existing episodes to the general style
     4. Move an existing folder into a seasonal subdirectory
     5. Rename a single folder
+    6. Delete a show
 
 Choice: """
 
@@ -43,7 +45,7 @@ def main():
         except:
             print("Error: Please enter a number.")
 
-        if mode not in range(1, 6):
+        if mode not in range(1, 7):
             print("Error: Please input a valid number.")
 
         # Load the config
@@ -60,6 +62,8 @@ def main():
             season.season(conf)
         elif mode is 5:
             rename.rename_single(conf)
+        elif mode is 6:
+            delete.delete(conf)
             
 
 
