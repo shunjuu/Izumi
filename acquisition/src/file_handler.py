@@ -3,6 +3,8 @@ import os
 
 import pprint as pp
 
+import anitopy
+
 from time import sleep 
 
 from bin import hisha2
@@ -35,6 +37,7 @@ class FileHandler:
         # -------------------
 
         self.episode = None # A string representation, the name of the new file with file extension
+        self.episode_new = None # String rep of the new filename after Anitopy cleans it up
         self.show = None # A string representation of the show of the new file. No "/" at the end
         self.filesize = None # An integer representation of the size of the file, in bytes
         self.sub_type = None # One of "hardsub" or "softsub", determined by file extension solely
@@ -172,6 +175,37 @@ class FileHandler:
 
         else: 
             return None
+
+    def _generate_new_episode(self, episode): 
+        """
+        Takes the old filename and generates a new, clean name for it.
+
+        Params:
+            episode - the name of the old episode file
+
+        Return: A "cleaned" filename
+        """
+
+        # Parse the filename
+        a = anitopy.parse(episode)
+
+        # Generate the new episode name
+        new_episode = a['anime_title'] + " - " + a['episode_number']
+
+        # Mark video resolution
+        if 'video_resolution' in a:
+            new_episode = new_episode + " [" + a['video_resolution'] + "]"
+
+        # Mark if uncensored
+        if 'other' in a and 'uncensored' in a['other'].lower():
+            new_episode += " (Uncensored)" 
+
+        # Add the extension
+        _, ext = os.path.splitext(episode)
+        new_episode += ext
+
+        return new_episode
+
 
     # --------------------
     # Getters!
