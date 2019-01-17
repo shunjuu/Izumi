@@ -48,6 +48,7 @@ class FileHandler:
 
         # self.episode NEEDS to be run before self._load_show()
         self.episode = self._load_episode(conf, args)
+        self.episode_new = self._generate_new_episode(self.episode)
         self.show = self._load_show(args)
         self.filesize = self._load_filesize(conf, args)
         self.sub_type = self._load_sub_type(self.episode)
@@ -216,6 +217,12 @@ class FileHandler:
         Gets the file's episode name as a string
         """
         return self.episode
+
+    def get_episode_new(self):
+        """
+        Gets the file's cleaned name as a string
+        """
+        return self.episode_new
 
     def get_show(self):
         """
