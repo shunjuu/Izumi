@@ -12,7 +12,7 @@ class ArgumentHandler:
     what it can from the argument.
     """
 
-    def __init__(self, conf):
+    def __init__(self, conf, inote=None):
         """
         Args:
             conf: a ConfigHandler which already has the config.yml/json loaded.
@@ -28,6 +28,10 @@ class ArgumentHandler:
         # Either of these could be none because ISDIR isn't guaranteed to happen
         self.show = None # The show name if provided, else None
         self.episode = None # The name of the episode if provided, else None
+
+        # Load inote if it's provided
+        if inote:
+            self.load_inote(inote)
 
 
     def load_inote(self, inote):

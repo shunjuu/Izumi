@@ -39,6 +39,10 @@ class ConfigHandler:
 
         self.watch_folder = None # The watch folder of the string
 
+        self.destinations = None # A list of rclone destinations
+        self.airing_folder = None # The name of an airing folder to store to
+        self.rclone_flags = None # Flags used by rclone to determine its output
+
         self.encoders_always = None # The encoding endpoints, always
         self.encoders_sequential = None # The encoding endpoints, sequential
         self.notifiers_always = None # The notification endpoints, always
@@ -70,6 +74,7 @@ class ConfigHandler:
 
         self.destinations = self._load_destinations(self._conf, self._web_conf_use)
         self.airing_folder = self._load_airing_folder(self._conf, self._web_conf_use)
+        self.rclone_flags = self._load_rclone_flags(self._conf, self._web_conf_use)
 
         self.encoders_always = self._load_endpoints_encoders_always(self._conf, self._web_conf_use)
         self.encoders_sequential = self._load_endpoints_encoders_sequential(self._conf, self._web_conf_use)
@@ -235,6 +240,27 @@ class ConfigHandler:
 
         return airing
 
+
+    def _load_rclone_flags(self, conf, web):
+        """
+        Determines the flags for rclone to use when uploading.
+
+        Params:
+            conf: self._conf, which represents a dict object 
+                of the loaded conf
+            web: A boolean value which indicates if the web conf 
+                is being used (default: local)
+
+        Returns: The flags specified as a string
+        """
+
+        # TODO: Return if web
+        if web:
+            pass
+
+        # Return the local
+        flags = conf['uploading']['rclone-flags']
+        return flags
 
     def _load_destinations(self, conf, web):
         """
@@ -444,8 +470,15 @@ class ConfigHandler:
     def get_airing_folder_name(self):
         """
         Returns the airing folder name as a String
+        Contains a "/" at the end
         """
         return self.airing_folder
+
+    def get_rclone_flags(self):
+        """
+        Returns the flags used by rclone as a single string.
+        """
+        return self.rclone_flags
 
     def get_encoders(self):
         """
