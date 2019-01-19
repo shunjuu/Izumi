@@ -43,7 +43,7 @@ def delete(config):
 
         print("Now working on %s%s%s (%s%s%s)" 
                 % (Colors.WARNING, r[0], Colors.ENDC, 
-                    Colors.OKBLUE, r[2], Colors.ENDC ))
+                    Colors.OKBLUE, r[option], Colors.ENDC ))
 
         # Check if the path exists.
         res = os.popen(LIST % (r[0], r[option], show)).read()

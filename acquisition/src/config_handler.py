@@ -16,6 +16,8 @@ JSON_EXT = ['.json']
 class ConfigHandler:
     """
     ConfigHandler deals with loading and extracting configurations. 
+
+    This class does not print anything through the logger.
     """
 
     def __init__(self, cpath="config.yml"):
@@ -50,8 +52,12 @@ class ConfigHandler:
         self.distributors_always = None # The distribution endpoints, always
         self.distributors_sequential = None # The distribution endpoints, sequential
 
+        self.name = None # The name of this application insance
         self.delimiter = None # The delimiter used by inotify !!IMPORTANT
         self.verbose = False # Whether or not we are printing verbosely
+
+        self.logging_logfmt = None # The format string for the logger to use
+        self.logging_datefmt = None # If logging strings include asctime (strftime format)
 
         # ---------------- #
 
@@ -83,9 +89,12 @@ class ConfigHandler:
         self.distributors_always = self._load_endpoints_distributors_always(self._conf, self._web_conf_use)
         self.distributors_sequential = self._load_endpoints_distributors_sequential(self._conf, self._web_conf_use)
 
+        self.name = self._load_system_name(self._conf, self._web_conf_use)
         self.delimiter = self._load_system_delimiter(self._conf, self._web_conf_use)
         self.verbose = self._load_system_verbose(self._conf, self._web_conf_use)
         
+        self.logging_logfmt = self._load_logging_logfmt(self._conf, self._web_conf_use)
+        self.logging_datefmt = self._load_logging_datefmt(self._conf, self._web_conf_use)
 
     def _load_local_config(self, cpath_abs):
         """
@@ -418,6 +427,25 @@ class ConfigHandler:
         # Return from the local config
         return conf['endpoints']['distributors']['sequential']
 
+    def _load_system_name(self, conf, web):
+        """
+        Gets the instance name for this application
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+                is being used (default: local)
+
+        Returns: The name, as a string
+        """
+
+        if web:
+            pass
+
+        # Return from the local config
+        return conf['system']['name']
+
     def _load_system_delimiter(self, conf, web):
         """
         Finds the Delimiter set in Config and used by inotify
@@ -453,6 +481,42 @@ class ConfigHandler:
 
         # Return from the local config
         return conf['system']['verbose']
+
+    def _load_logging_logfmt(self, conf, web):
+        """
+        Finds the logfmt string for logging set in Config
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+                is being used (default: local)
+
+        Returns: The logfmt string
+        """
+        if web:
+            pass
+
+        # Return from the local config
+        return conf['system']['logging']['logfmt']
+
+    def _load_logging_datefmt(self, conf, web):
+        """
+        Finds the datefmt string for logging set in Config
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+                is being used (default: local)
+
+        Returns: The datefmt string
+        """
+        if web:
+            pass
+
+        # Return from the local config
+        return conf['system']['logging']['datefmt']
 
     # Getter methods
 
@@ -536,6 +600,12 @@ class ConfigHandler:
         """
         return self.distributors_sequential
 
+    def get_name(self):
+        """
+        Returns the name for this application specified by the user
+        """
+        return self.name
+
     def get_delimiter(self):
         """
         Returns the delimiter used by inotify as a string
@@ -548,4 +618,14 @@ class ConfigHandler:
         """
         return self.verbose
 
+    def get_logging_logfmt(self):
+        """
+        Returns a string reprsentation for the logfmt
+        """
+        return self.logging_logfmt
 
+    def get_logging_datefmt(self):
+        """
+        Returns a string reprsentation for the datefmt
+        """
+        return self.logging_datefmt

@@ -12,13 +12,16 @@ class ArgumentHandler:
     what it can from the argument.
     """
 
-    def __init__(self, conf, inote=None):
+    def __init__(self, conf, printh, inote=None):
         """
         Args:
             conf: a ConfigHandler which already has the config.yml/json loaded.
         """
 
         self._conf = conf
+
+        # self._logger = printh.get_logger()
+        # self._colors = printh.Colors()
 
         """
         Class variables
@@ -42,6 +45,7 @@ class ArgumentHandler:
         Params:
             inote: An inote string that this application was executed with.
         """
+
         self._inote = inote
         self.show = self._load_show(inote)
         self.episode = self._load_episode(inote)

@@ -6,23 +6,28 @@ from src.argument_handler import ArgumentHandler
 from src.file_handler import FileHandler
 from src.network_handler import NetworkHandler
 from src.os_handler import OSHandler
+from src.print_handler import PrintHandler
 
 from time import sleep
 
 def main():
 
     c = ConfigHandler()
-    a = ArgumentHandler(c, sys.argv[1])
+    p = PrintHandler(c)
+    #a = ArgumentHandler(c, sys.argv[1])
     #a.load_inote(sys.argv[1])
-    f = FileHandler(c, a, sys.argv[1])
-    n = NetworkHandler(c, f)
-    o = OSHandler(c, a, f)
+    #f = FileHandler(c, a, sys.argv[1])
+    #n = NetworkHandler(c, f)
+    #o = OSHandler(c, a, f)
 
-    o.create_temp_replica_fs()
+    izumi = p.get_logger()
+    izumi.info("Hello World")
 
-    sleep(20)
+    #o.create_temp_replica_fs()
+
+    #sleep(20)
     #o.upload()
-    o.cleanup()
+    #o.cleanup()
 
     print("-------")
 
