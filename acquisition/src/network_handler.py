@@ -90,7 +90,7 @@ class NetworkHandler:
             # TODO: Error messages!
 
         # Validate that the response header was within a 2XX
-        if int(res.status_code) / 200 != 1:
+        if 200 > res.status_code or res.status_code >= 300:
             return False
             # Exit! Because it'll get caught
 

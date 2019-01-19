@@ -3,6 +3,9 @@ import os
 
 import pprint as pp
 
+# Print statements
+from src.prints.argument_handler_prints import ArgumentHandlerPrints
+
 class ArgumentHandler:
     """
     Not to be confused with ArgParser, this class is designed to handle
@@ -20,8 +23,9 @@ class ArgumentHandler:
 
         self._conf = conf
 
-        # self._logger = printh.get_logger()
-        # self._colors = printh.Colors()
+        self._logger = printh.get_logger()
+        self._colors = printh.Colors()
+        self._prints = ArgumentHandlerPrints(self._colors)
 
         """
         Class variables
@@ -45,6 +49,9 @@ class ArgumentHandler:
         Params:
             inote: An inote string that this application was executed with.
         """
+
+        self._logger.warning(self._prints.DISPLAY_INOTE % (inote))
+           # (self._colors.OKGREEN, inote, self._colors.ENDC))
 
         self._inote = inote
         self.show = self._load_show(inote)
@@ -72,9 +79,14 @@ class ArgumentHandler:
         # argument (index 2) is the new folder
         # Isdir could be in the show name, so we only check the event log
         if "isdir" in args[1].lower(): 
-            if args[2].endswith("/"): 
-                return args[2][:-1]
-            return args[2]
+
+            show = args[2]
+
+            if show.endswith("/"): 
+                show = show[:-1]
+
+            self._logger.info(self._prints.SHOW_LOADED % (show))
+            return show
 
         # Isdir wasn't in the event, wihch means the episode file was created
         # However, the show name could be contained within the watch folder.
@@ -84,11 +96,15 @@ class ArgumentHandler:
         if len(removed_watch_path) != 0:
             # something besides the watch folder is there, so this is the show folder
             if removed_watch_path.endswith("/"):
-                return removed_watch_path[:-1]
+                removed_watch_path = removed_watch_path[:-1]
+
+            self._logger.info(self._prints.SHOW_LOADED % (removed_watch_path))
             return removed_watch_path
 
         # Not a ISDIR and no show folder was in the watch folder, so this event is just
         # a new episode without a show specified. Thus, return None
+
+        self._logger.info(self._prints.SHOW_NONE)
         return None
 
 
@@ -113,10 +129,12 @@ class ArgumentHandler:
         # If this is an ISDIR event (directory was created), then no episode
         # will be specified.
         if "isdir" in args[1].lower():
+            self._logger.info(self._prints.EPISODE_NONE)
             return None
 
         # Otherwise, because a file was made, it will always be the last argument
         # provided by inote (args split by delimiter)
+        self._logger.info(self._prints.EPISODE_LOADED % (args[2]))
         return args[2]
 
 

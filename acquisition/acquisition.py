@@ -14,14 +14,13 @@ def main():
 
     c = ConfigHandler()
     p = PrintHandler(c)
-    #a = ArgumentHandler(c, sys.argv[1])
-    #a.load_inote(sys.argv[1])
+    a = ArgumentHandler(c, p, sys.argv[1])
     #f = FileHandler(c, a, sys.argv[1])
     #n = NetworkHandler(c, f)
     #o = OSHandler(c, a, f)
 
-    izumi = p.get_logger()
-    izumi.info("Hello World")
+    #izumi = p.get_logger()
+    #izumi.info("Hello World")
 
     #o.create_temp_replica_fs()
 
