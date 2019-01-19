@@ -4,7 +4,11 @@ class NetworkHandlerPrints:
     This class stores all the various print statements used by NetworkHandler
     """
 
-    def __init__(self):
+    def __init__(self, colors):
+        """
+        Params:
+            colors - print_handler.Colors() module
+        """
 
         # Print Statements
 

@@ -50,8 +50,8 @@ class ArgumentHandler:
             inote: An inote string that this application was executed with.
         """
 
-        self._logger.warning(self._prints.DISPLAY_INOTE % (inote))
-           # (self._colors.OKGREEN, inote, self._colors.ENDC))
+        # Output
+        self._logger.warning(self._prints.DISPLAY_INOTE.format(inote))
 
         self._inote = inote
         self.show = self._load_show(inote)
@@ -85,7 +85,7 @@ class ArgumentHandler:
             if show.endswith("/"): 
                 show = show[:-1]
 
-            self._logger.info(self._prints.SHOW_LOADED % (show))
+            self._logger.info(self._prints.SHOW_LOADED.format(show))
             return show
 
         # Isdir wasn't in the event, wihch means the episode file was created
@@ -95,10 +95,12 @@ class ArgumentHandler:
         removed_watch_path = args[0].replace(self._conf.get_watch_folder(), "")
         if len(removed_watch_path) != 0:
             # something besides the watch folder is there, so this is the show folder
+
+            # Remove the "/" at the end if there is one
             if removed_watch_path.endswith("/"):
                 removed_watch_path = removed_watch_path[:-1]
 
-            self._logger.info(self._prints.SHOW_LOADED % (removed_watch_path))
+            self._logger.info(self._prints.SHOW_LOADED.format(removed_watch_path))
             return removed_watch_path
 
         # Not a ISDIR and no show folder was in the watch folder, so this event is just
@@ -134,7 +136,7 @@ class ArgumentHandler:
 
         # Otherwise, because a file was made, it will always be the last argument
         # provided by inote (args split by delimiter)
-        self._logger.info(self._prints.EPISODE_LOADED % (args[2]))
+        self._logger.info(self._prints.EPISODE_LOADED.format(args[2]))
         return args[2]
 
 

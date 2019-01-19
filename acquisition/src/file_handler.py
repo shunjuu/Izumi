@@ -8,6 +8,7 @@ import anitopy
 from time import sleep 
 
 from bin import hisha2
+from src.prints.file_handler_prints import FileHandlerPrints
 
 class FileHandler:
     """
@@ -18,7 +19,7 @@ class FileHandler:
     if necessary to find files (in the event of an ISDIR creation)
     """
 
-    def __init__(self, conf, args, inote):
+    def __init__(self, conf, args, printh, inote):
         """
         Args: 
             conf - a ConfigHandler that should already be populated
@@ -31,6 +32,11 @@ class FileHandler:
         self._conf = conf
         self._args = args
         self._inote = inote
+
+        # Logging Tools
+        self._logger = printh.get_logger()
+        self._colors = printh.Colors()
+        self._prints = FileHandlerPrints(self._colors)
 
         # -------------------
         # Variables
@@ -68,9 +74,10 @@ class FileHandler:
         # If the inote event was not ISDIR, then ArgumentHandler will already have the episode 
         episode = args.get_episode()
         if episode:
+            self._logger.info(self._prints.EPISODE_LOADED_ARG.format(episode))
             return episode
 
-        # But if this is not an ISDIR event, then we need to find the new episode in the directory
+        # But if this is an ISDIR event, then we need to find the new episode in the directory
         # We will make sure there's only one file in the diretory, but this is mostly
         # to make sure a hardlink wasn't suddenly inserted
 
@@ -87,11 +94,13 @@ class FileHandler:
 
         if len(episode_folder_contents) != 1:
             ## TODO: We need to print an error message here and end with it.
+            self._logger.error(self._prints.EPISODE_LOADED_ERROR)
             sys.exit(1)
 
         # If there's only one file within the folder, then we know the new episode
         # has to be that specific file (also ending in .mkv)
         episode = episode_folder_contents[0]
+        self._logger.info(self._prints.EPISODE_LOADED_FOUND.format(episode))
 
         return episode
 
@@ -111,11 +120,16 @@ class FileHandler:
         # Args may already have determined the show from the passed-in args. If so, just return that.
         show = args.get_show()
         if show:
+            self._logger.info(self._prints.SHOW_LOADED_ARG.format(show))
             return show
 
         # If the show wasn't included, this means the episode was included on its own.
         # What's nice about this? The Hisha library takes care of it for us.
         show = hisha2.hisha(self.episode)
+        self._logger.info(self._prints.SHOW_LOADED_HISHA.format(show))
+
+        # There should be a case where Hisha doesn't find it
+        # But hisha3 will need to be developed first
 
         return show
 
@@ -143,6 +157,7 @@ class FileHandler:
         if 'isdir' in sys.argv[1].lower():
             episode_path = conf.get_watch_folder() + args.get_show() + "/" + self.episode
             size = os.path.getsize(episode_path)
+            self._logger.info(self._prints.FILESIZE_DISPLAY.format(size))
             return size
 
         # In either case where there is no ISDIR event, then the inote will point
@@ -153,6 +168,7 @@ class FileHandler:
 
         episode_path = args[0] + args[2]
         size = os.path.getsize(episode_path)
+        self._logger.info(self._prints.FILESIZE_DISPLAY.format(size))
         return size
 
 
@@ -169,12 +185,15 @@ class FileHandler:
         """
 
         if episode.endswith(".mkv"):
-            return "hardsub"
-
-        elif episode.endswith('.mp4'):
+            self._logger.info(self._prints.SUB_TYPE.format("Softsub"))
             return "softsub"
 
+        elif episode.endswith('.mp4'):
+            self._logger.info(self._prints.SUB_TYPE.format("Hardsub"))
+            return "hardsub"
+
         else: 
+            self._logger.info(self._prints.SUB_TYPE.format("None."))
             return None
 
     def _generate_new_episode(self, episode): 
@@ -205,6 +224,7 @@ class FileHandler:
         _, ext = os.path.splitext(episode)
         new_episode += ext
 
+        self._logger.warning(self._prints.EPISODE_NEW_NAME.format(new_episode))
         return new_episode
 
 

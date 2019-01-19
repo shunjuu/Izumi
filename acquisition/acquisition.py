@@ -15,7 +15,7 @@ def main():
     c = ConfigHandler()
     p = PrintHandler(c)
     a = ArgumentHandler(c, p, sys.argv[1])
-    #f = FileHandler(c, a, sys.argv[1])
+    f = FileHandler(c, a, p, sys.argv[1])
     #n = NetworkHandler(c, f)
     #o = OSHandler(c, a, f)
 
