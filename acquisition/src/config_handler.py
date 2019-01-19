@@ -273,6 +273,8 @@ class ConfigHandler:
                 is being used (default: local)
 
         Returns: A list of (watch folder) strings
+
+        Affixes a "/" to the end of each config if it's missing.
         """
         if web:
             pass
@@ -488,13 +490,13 @@ class ConfigHandler:
 
     def get_encoders_always(self):
         """
-        Returns the always encoder endpoints as a list of lists
+        Returns the always encoder endpoints as a list of dicts
         """
         return self.encoders_always
 
     def get_encoders_sequential(self):
         """
-        Returns the sequential encoder endpoints as a list of list of lists
+        Returns the sequential encoder endpoints as a dict of list of dicts
         """
         return self.encoders_sequential
 
@@ -506,13 +508,13 @@ class ConfigHandler:
 
     def get_notifiers_always(self):
         """
-        Returns the always notifier endpoints as a list of lists
+        Returns the always notifier endpoints as a list of dicts
         """
         return self.notifiers_always
 
     def get_notifiers_sequential(self):
         """
-        Returns the sequential notifier endpoints as a list of list of lists
+        Returns the sequential notifier endpoints as a dict of list of dicts
         """
         return self.notifiers_sequential
 
@@ -524,13 +526,13 @@ class ConfigHandler:
 
     def get_distributors_always(self):
         """
-        Returns the always distributors endpoints as a list of lists
+        Returns the always distributors endpoints as a list of dicts
         """
         return self.distributors_always
 
     def get_distributors_sequential(self):
         """
-        Returns the sequential distributors endpoints as a list of list of lists
+        Returns the sequential distributors endpoints as a dict of list of dicts
         """
         return self.distributors_sequential
 

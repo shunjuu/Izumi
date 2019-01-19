@@ -7,6 +7,8 @@ from src.file_handler import FileHandler
 from src.network_handler import NetworkHandler
 from src.os_handler import OSHandler
 
+from time import sleep
+
 def main():
 
     c = ConfigHandler()
@@ -17,7 +19,9 @@ def main():
     o = OSHandler(c, a, f)
 
     o.create_temp_replica_fs()
-    o.upload()
+
+    sleep(20)
+    #o.upload()
     o.cleanup()
 
     print("-------")

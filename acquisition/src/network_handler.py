@@ -97,39 +97,36 @@ class NetworkHandler:
         return True
 
 
-    def _notify(self, get_always, get_sequential):
+    def _notify(self, always, sequential):
         """
         A general form to send out requests and get responses.
         Yes, this is a higher-order function.
 
         Params:
-            get_always: Method to get the always entries
-            get_sequential: Method to get the sequential entries
+            always: A list of "Always" formatted entries
+            sequential: A dict of "Sequential" formatted entires
         """
 
         # First, send out the requests to the always entries
-        always = get_always()
 
         for entry in always: 
             # Try to send with auth key, but if it doesn't have it send without
             try:
-                self._send_request(entry[0], entry[1])
+                self._send_request(entry['url'], entry['auth'])
             except:
-                self._send_request(entry[0])
+                self._send_request(entry['url'])
 
         # Second, keep trying the sequential until one is successful
-        sequential = get_sequential()
 
         # There are multiple groupings also supported
-        for group in sequential:
-
+        for _, group in sequential.items():
             for entry in group:
                 # Try to send with auth key, but if it doensn't have it send without
                 try:
-                    if self._send_request(entry[0], entry[1]):
+                    if self._send_request(entry['url'], entry['auth']):
                         break
                 except:
-                    if self._send_request(entry[0]):
+                    if self._send_request(entry['url']):
                         break 
 
         return
@@ -142,8 +139,8 @@ class NetworkHandler:
         """
 
         # Call the general notifier, passing in the encoder functions
-        self._notify(self._conf.get_encoders_always, 
-                        self._conf.get_encoders_sequential)
+        self._notify(self._conf.get_encoders_always(), 
+                        self._conf.get_encoders_sequential())
 
     def notify_notifiers(self):
         """
@@ -151,8 +148,8 @@ class NetworkHandler:
         """
 
         # Call the general notifer, passing in the notifier functions
-        self._notify(self._conf.get_notifiers_always,
-                        self._conf.get_notifiers_sequential)
+        self._notify(self._conf.get_notifiers_always(),
+                        self._conf.get_notifiers_sequential())
 
     def notify_distributors(self):
         """
@@ -160,5 +157,5 @@ class NetworkHandler:
         """
 
         # Call the general notifier, passing in the distributor functions
-        self._notify(self._conf.get_distributors_always,
-                        self._conf.get_distributors_sequential)
+        self._notify(self._conf.get_distributors_always(),
+                        self._conf.get_distributors_sequential())

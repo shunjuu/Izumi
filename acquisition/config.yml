@@ -30,70 +30,79 @@ uploading:
 # Grouping body to list endpoints for other Izumi modules for this app to talk to.
 endpoints:
 
-  # A list of U2 Encoder endpoints to send to.
-  # Usually only one is here, but multiple encoder endpoints are supported (for various settings)
-  # The format is a list of lists. Either list format is usable.
-  # For each member in the list:
-  # - Index 0 is the URL of the Encoding Unit (U2). It should include http/https. [type: String-URL]
-  # - Index 1 is a an optional Authorization header token if the endpoint requires a header. [type: String-Key]
-  # To have no encoders, simply have an empty list "[]"
+  # The endpoints to send U2 Encoder requests.
+  # url represents the URL to request to. It should contain http header
+  # auth is an optional authorization key to send the request to.
+  # auth can be ommitted.
+  # To specify none, simply have always/sequential as empty lists ([])
   encoders:
 
-    # These urls will always be notified, regardless if one fails
+    # These urls will always be notified, regardless of their failure state
     always:
-      - ["https://endpoint1.url/notify", "authorization_key"]
-      - ["https://endpoint2.url/notify"]
+      - url: "https://endpoint1.url/notify"
+        auth: "authorization_key1"
+      - url: "https://endpoint2.url/notify"
 
-    # Per each group in the list, each member in the group will be pinged
-    # until one is successful.
+    # For each group, try each url until one is successful
     sequential:
-      - - ["https://endpoint1.url/notify", "authorization_key"]
-        - ['https://endpoint2.url/notify']
-      - - ["https://endpoint3.url/notify", "authorization_key"]
-        - ['https://endpoint4.url/notify']
+      group1:
+        - url: "https://endpoint1.url/notify"
+          auth: "authorization_key1"
+        - url: "https://endpoint2.url/notify"
+      group2:
+        - url: "https://endpoint3.url/notify"
+          auth: "authorization_key3"
+        - url: "https://endpoint4.url/notify"
 
-  # A list of U3 Notification endpoints to send to.
-  # The format is a list of lists. Either list format is usable.
-  # For each member in the list:
-  # - Index 0 is the URL of the Notification Unit (U3). It should include http/https. [type: String-URL]
-  # - Index 1 is a an optional Authorization header token if the endpoint requires a header. [type: String-Key]
-  # To have no notifiers, simply have an empty list "[]"
+
+  # The endpoints to send U3 Notification requests.
+  # url represents the URL to request to. It should contain http header
+  # auth is an optional authorization key to send the request to.
+  # auth can be ommitted.
+  # To specify none, simply have always/sequential as empty lists ([])
   notifiers:
 
-    # These urls will always be notified, regardless if one fails
+    # These urls will always be notified, regardless of their failure state
     always:
-      - ["https://endpoint1.url/notify", "authorization_key"]
-      - ["https://endpoint2.url/notify"]
+      - url: "https://endpoint1.url/notify"
+        auth: "authorization_key1"
+      - url: "https://endpoint2.url/notify"
 
-    # Per each group in the list, each member in the group will be pinged
-    # until one is successful.
+    # For each group, try each url until one is successful
     sequential:
-      - - ["https://endpoint1.url/notify", "authorization_key"]
-        - ['https://endpoint2.url/notify']
-      - - ["https://endpoint3.url/notify", "authorization_key"]
-        - ['https://endpoint4.url/notify']
+      group1:
+        - url: "https://endpoint1.url/notify"
+          auth: "authorization_key1"
+        - url: "https://endpoint2.url/notify"
+      group2:
+        - url: "https://endpoint3.url/notify"
+          auth: "authorization_key3"
+        - url: "https://endpoint4.url/notify"
 
-  # A list of U4 Distributor endpoints to send to.
-  # The format is a list of lists. Either list format is usable.
-  # For each member in the list:
-  # - Index 0 is the URL of the Distributor Unit (U4). It should include http/https. [type: String-URL]
-  # - Index 1 is a an optional Authorization header token if the endpoint requires a header. [type: String-Key]
-  # To have no distributors, simply have an empty list "[]"
+
+  # The endpoints to send U4 Distributor requests.
+  # url represents the URL to request to. It should contain http header
+  # auth is an optional authorization key to send the request to.
+  # auth can be ommitted.
+  # To specify none, simply have always/sequential as empty lists ([])
   distributors:
 
-    # These urls will always be notified, regardless if one fails
+    # These urls will always be notified, regardless of their failure state
     always:
-      - ["https://endpoint1.url/notify", "authorization_key"]
-      - ["https://endpoint2.url/notify"]
+      - url: "https://endpoint1.url/notify"
+        auth: "authorization_key1"
+      - url: "https://endpoint2.url/notify"
 
-    # Per each group in the list, each member in the group will be pinged
-    # until one is successful.
+    # For each group, try each url until one is successful
     sequential:
-      - - ["https://endpoint1.url/notify", "authorization_key"]
-        - ['https://endpoint2.url/notify']
-      - - ["https://endpoint3.url/notify", "authorization_key"]
-        - ['https://endpoint4.url/notify']
-
+      group1:
+        - url: "https://endpoint1.url/notify"
+          auth: "authorization_key1"
+        - url: "https://endpoint2.url/notify"
+      group2:
+        - url: "https://endpoint3.url/notify"
+          auth: "authorization_key3"
+        - url: "https://endpoint4.url/notify"
 
 # Application-specific settings
 system:
