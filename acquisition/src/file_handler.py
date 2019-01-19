@@ -35,8 +35,7 @@ class FileHandler:
 
         # Logging Tools
         self._logger = printh.get_logger()
-        self._colors = printh.Colors()
-        self._prints = FileHandlerPrints(self._colors)
+        self._prints = FileHandlerPrints(printh.Colors())
 
         # -------------------
         # Variables

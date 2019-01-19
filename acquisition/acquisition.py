@@ -16,7 +16,8 @@ def main():
     p = PrintHandler(c)
     a = ArgumentHandler(c, p, sys.argv[1])
     f = FileHandler(c, a, p, sys.argv[1])
-    #n = NetworkHandler(c, f)
+    n = NetworkHandler(c, f, p)
+    n.notify_encoders()
     #o = OSHandler(c, a, f)
 
     #izumi = p.get_logger()

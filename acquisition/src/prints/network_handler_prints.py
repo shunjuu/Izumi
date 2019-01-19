@@ -10,23 +10,40 @@ class NetworkHandlerPrints:
             colors - print_handler.Colors() module
         """
 
-        # Print Statements
+        # Some temporary, frequent-use variables
+        endc = colors.ENDC 
+        prefix = "[Network] "
 
-        # Sending requests
-        self.SENDING_REQUEST = "Sending request to %s%s%s..."
-        self.SENDING_REQUEST_SUCCESS = "Request to %s%s%s was successful."
-        self.SENDING_REQUEST_FAIL = "Request to %s%s%s failed."
+        # Sending Request Printouts
+        sending_color = colors.BLUE
+        self.SENDING_REQUEST = prefix + "Sending request to: " + \
+            sending_color + "{}" + endc
+        self.SENDING_REQUEST_SUCCESS = prefix + "Request to " + \
+            sending_color + "{}" + colors.OKGREEN + "successful" + endc
+
+        # Errors for Requests
+        error_color = colors.FAIL
+        self.SENDING_REQUEST_FAIL = prefix + "Request to " + \
+            sending_color + "{}" + error_color + "failed" + endc
+        self.SENDING_REQUEST_CONNECTION_ERROR = prefix + error_color + \
+            "Failed to connect to the server, please retry." + endc
+        self.SENDING_REQUEST_SCHEMA_ERROR = prefix + "URL " + \
+            error_color + "{}" + endc + " is missing schema (http/https)"
+        self.SENDING_REQUEST_TIMEOUT_ERROR = prefix + "Timeout occured for " + \
+            error_color + "{}" + endc
+        self.SENDING_REQUEST_BAD_CODE = prefix + "Response from " + \
+            error_color + "{}" + endc + " returned bad response code " + \
+            error_color + "{}" + endc
 
         # Sending Group Bodies
-        self.GROUP_ENCODERS = "Now sending requests to %sencoders%s."
-        self.GROUP_NOTIFIERS = "Now sending requests to %snotifiers%s."
-        self.GROUP_DISTRIBUTORS = "Now sending requests to %sdistributors%s."
+        group_color = colors.BLUE
+        group_base = prefix + "Now sending requests to " + group_color + "{}" + endc
+        self.GROUP_ENCODERS = group_base.format("encoders")
+        self.GROUP_NOTIFIERS = group_base.format("notifiers")
+        self.GROUP_DISTRIBUTORS = group_base.format("distributors")
 
         # Always Bodies
-        self.BODY_ALWAYS = "Working on %sAlways%s requests."
-        self.BODY_SEQUENTIAl = "Working on %sSequential%s requests."
-
-        # Warning messages
-        self.WARNING_BAD_CODE = "Request to %s%s%s failed due to a bad response code (%s)."
-
-        # Error messages
+        body_color = colors.BLUE
+        body_base = prefix + "Working on " + body_color + "{}" + endc + "..."
+        self.BODY_ALWAYS = body_base.format("Always")
+        self.BODY_SEQUENTIAL = body_base.format("Sequential")

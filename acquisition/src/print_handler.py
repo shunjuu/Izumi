@@ -21,6 +21,7 @@ class PrintHandler():
         OKBLUE = '\033[94m'
         OKGREEN = '\033[92m'
         GREEN = '\033[32m'
+        BLUE = '\033[01;36m'
         WARNING = '\033[93m'
         LCYAN = '\033[0;96m'
         ORANGE = '\033[0;33m'

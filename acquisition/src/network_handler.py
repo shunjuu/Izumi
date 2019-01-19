@@ -4,6 +4,9 @@ import os
 import pprint as pp 
 import requests
 
+
+from src.prints.network_handler_prints import NetworkHandlerPrints
+
 class NetworkHandler:
     """
     NetworkHandler will handle sending out all of the various requests to
@@ -14,7 +17,7 @@ class NetworkHandler:
     Units if designated necessary.
     """
 
-    def __init__(self, conf, fileh):
+    def __init__(self, conf, fileh, printh):
         """
         Args:
             conf - a ConfigHandler that should already be populated
@@ -35,6 +38,10 @@ class NetworkHandler:
         # Store handlers as "private" variables
         self._conf = conf
         self._fileh = fileh
+
+        # Logging Tools
+        self._logger = printh.get_logger()
+        self._prints = NetworkHandlerPrints(printh.Colors())
 
         # Variables
         self.request = self._generate_request(fileh) # A dict representing the JSOn request
@@ -84,16 +91,31 @@ class NetworkHandler:
             headers['authorization'] = auth_key
 
         try:
+            self._logger.info(self._prints.SENDING_REQUEST.format(url))
             res = requests.post(url, json=self.request, headers=headers, timeout=5)
-        except:
+        except requests.exceptions.ConnectionError:
+            # When the internet has some kind of issue, just exit
+            self._logger.error(self._prints.SENDING_REQUEST_CONNECTION_ERROR) 
             return False
-            # TODO: Error messages!
+        except requests.exceptions.MissingSchema:
+            # When http or https is missing
+            self._logger.error(self._prints.SENDING_REQUEST_SCHEMA_ERROR.format(url))
+            return False
+        except request.exceptions.Timeout:
+            # When the connection times out
+            self._logger.error(self._prints.SENDING_REQUEST_TIMEOUT_ERROR.format(url))
+            return False
+        except:
+            self._logger.info(self._prints.SENDING_REQUEST_FAIL.format(url))
+            return False
 
         # Validate that the response header was within a 2XX
         if 200 > res.status_code or res.status_code >= 300:
+            self._logger.info(self._prints.SENDING_REQUEST_BAD_CODE.format(
+                url, res.status_code))
             return False
-            # Exit! Because it'll get caught
 
+        self._logger.info(self._prints.SENDING_REQUEST_SUCCESS.format(url))
         return True
 
 
@@ -109,6 +131,8 @@ class NetworkHandler:
 
         # First, send out the requests to the always entries
 
+        self._logger.info(self._prints.BODY_ALWAYS)
+
         for entry in always: 
             # Try to send with auth key, but if it doesn't have it send without
             try:
@@ -117,6 +141,8 @@ class NetworkHandler:
                 self._send_request(entry['url'])
 
         # Second, keep trying the sequential until one is successful
+
+        self._logger.info(self._prints.BODY_SEQUENTIAL)
 
         # There are multiple groupings also supported
         for _, group in sequential.items():
@@ -138,6 +164,8 @@ class NetworkHandler:
         Sends out notifications to all the U2 Encoders per their standards.
         """
 
+        self._logger.info(self._prints.GROUP_ENCODERS)
+
         # Call the general notifier, passing in the encoder functions
         self._notify(self._conf.get_encoders_always(), 
                         self._conf.get_encoders_sequential())
@@ -147,6 +175,8 @@ class NetworkHandler:
         Sends out notifications to all the U3 Notifier modules
         """
 
+        self._logger.info(self._prints.GROUP_NOTIFIERS)
+
         # Call the general notifer, passing in the notifier functions
         self._notify(self._conf.get_notifiers_always(),
                         self._conf.get_notifiers_sequential())
@@ -155,6 +185,8 @@ class NetworkHandler:
         """
         Sends out notifications to all the U4 Distributor modules
         """
+
+        self._notify(self._prints.GROUP_DISTRIBUTORS)
 
         # Call the general notifier, passing in the distributor functions
         self._notify(self._conf.get_distributors_always(),

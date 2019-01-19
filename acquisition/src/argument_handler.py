@@ -24,8 +24,7 @@ class ArgumentHandler:
         self._conf = conf
 
         self._logger = printh.get_logger()
-        self._colors = printh.Colors()
-        self._prints = ArgumentHandlerPrints(self._colors)
+        self._prints = ArgumentHandlerPrints(printh.Colors())
 
         """
         Class variables
