@@ -186,7 +186,7 @@ class NetworkHandler:
         Sends out notifications to all the U4 Distributor modules
         """
 
-        self._notify(self._prints.GROUP_DISTRIBUTORS)
+        self._logger.info(self._prints.GROUP_DISTRIBUTORS)
 
         # Call the general notifier, passing in the distributor functions
         self._notify(self._conf.get_distributors_always(),

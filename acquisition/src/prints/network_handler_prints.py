@@ -19,12 +19,12 @@ class NetworkHandlerPrints:
         self.SENDING_REQUEST = prefix + "Sending request to: " + \
             sending_color + "{}" + endc
         self.SENDING_REQUEST_SUCCESS = prefix + "Request to " + \
-            sending_color + "{}" + colors.OKGREEN + "successful" + endc
+            sending_color + "{}" + colors.OKGREEN + " successful" + endc
 
         # Errors for Requests
         error_color = colors.FAIL
         self.SENDING_REQUEST_FAIL = prefix + "Request to " + \
-            sending_color + "{}" + error_color + "failed" + endc
+            sending_color + "{}" + error_color + " failed" + endc
         self.SENDING_REQUEST_CONNECTION_ERROR = prefix + error_color + \
             "Failed to connect to the server, please retry." + endc
         self.SENDING_REQUEST_SCHEMA_ERROR = prefix + "URL " + \
