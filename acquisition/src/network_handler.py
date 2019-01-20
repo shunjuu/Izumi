@@ -95,18 +95,18 @@ class NetworkHandler:
             res = requests.post(url, json=self.request, headers=headers, timeout=5)
         except requests.exceptions.ConnectionError:
             # When the internet has some kind of issue, just exit
-            self._logger.error(self._prints.SENDING_REQUEST_CONNECTION_ERROR) 
+            self._logger.warning(self._prints.SENDING_REQUEST_CONNECTION_ERROR) 
             return False
         except requests.exceptions.MissingSchema:
             # When http or https is missing
-            self._logger.error(self._prints.SENDING_REQUEST_SCHEMA_ERROR.format(url))
+            self._logger.warning(self._prints.SENDING_REQUEST_SCHEMA_ERROR.format(url))
             return False
         except request.exceptions.Timeout:
             # When the connection times out
-            self._logger.error(self._prints.SENDING_REQUEST_TIMEOUT_ERROR.format(url))
+            self._logger.warning(self._prints.SENDING_REQUEST_TIMEOUT_ERROR.format(url))
             return False
         except:
-            self._logger.info(self._prints.SENDING_REQUEST_FAIL.format(url))
+            self._logger.warning(self._prints.SENDING_REQUEST_FAIL.format(url))
             return False
 
         # Validate that the response header was within a 2XX
