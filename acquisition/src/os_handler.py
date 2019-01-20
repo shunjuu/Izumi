@@ -6,6 +6,8 @@ import tempfile
 
 import pprint as pp
 
+from src.prints.os_handler_prints import OSHandlerPrints
+
 # The upload command that is used to upload files.
 UPLOAD = "rclone copy %s %s %s"
 
@@ -15,12 +17,13 @@ class OSHandler:
     directories, and calling rclone to upload the files.
     """
 
-    def __init__(self, conf, args, fileh):
+    def __init__(self, conf, args, fileh, printh):
         """
         Args:
             conf - a ConfigHandler that should already be populated
             args - an ArgumentHandler that should already be populated
             fileh - a FileHandler that should already be populated
+            printh - a PrintHandler that should already be populated
         """
 
         self._conf = conf
@@ -28,6 +31,11 @@ class OSHandler:
         self._fileh = fileh
 
         self.temp_dir = None # This stores the path of the temporary directory
+
+        # Logging Tools
+        self._logger = printh.get_logger()
+        self._prints = OSHandlerPrints(printh.Colors())
+
 
     def _create_temp_dir(self):
         """
@@ -37,9 +45,12 @@ class OSHandler:
             self.temp_dir = tempfile.mkdtemp(dir=sys.path[0])
             if not self.temp_dir.endswith("/"):
                 self.temp_dir += "/"
-        except:
+
+            self._logger.info(self._prints.TEMP_DIR_CREATE_SUCCESS.format(self.temp_dir))
+        except Exception as e:
             # TODO: print error messages
-            sys.exit(2)
+            self._logger.error(self._prints.TEMP_DIR_CREATE_ERROR)
+            os._exit(2)
 
     def create_temp_replica_fs(self):
         """
@@ -60,10 +71,16 @@ class OSHandler:
 
         # Make the path which rclone will be copying to
         os.makedirs(path)
+        self._logger.info(self._prints.FS_PATH_CREATION.format(path))
 
         # Hard link the original file to the new episode name
         source_file = self.__get_source_file()
         new_episode_path = os.path.abspath(path + episode)
+
+        # Output
+        self._logger.info(self._prints.FS_PATH_LINK_1.format(source_file))
+        self._logger.info(self._prints.FS_PATH_LINK_2.format(new_episode_path))
+
         os.link(source_file, new_episode_path)
 
         # We want to hardlink here because it's instant and 
@@ -83,7 +100,12 @@ class OSHandler:
         else:
             episode_path = args[0] + args[2]
 
-        return os.path.abspath(episode_path)
+        # Get the absolute path
+        episode_path = os.path.abspath(episode_path)
+
+        self._logger.info(self._prints.SOURCE_FILE_FOUND.format(episode_path))
+
+        return episode_path
 
     def upload(self):
         """
@@ -93,7 +115,9 @@ class OSHandler:
         of that folder online as is.
         """
         for dest in self._conf.get_destinations():
+            self._logger.info(self._prints.RCLONE_UPLOAD_START.format(dest))
             os.system(UPLOAD % (self.temp_dir, dest, self._conf.get_rclone_flags()))
+            self._logger.info(self._prints.RCLONE_UPLOAD_END.format(dest))
 
     def cleanup(self):
         """
@@ -117,9 +141,10 @@ class OSHandler:
             src_folder = os.path.abspath(args[0] + args[2])
             try:
                 shutil.rmtree(src_folder)
+                self._logger.warning(self._prints.CLEANUP_SRC_OBJ_ISDIR.format(src_folder))
             except:
-                # TODO: print error messages
-                sys.exit(2)
+                self._logger.error(self._prints.CLEANUP_SRC_OBJ_ISDIR_ERROR.format(src_folder))
+                os._exit(2)
 
         # It wasn't a directory created
         else:
@@ -128,12 +153,16 @@ class OSHandler:
             args_watch_folder = os.path.abspath(args[0])
 
             if args_watch_folder == conf_watch_folder:
-                os.remove(os.path.abspath(args[0] + args[2]))
+                src_file_path = os.path.abspath(args[0] + args[2])
+                self._logger.warning(self._prints.CLEANUP_SRC_OBJ_FILE_ONLY.format(src_file_path))
+                os.remove(src_file_path)
 
             # If we reached this else point, it means a folder/show name
             # was provded at the start, which means it will be args[0]
             else:
-                shutil.rmtree(os.path.abspath(args[0]))
+                src_folder_path = os.path.abspath(args[0])
+                self._logger.warning(self._prints.CLEANUP_SRC_OBJ_FOLDER_PROVIDED.format(src_folder_path))
+                shutil.rmtree(src_folder_path)
 
 
     def _delete_temp_all(self):
@@ -143,9 +172,10 @@ class OSHandler:
         """
         try:
             shutil.rmtree(self.temp_dir)
+            self._logger.warning(self._prints.CLEANUP_TEMP_ALL.format(self.get_temp_dir()))
         except:
-            # TODO: print error messages
-            sys.exit(2)
+            self._logger.error(self._prints.CLEANUP_TEMP_ALL_ERROR.format(self.get_temp_dir()))
+            os._exit(2)
 
 
     def get_temp_dir(self):

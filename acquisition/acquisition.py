@@ -12,22 +12,19 @@ from time import sleep
 
 def main():
 
+    inote = sys.argv[1]
+
     c = ConfigHandler()
     p = PrintHandler(c)
-    a = ArgumentHandler(c, p, sys.argv[1])
-    f = FileHandler(c, a, p, sys.argv[1])
+    a = ArgumentHandler(c, p, inote)
+    f = FileHandler(c, a, p, inote)
     n = NetworkHandler(c, f, p)
-    n.notify_encoders()
-    #o = OSHandler(c, a, f)
+    o = OSHandler(c, a, f, p)
 
-    #izumi = p.get_logger()
-    #izumi.info("Hello World")
-
-    #o.create_temp_replica_fs()
-
-    #sleep(20)
-    #o.upload()
-    #o.cleanup()
+    o.create_temp_replica_fs()
+    sleep(10)
+    o.upload()
+    o.cleanup()
 
     print("-------")
 

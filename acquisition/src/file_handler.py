@@ -24,6 +24,7 @@ class FileHandler:
         Args: 
             conf - a ConfigHandler that should already be populated
             args - an ArgumentHandler that should already be populated
+            printh - a PrintHandler that should already be populated
 
             FileHandler will automatically determine properties upon initialization
         """

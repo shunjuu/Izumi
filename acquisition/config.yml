@@ -25,7 +25,7 @@ uploading:
   airing-folder-name: "Airing"
 
   # Flags to be used in the rclone uploading prompt. Determines verbosity of rclone.
-  rclone-flags: "-v --stats 1s --stats-one-line --progress"
+  rclone-flags: "--stats 1s --stats-one-line --progress"
 
 # Grouping body to list endpoints for other Izumi modules for this app to talk to.
 endpoints:

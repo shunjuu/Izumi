@@ -19,6 +19,7 @@ class ArgumentHandler:
         """
         Args:
             conf: a ConfigHandler which already has the config.yml/json loaded.
+            printh: A PrintHandler that should already be populated
         """
 
         self._conf = conf
