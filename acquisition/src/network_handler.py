@@ -59,7 +59,7 @@ class NetworkHandler:
         """
         req = dict()
         req['show'] = fileh.get_show()
-        req['episode'] = fileh.get_episode()
+        req['episode'] = fileh.get_episode_new()
         req['filesize'] = fileh.get_filesize()
         req['sub'] = fileh.get_sub_type()
 

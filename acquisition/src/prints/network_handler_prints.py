@@ -37,7 +37,7 @@ class NetworkHandlerPrints:
 
         # Sending Group Bodies
         group_color = colors.BLUE
-        group_base = prefix + "Now sending requests to " + group_color + "{}" + endc
+        group_base = prefix + "Now sending requests to " + colors.MAGENTA + "{}" + endc
         self.GROUP_ENCODERS = group_base.format("encoders")
         self.GROUP_NOTIFIERS = group_base.format("notifiers")
         self.GROUP_DISTRIBUTORS = group_base.format("distributors")
