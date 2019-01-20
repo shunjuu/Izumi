@@ -22,9 +22,12 @@ def main():
     o = OSHandler(c, a, f, p)
 
     o.create_temp_replica_fs()
-    sleep(10)
     o.upload()
     o.cleanup()
+
+    n.notify_encoders()
+    n.notify_notifiers()
+    n.notify_distributors()
 
     print("-------")
 
