@@ -38,7 +38,7 @@ class ConfigHandler:
         self._conf = None # The real config to parse all other vars from
         self._web_conf_use = False # Whether or not using web-style conf
 
-        self.listen_port = None # The port Flask will listen to
+        self.listen_port = None # The mpoport Flask will listen to
 
         self.download_download_sources = None # The list of rclone sources to dl from
         self.download_softsub_folder = None # The name of the softsub folder name
@@ -115,8 +115,7 @@ class ConfigHandler:
             with open(cpath_abs, 'r') as cfyml:
                 try:
                     return yaml.load(cfyml)
-                except Exception as e:
-                    print(e)
+                except:
                     pass
                     # TODO: print statement here for loading config error
 
