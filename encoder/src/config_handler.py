@@ -12,24 +12,23 @@ import requests # For fetching web configs
 YAML_EXT = ['.yaml', '.yml']
 JSON_EXT = ['.json']
 
-
 class ConfigHandler:
     """
-    ConfigHandler deals with loading and extracting configurations. 
+    ConfigHandler deals with loading and extracting configurations.
 
     This class does not print anything through the logger.
     """
 
-    def __init__(self, cpath="config.yml"):
+    def __init__(self,  cpath="config.yml"):
         """
         Args:
             cpath - A path that points to the config file. If not specified,
-            the application will load the regular config.yml.
+            the application will load the regular config.yml
         """
 
         # Get the absolute path of the config.yml path for all use cases.
         cpath_abs = os.path.abspath(cpath)
-        # Load the config into a dict Object
+        # Load the config into a dict object
         initial_conf = self._load_local_config(cpath_abs)
 
         """
@@ -39,21 +38,22 @@ class ConfigHandler:
         self._conf = None # The real config to parse all other vars from
         self._web_conf_use = False # Whether or not using web-style conf
 
-        self.watch_folder = None # The watch folder of the string
+        self.listen_port = None # The port Flask will listen to
 
-        self.destinations = None # A list of rclone destinations
-        self.airing_folder = None # The name of an airing folder to store to
-        self.rclone_flags = None # Flags used by rclone to determine its output
+        self.download_download_sources = None # The list of rclone sources to dl from
+        self.download_softsub_folder = None # The name of the softsub folder name
+        self.download_rclone_flags = None # Flags for rclone to use when downloading
 
-        self.encoders_always = None # The encoding endpoints, always
-        self.encoders_sequential = None # The encoding endpoints, sequential
+        self.upload_destinations = None # List of rclone dests to upload to
+        self.upload_hardsub_folder = None # The name of the hardsub folder to upload to
+        self.upload_rclone_flags = None # Flags for rclone to use when downloading
+
         self.notifiers_always = None # The notification endpoints, always
         self.notifiers_sequential = None # The notification endpoints, sequential
         self.distributors_always = None # The distribution endpoints, always
         self.distributors_sequential = None # The distribution endpoints, sequential
 
         self.name = None # The name of this application insance
-        self.delimiter = None # The delimiter used by inotify !!IMPORTANT
         self.verbose = False # Whether or not we are printing verbosely
 
         self.logging_logfmt = None # The format string for the logger to use
@@ -76,21 +76,23 @@ class ConfigHandler:
         # ---------------- #
         # Populate the rest of the variables now
         # ---------------- #
-        self.watch_folder = self._load_watch_folder(self._conf, self._web_conf_use)
+        self.listen_port = self._load_listen_port(self._conf, self._web_conf_use)
 
-        self.destinations = self._load_destinations(self._conf, self._web_conf_use)
-        self.airing_folder = self._load_airing_folder(self._conf, self._web_conf_use)
-        self.rclone_flags = self._load_rclone_flags(self._conf, self._web_conf_use)
+        self.download_download_sources = self._load_download_download_sources(self._conf, self._web_conf_use)
+        self.download_softsub_folder = self._load_download_softsub_folder(self._conf, self._web_conf_use)
+        self.download_rclone_flags = self._load_download_rclone_flags(self._conf, self._web_conf_use)
 
-        self.encoders_always = self._load_endpoints_encoders_always(self._conf, self._web_conf_use)
-        self.encoders_sequential = self._load_endpoints_encoders_sequential(self._conf, self._web_conf_use)
+        self.upload_destinations = self._load_upload_destinations(self._conf, self._web_conf_use)
+        self.upload_hardsub_folder = self._load_upload_hardsub_folder(self._conf, self._web_conf_use)
+        self.upload_rclone_flags = self._load_upload_rclone_flags(self._conf, self._web_conf_use)
+
         self.notifiers_always = self._load_endpoints_notifiers_always(self._conf, self._web_conf_use)
         self.notifiers_sequential = self._load_endpoints_notifiers_sequential(self._conf, self._web_conf_use)
         self.distributors_always = self._load_endpoints_distributors_always(self._conf, self._web_conf_use)
         self.distributors_sequential = self._load_endpoints_distributors_sequential(self._conf, self._web_conf_use)
+ 
 
         self.name = self._load_system_name(self._conf, self._web_conf_use)
-        self.delimiter = self._load_system_delimiter(self._conf, self._web_conf_use)
         self.verbose = self._load_system_verbose(self._conf, self._web_conf_use)
         
         self.logging_logfmt = self._load_logging_logfmt(self._conf, self._web_conf_use)
@@ -113,7 +115,8 @@ class ConfigHandler:
             with open(cpath_abs, 'r') as cfyml:
                 try:
                     return yaml.load(cfyml)
-                except:
+                except Exception as e:
+                    print(e)
                     pass
                     # TODO: print statement here for loading config error
 
@@ -141,7 +144,6 @@ class ConfigHandler:
         Returns: The string representing the web-config entry
         """
         return conf['web-config']
-
 
     def __determine_url_extension(self, url):
         """
@@ -197,9 +199,10 @@ class ConfigHandler:
                 pass     
                 # TODO: print statement here for loading config error
 
-    def _load_watch_folder(self, conf, web):
+
+    def _load_listen_port(self, conf, web):
         """
-        Determines the watch folder for this application.
+        Retrieve the port for Flask to listen to.
 
         Params:
             conf: self._conf, which represents a dict object
@@ -207,107 +210,53 @@ class ConfigHandler:
             web: A boolean value which indicates if the web conf
                 is being used (default: local)
 
-        Returns: The watch folder string, which ends with a "/"
+        Returns: The port, as an integer
         """
 
-        # TODO: Return if web
         if web:
             pass
 
-        # Return the local, since we're not using the web conf
-        folder = conf['watch-folder']
-        # And append a "/" if it's not added in by the user
-        folder = folder if folder.endswith("/") else folder + "/"
-
-        return folder
+        # Return from the local config
+        return int(conf['listen-port'])
 
 
-    def _load_airing_folder(self, conf, web):
+    def _load_download_download_sources(self, conf, web):
         """
-        Gets the name of "Airing" folder for new shows, and appends a "/" at the end
-        if there isn't one already. Otherwise, if it's a blank string, simply 
-        gets the Airing folder as is. (ending with / is for ease of building strings later.) 
+        Gets the list of rclone download sources.
 
         Params:
-            conf: self._conf, which represents a dict object 
+            conf: self._conf, which represents a dict object
                 of the loaded conf
-            web: A boolean value which indicates if the web conf 
+            web: A boolean value which indicates if the web conf
                 is being used (default: local)
 
-        Returns: The airnig folder string ending with "/", or an empty string
+        Returns: A list of strings that are the rclone sources
+        All sources end with "/"
         """
-        # TODO: Return if web
+
         if web:
             pass
 
-        # Return the local, since we're not using the web conf
-        airing = conf['uploading']['airing-folder-name']
-        # Make sure it ends with a "/" if there's anything in airing
-        if airing:
-            if not airing.endswith("/"):
-                airing = airing + "/"
+        # Return from the local config
+        folder = conf['downloading']['download-sources']
 
-        return airing
-
-
-    def _load_rclone_flags(self, conf, web):
-        """
-        Determines the flags for rclone to use when uploading.
-
-        Params:
-            conf: self._conf, which represents a dict object 
-                of the loaded conf
-            web: A boolean value which indicates if the web conf 
-                is being used (default: local)
-
-        Returns: The flags specified as a string
-        """
-
-        # TODO: Return if web
-        if web:
-            pass
-
-        # Return the local
-        flags = conf['uploading']['rclone-flags']
-        return flags
-
-    def _load_destinations(self, conf, web):
-        """
-        Determines the rclone endpoints for files to be uploaded to.
-
-        Params:
-            conf: self._conf, which represents a dict object 
-                of the loaded conf
-            web: A boolean value which indicates if the web conf 
-                is being used (default: local)
-
-        Returns: A list of (watch folder) strings
-
-        Affixes a "/" to the end of each config if it's missing.
-        """
-        if web:
-            pass
-
-        # Return the local, since we're not using the web conf
-        folder = conf['uploading']['upload-destinations']
-
-        # The length of the destinations list must be at least 1
-        # Or else the uploader config is bad
+        # The length of the folders must be at least 1 
+        # or else the config is bad
         if len(folder) < 1:
             # TODO: print an error and exit
             sys.exit(1)
 
-        # Make sure each destination ends with a "/"
-        for dest in folder:
-            if not dest.endswith("/"):
-                dest = dest + "/"
+        # Make sure aech destination ends with a "/"
+        for src in folder:
+            if not src.endswith("/"):
+                src = src + "/"
 
         return folder
 
 
-    def _load_endpoints_encoders_always(self, conf, web):
+    def _load_download_softsub_folder(self, conf, web):
         """
-        Finds the ALWAYS encoder endpoints.
+        Gets the name of the softsub folder
 
         Params:
             conf: self._conf, which represents a dict object
@@ -315,19 +264,24 @@ class ConfigHandler:
             web: A boolean value which indicates if the web conf
                 is being used (default: local)
 
-        Returns: A list of lists, where each inside list represents one endpoint
-            entry. Index 0 is URL, Index 1 (optional) is an Authorization key.
+        Returns the folder name, ending with a "/"
         """
+
         if web:
             pass
 
-        # Return from the local config
-        return conf['endpoints']['encoders']['always']
+        folder = conf['downloading']['softsub-folder-name']
+
+        if folder:
+            if not folder.endswith("/"):
+                folder += "/"
+
+        return folder
 
 
-    def _load_endpoints_encoders_sequential(self, conf, web):
+    def _load_download_rclone_flags(self, conf, web):
         """
-        Finds the SEQUENTIAL encoder endpoints.
+        Gets the rclone flags used by the downloader
 
         Params:
             conf: self._conf, which represents a dict object
@@ -335,17 +289,87 @@ class ConfigHandler:
             web: A boolean value which indicates if the web conf
                 is being used (default: local)
 
-        Returns: A list of list of lists. 
-        For x in root list, y in x in order represents URLs in order to 
-        try until a single request succeeds.
-        Follows standard index 0/1 url/auth key(opt)
+        Returns the rclone flags as a string
         """
+
         if web:
             pass
 
-        # Return from the local config
-        return conf['endpoints']['encoders']['sequential']
+        return conf['downloading']['rclone-flags']
 
+    def _load_upload_destinations(self, conf, web):
+        """
+        Gets the reclone upload destinations by the downloader
+
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+                is being used (default: local)
+
+        Returns the rclone upload locations, each ending with a "/"
+        """
+
+        if web:
+            pass
+
+        folder = conf['uploading']['upload-destinations']
+
+        # The length of the folders must be at least 1 
+        # or else the config is bad
+        if len(folder) < 1:
+            # TODO: print an error and exit
+            sys.exit(1)
+
+        # Make sure aech destination ends with a "/"
+        for dest in folder:
+            if not dest.endswith("/"):
+                dest = dest + "/"
+
+        return folder       
+
+    def _load_upload_hardsub_folder(self, conf, web):
+        """
+        Gets the name of the hardsub folder
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+                is being used (default: local)
+
+        Returns the hardsub folder ending with a "/"
+        """
+
+        if web:
+            pass
+
+        folder = conf['uploading']['hardsub-folder-name']
+
+        if folder:
+            if not folder.endswith("/"):
+                folder += "/"
+
+        return folder
+
+    def _load_upload_rclone_flags(self, conf, web):
+        """
+        Gets the rclone flags to be used when uploading
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+                is being used (default: local)
+
+        Returns the rclone flags as a string
+        """
+
+        if web:
+            pass
+
+        return conf['uploading']['rclone-flags']
 
     def _load_endpoints_notifiers_always(self, conf, web):
         """
@@ -446,24 +470,6 @@ class ConfigHandler:
         # Return from the local config
         return conf['system']['name']
 
-    def _load_system_delimiter(self, conf, web):
-        """
-        Finds the Delimiter set in Config and used by inotify
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns: The delimiter, as a string
-        """
-        if web:
-            pass
-
-        # Return from the local config
-        return conf['system']['delimiter']
-
     def _load_system_verbose(self, conf, web):
         """
         Finds the Boolean Verbose option set in Config
@@ -518,51 +524,49 @@ class ConfigHandler:
         # Return from the local config
         return conf['system']['logging']['datefmt']
 
-    # Getter methods
+    # Getters
+    def get_listen_port(self):
+        """
+        Returns the port for flask to listen to, as an integer
+        """
+        return self.listen_port
 
-    def get_watch_folder(self):
+    def get_download_download_sources(self):
         """
-        Returns the watch folder, as a string
-        The path will end with a "/"
+        Returns the rclone download sources list, each ending with "/"
         """
-        return self.watch_folder
+        return self.download_download_sources
 
-    def get_destinations(self):
+    def get_download_softsub_folder(self):
         """
-        Returns the upload destinations, as a list of strings
+        Returns the softsub folder as a string, with "/" ending
         """
-        return self.destinations
+        return self.download_softsub_folder
 
-    def get_airing_folder_name(self):
+    def get_download_rclone_flags(self):
         """
-        Returns the airing folder name as a String
-        Contains a "/" at the end
+        Returns the download rclone flags as a string
         """
-        return self.airing_folder
+        return self.download_rclone_flags
 
-    def get_rclone_flags(self):
+    def get_upload_destinations(self):
         """
-        Returns the flags used by rclone as a single string.
+        Returns the upload destinations as a list of strings, all ending
+        with "/"
         """
-        return self.rclone_flags
+        return self.upload_destinations
 
-    def get_encoders(self):
+    def get_upload_hardsub_folder(self):
         """
-        Returns the encoders as a tuple (always, sequential)
+        Returns the upload hardsub folder, ending with a "/"
         """
-        return (self.encoders_always, self.encoders_sequential)
+        return self.upload_hardsub_folder
 
-    def get_encoders_always(self):
+    def get_upload_rclone_flags(self):
         """
-        Returns the always encoder endpoints as a list of dicts
+        Returns the string representing the upload rclone flags
         """
-        return self.encoders_always
-
-    def get_encoders_sequential(self):
-        """
-        Returns the sequential encoder endpoints as a dict of list of dicts
-        """
-        return self.encoders_sequential
+        return self.upload_rclone_flags
 
     def get_notifiers(self):
         """
@@ -605,12 +609,6 @@ class ConfigHandler:
         Returns the name for this application specified by the user
         """
         return self.name
-
-    def get_delimiter(self):
-        """
-        Returns the delimiter used by inotify as a string
-        """
-        return self.delimiter
 
     def get_verbose(self):
         """

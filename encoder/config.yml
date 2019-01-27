@@ -1,60 +1,51 @@
-# This is the folder the application will watch for new files. 
-# [type: String-URL]
-# This MUST be included in this config, and not the web-config.
-watch-folder: "/home/rocia/Desktop"
+# This is the port this application will listen on.
+# [type: Integer]
+listen-port: 80
 
-# You can optionally load a global config from a web source.
-# If you do not, leave this as an empty string.
+# You can optionally load a global config from a web source
+# If you do not, leave this as an empty-string.
 # [type: String-URL]
 web-config: ""
 
-# Grouping body to specify the names used when uploading files
+# Authorization files must be stored locally.
+
+# Grouping body to specify where to download files from
+downloading:
+
+  # A list of rclone strings for Encoding to attempt to download the episode
+  # from. The first listing that's marked to have the file will be downloaded
+  # from.
+  # [type: A list of strings]
+  download-sources:
+    - "rclone_config:source/"
+
+  # This is an optional parameter to specify a source folder in case
+  # all of the download soures have their final folders as the same name.
+  softsub-folder-name: "Airing"
+
+  # Flags to be used in the rclone uploading prompt. Determines verbosity of rclone.
+  rclone-flags: "--stats 1s --stats-one-line --progress"
+
+# Grouping body to specify the names when uploading files
 uploading:
 
-  # A list of rclone strings for Acqusition to upload the file to
-  # There must be at least one destination listed, because Acquisition
-  # doesn't touch original files. Usually this is just a list of 1 element.
+  # A list of rclone strings for Encoding to upload the completed encode to
+  # There must be at least one destination listed. Usually this is just
+  # one element, but multiple are supported in lieu of Distribution.
   # [type: A list of strings]
   upload-destinations:
     - "rclone_config:folder/"
 
-  # This is an optional parameter which allows you to specify the name of an 
-  # "Airing" folder for shows. It's recommend you use the Airing folder because
-  # if switching to a web config, the Airing folder will be tacked on.
-  # This is also used to tack the same suffix onto every destination.
-  # To not use it, simply leave it as an empty string.
-  airing-folder-name: "Airing"
+  # This is an optional parameter which allows you to specify the name of
+  # an "Airing [Hardsub]" folder. It's recommended you use this parameter
+  # instead of tacking it onto each upload-destination.
+  hardsub-folder-name: "Airing [Hardsub]"
 
   # Flags to be used in the rclone uploading prompt. Determines verbosity of rclone.
   rclone-flags: "--stats 1s --stats-one-line --progress"
 
 # Grouping body to list endpoints for other Izumi modules for this app to talk to.
 endpoints:
-
-  # The endpoints to send U2 Encoder requests.
-  # url represents the URL to request to. It should contain http header
-  # auth is an optional authorization key to send the request to.
-  # auth can be ommitted.
-  # To specify none, simply have always/sequential as empty lists ([])
-  encoders:
-
-    # These urls will always be notified, regardless of their failure state
-    always:
-      - url: "https://endpoint1.url/notify"
-        auth: "authorization_key1"
-      - url: "https://endpoint2.url/notify"
-
-    # For each group, try each url until one is successful
-    sequential:
-      group1:
-        - url: "https://endpoint1.url/notify"
-          auth: "authorization_key1"
-        - url: "https://endpoint2.url/notify"
-      group2:
-        - url: "https://endpoint3.url/notify"
-          auth: "authorization_key3"
-        - url: "https://endpoint4.url/notify"
-
 
   # The endpoints to send U3 Notification requests.
   # url represents the URL to request to. It should contain http header
@@ -111,14 +102,9 @@ system:
   # The identifier for this system
   name: "izumi"
 
-  # This is the delimiter used by inotify to split the arguments.
-  # Don't edit this unless you know what you're doing.
-  # [type: String]
-  delimiter: "||"
-
   # Whether or not the application should print more information.
   # [type: Boolean]
-  verbose: Yes
+  verbose: yes
 
   # Logging settings
   logging:

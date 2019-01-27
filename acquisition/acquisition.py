@@ -1,3 +1,7 @@
+"""
+U1 Acquisition handles dealing with new episodes moved into a watch folder.
+"""
+
 import sys
 import os
 
