@@ -38,7 +38,11 @@ class ConfigHandler:
         self._conf = None # The real config to parse all other vars from
         self._web_conf_use = False # Whether or not using web-style conf
 
-        self.listen_port = None # The mpoport Flask will listen to
+        self.listen_port = None # The port Flask will listen to
+
+        self.encode_encode_flags = None # The flags to be used for encoding videos
+        self.encode_encode_jobs = None # Number of encoding jobs that can run at once
+
 
         self.download_download_sources = None # The list of rclone sources to dl from
         self.download_softsub_folder = None # The name of the softsub folder name
@@ -77,6 +81,9 @@ class ConfigHandler:
         # Populate the rest of the variables now
         # ---------------- #
         self.listen_port = self._load_listen_port(self._conf, self._web_conf_use)
+
+        self.encode_encode_flags = self._load_encode_encode_flags(self._conf, self._web_conf_use) 
+        self.encode_encode_jobs = self._load_encode_encode_jobs(self._conf, self._web_conf_use)
 
         self.download_download_sources = self._load_download_download_sources(self._conf, self._web_conf_use)
         self.download_softsub_folder = self._load_download_softsub_folder(self._conf, self._web_conf_use)
@@ -218,6 +225,48 @@ class ConfigHandler:
         # Return from the local config
         return int(conf['listen-port'])
 
+        self.encode_encode_jobs = self._load_encode_encode_jobs(self._conf, self._web_conf_use)
+
+    def _load_encode_encode_flags(self, conf, web):
+        """
+        Retrive the flags for ffmpeg to use.
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+                is being used (default: local)
+
+        Returns: The flags as a string
+        """
+
+        if web:
+            pass
+
+        return conf['encoding']['encode-flags']
+
+    def _load_encode_encode_jobs(self, conf, web):
+        """
+        Retrives the number of jobs that a single encoder can run simultaneously.
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+                is being used (default: local)
+
+        Returns: The number of encoding jobs, as an integer.
+        """
+
+        if web:
+            pass
+
+        count = int(conf['encoding']['encode-jobs'])
+        if count < 1:
+            # There's an error here
+            sys.exit(1)
+
+        return count
 
     def _load_download_download_sources(self, conf, web):
         """
@@ -529,6 +578,18 @@ class ConfigHandler:
         Returns the port for flask to listen to, as an integer
         """
         return self.listen_port
+
+    def get_encode_encode_flags(self):
+        """
+        Returns the flags to be used by rclone as a string
+        """
+        return self.encode_encode_flags
+
+    def get_encode_encode_jobs(self):
+        """
+        Returns the number of encoding jobs run simultaneously as an int.
+        """
+        return self.encode_encode_jobs
 
     def get_download_download_sources(self):
         """

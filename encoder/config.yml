@@ -1,6 +1,6 @@
 # This is the port this application will listen on.
 # [type: Integer]
-listen-port: 80
+listen-port: 8080
 
 # You can optionally load a global config from a web source
 # If you do not, leave this as an empty-string.
@@ -8,6 +8,19 @@ listen-port: 80
 web-config: ""
 
 # Authorization files must be stored locally.
+
+# Grouping body for encoding specifics
+encoding:
+
+  # The encoding flags for ffmpeg to use. 
+  # To not use any flags, leave this as an empty string.
+  encode-flags: "-y -nostdin -strict -2"
+  # To specify number of threads for each job, also include it here.
+
+  # This system supports encoding multiple videos at once (done by threads).
+  # Enter the number (as an integer) for how many jobs can be supported by the host CPU
+  # at once, or at user preference. This number must be greater than or equal to 1.
+  encode-jobs: 1
 
 # Grouping body to specify where to download files from
 downloading:

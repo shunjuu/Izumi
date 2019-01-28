@@ -142,7 +142,7 @@ class FileHandler:
             conf: A ConfigHandler object that is already populated
             args: An ArgumentHandler object that is already populated
 
-        Returns: The size of the episode (in bytes)
+        Returns: The size of the episode (in bytes), as an int
         """
 
         # There are a finite amount of ways in which this program was executed.
@@ -193,7 +193,7 @@ class FileHandler:
             return "hardsub"
 
         else: 
-            self._logger.info(self._prints.SUB_TYPE.format("None."))
+            self._logger.info(self._prints.SUB_TYPE.format("None"))
             return None
 
     def _generate_new_episode(self, episode): 
