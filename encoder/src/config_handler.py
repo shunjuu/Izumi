@@ -294,10 +294,10 @@ class ConfigHandler:
             # TODO: print an error and exit
             sys.exit(1)
 
-        # Make sure aech destination ends with a "/"
-        for src in folder:
-            if not src.endswith("/"):
-                src = src + "/"
+        # Make sure each destination ends with a "/"
+        for src in range(len(folder)):
+            if not folder[src].endswith("/"):
+                folder[src] += "/"
 
         return folder
 
@@ -370,10 +370,10 @@ class ConfigHandler:
             # TODO: print an error and exit
             sys.exit(1)
 
-        # Make sure aech destination ends with a "/"
-        for dest in folder:
-            if not dest.endswith("/"):
-                dest = dest + "/"
+        # Make sure each destination ends with a "/"
+        for dest in range(len(folder)):
+            if not folder[dest].endswith("/"):
+                folder[dest] += "/"
 
         return folder       
 

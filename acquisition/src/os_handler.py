@@ -9,7 +9,7 @@ import pprint as pp
 from src.prints.os_handler_prints import OSHandlerPrints
 
 # The upload command that is used to upload files.
-UPLOAD = "rclone copy %s %s %s"
+UPLOAD = "rclone copy {} {} {}"
 
 class OSHandler:
     """
@@ -116,7 +116,7 @@ class OSHandler:
         """
         for dest in self._conf.get_destinations():
             self._logger.info(self._prints.RCLONE_UPLOAD_START.format(dest))
-            os.system(UPLOAD % (self.temp_dir, dest, self._conf.get_rclone_flags()))
+            os.system(UPLOAD.format(self.temp_dir, dest, self._conf.get_rclone_flags()))
             self._logger.info(self._prints.RCLONE_UPLOAD_END.format(dest))
 
     def cleanup(self):

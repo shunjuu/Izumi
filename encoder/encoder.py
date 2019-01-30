@@ -20,6 +20,7 @@ from queue import Queue
 from src.config_handler import ConfigHandler
 from src.auth_handler import AuthHandler
 from src.request_handler import RequestHandler
+from src.os_handler import OSHandler
 from src.print_handler import PrintHandler
 
 # Let flask just use the default name
@@ -45,6 +46,9 @@ def encode_worker():
 
         # Process the encoding job here
         print(new_request.get_show())
+        o = OSHandler(c, new_request)
+        #o._create_temp_dir()
+        o.download()
 
         # Mark the job as done
         episode_job_queue.task_done()
@@ -58,6 +62,9 @@ def encode():
 
     a.refresh() # Refresh in case any auths were made
     status = a.authorize(request.headers)
+
+    if not status:
+        return "Unauthorized request", 403
 
     r = RequestHandler(request)
     episode_job_queue.put(r)

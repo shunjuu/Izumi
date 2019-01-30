@@ -298,9 +298,9 @@ class ConfigHandler:
             sys.exit(1)
 
         # Make sure each destination ends with a "/"
-        for dest in folder:
-            if not dest.endswith("/"):
-                dest = dest + "/"
+        for dest in range(len(folder)):
+            if not folder[dest].endswith("/"):
+                folder[dest] += "/"
 
         return folder
 
