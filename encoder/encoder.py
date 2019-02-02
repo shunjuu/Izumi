@@ -12,6 +12,7 @@ import yaml
 
 # Web server
 from flask import Flask, request
+from time import sleep
 
 # For spawning background threads to encode
 from threading import Thread
@@ -45,10 +46,12 @@ def encode_worker():
         new_request = episode_job_queue.get()
 
         # Process the encoding job here
-        print(new_request.get_show())
         o = OSHandler(c, new_request)
         #o._create_temp_dir()
         o.download()
+        o.encode()
+        sleep(3)
+        o.cleanup()
 
         # Mark the job as done
         episode_job_queue.task_done()

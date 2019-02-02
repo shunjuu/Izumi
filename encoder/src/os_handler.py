@@ -7,10 +7,14 @@ import json
 
 import pprint as pp 
 
+from src.encode.h264_standard import H264Standard
+
 # The upload command to pull files
 DOWNLOAD = "rclone copyto \"{}\" \"{}\" {}"
 # The first two are source and dest, the third is the user-specified flags
 LIST = 'rclone lsjson -R \"{}{}\" 2>/dev/null'
+# The video extension
+EXT = ".mp4"
 
 class OSHandler:
     """
@@ -27,22 +31,25 @@ class OSHandler:
         self._conf = conf 
         self._reqh = reqh
 
-        self._temp_dir = None # Store the temporary directory we're working in
+        self._temp_src_dir = None # Store the temporary directory we're working in
         self._temp_src_file = None # Where the temporary src file downloaded is
 
-    
+        self._temp_out_dir = None # Full dir path of new file. Overlaps with self._temp_src_dir
+        self._temp_out_file = None # Where the encoded file is located
+
+
     def _create_temp_dir(self):
         """
         Creates a temporary directory and sets the class variable to it.
         """
         try:
             # tempfile.mkdtemp returns the absolute path
-            self.temp_dir = tempfile.mkdtemp(dir=sys.path[0])
+            self._temp_src_dir = tempfile.mkdtemp(dir=sys.path[0])
             # Append a "/" if it's not already there
-            if not self.temp_dir.endswith("/"):
-                self.temp_dir += "/"
+            if not self._temp_src_dir.endswith("/"):
+                self._temp_src_dir += "/"
 
-            #self._logger.info(self._prints.TEMP_DIR_CREATE_SUCCESS.format(self.temp_dir))
+            #self._logger.info(self._prints.TEMP_DIR_CREATE_SUCCESS.format(self._temp_src_dir))
         except Exception as e:
             # TODO: print error messages
             #self._logger.error(self._prints.TEMP_DIR_CREATE_ERROR)
@@ -78,6 +85,7 @@ class OSHandler:
             # Usually thrown if the destination does not exist.
             return False
 
+
     def _download_episode(self, source):
         """
         Helper to actually download the file given from source to local. 
@@ -94,12 +102,13 @@ class OSHandler:
 
         # Because of ffmpeg limitations, the file needs to be downloaded first
         # as "temp.mkv" and have no : or special chars in the path
-        dest_file = self.temp_dir + "temp.mkv"
+        dest_file = self._temp_src_dir + "temp.mkv"
 
-        print(DOWNLOAD.format(source_file, dest_file, self._conf.get_download_rclone_flags()))
-        #os.system(DOWNLOAD.format(source_file, dest_file, self._conf.get_download_rclone_flags()))
+        #print(DOWNLOAD.format(source_file, dest_file, self._conf.get_download_rclone_flags()))
+        os.system(DOWNLOAD.format(source_file, dest_file, self._conf.get_download_rclone_flags()))
 
         return dest_file
+
 
     def download(self):
         """
@@ -114,6 +123,73 @@ class OSHandler:
                 # TODO: Print some stuff
                 self._create_temp_dir()
                 self._temp_src_file = self._download_episode(source)
+                return True
             else:
                 # TODO: Print some stuff
                 continue
+  
+
+    def _create_temp_replica_fs(self):
+        """
+        Create the temp replica FS:
+        temp/"Airing [Hardsub]"/"$SHOW"
+        """
+        hardsub_folder = self._conf.get_upload_hardsub_folder()
+        show_name = self._reqh.get_show() + "/" # Show doesn't end with "/"
+        self._temp_out_dir = self._temp_src_dir + hardsub_folder + show_name
+
+        os.makedirs(self._temp_out_dir)
+
+
+    def _create_hardsub_file_path(self):
+        """
+        Create the full/absolute path for the to-be hardsub file (.mp4)
+        /temp/"Airing [Hardsub]"/"$SHOW.mp4"
+        """
+        # Get the parts of the filename
+        filename, ext = os.path.splitext(self._reqh.get_episode())
+        # Generate the same name... as the hardsub type
+        hardsub_file = filename + EXT
+
+        return hardsub_file
+
+
+    def encode(self):
+        """
+        Takes the temp file and encodes it into what we want.
+
+        1. In the same temp directory, replicate the path fs for the new file
+           This includes the "Airing [Hardsub]" folder
+        2. Generate the path for the new mp4
+        3. Pass the source and the out file paths to the encoder
+        4. Profit
+        """
+        self._create_temp_replica_fs()
+        self._temp_out_file = self._create_hardsub_file_path()
+
+        encoder = H264Standard(self._conf, 
+            self._temp_src_file, self._temp_out_dir, self._temp_out_file)
+        encoder.encode()
+
+
+
+    # Cleanup methods
+
+    def _delete_temp_all(self):
+        """
+        Deletes the temporary directory and all of its children data.
+        In other words, deletes all traces of temp whatsoever.
+        """
+        try:
+            shutil.rmtree(self._temp_src_dir)
+        except:
+            os._exit(2)
+
+
+    def cleanup(self):
+        """
+        Purge the temporary folder and anything in it
+        """
+
+        # Delete the temp folder and everything in it 
+        self._delete_temp_all()

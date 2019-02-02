@@ -31,6 +31,7 @@ downloading:
   # [type: A list of strings]
   download-sources:
     - "rclone_config:source/"
+    - "airisu:/home/rocia/Desktop/"
 
   # This is an optional parameter to specify a source folder in case
   # all of the download soures have their final folders as the same name.
