@@ -11,6 +11,8 @@ from src.encode.h264_standard import H264Standard
 
 # The upload command to pull files
 DOWNLOAD = "rclone copyto \"{}\" \"{}\" {}"
+# The upload command that is used to upload files
+UPLOAD = "rclone copy {} {} {}"
 # The first two are source and dest, the third is the user-specified flags
 LIST = 'rclone lsjson -R \"{}{}\" 2>/dev/null'
 # The video extension
@@ -163,6 +165,8 @@ class OSHandler:
         2. Generate the path for the new mp4
         3. Pass the source and the out file paths to the encoder
         4. Profit
+
+        Returns the filesize of the new file as an integer in bytes
         """
         self._create_temp_replica_fs()
         self._temp_out_file = self._create_hardsub_file_path()
@@ -171,6 +175,28 @@ class OSHandler:
             self._temp_src_file, self._temp_out_dir, self._temp_out_file)
         encoder.encode()
 
+        out_file_size = os.path.getsize(self._temp_out_dir + self._temp_out_file)
+        return out_file_size
+
+
+    def upload(self):
+        """
+        Upload the newly generated file into the rclone destinations.
+        Because the replica FS already has been created, just copy the temp
+        path. 
+
+        Be sure to remove the src file, if it still exists (which it should).
+        """
+
+        # Remove the src file
+        print(self._temp_src_file)
+        try:
+            os.remove(self._temp_src_file)
+        except:
+            pass
+
+        for dest in self._conf.get_upload_destinations():
+            os.system(UPLOAD.format(self._temp_src_dir, dest, self._conf.get_upload_rclone_flags()))
 
 
     # Cleanup methods

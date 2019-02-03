@@ -49,7 +49,10 @@ def encode_worker():
         o = OSHandler(c, new_request)
         #o._create_temp_dir()
         o.download()
-        o.encode()
+        ofile_size = o.encode()
+        print(ofile_size)
+        sleep(3)
+        o.upload()
         sleep(3)
         o.cleanup()
 
