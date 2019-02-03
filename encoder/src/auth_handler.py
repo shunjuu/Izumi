@@ -8,6 +8,9 @@ import pprint as pp
 
 import requests
 
+# Print statements
+from src.prints.auth_handler_prints import AuthHandlerPrints
+
 # File Extension Definitions
 YAML_EXT = ['.yaml', '.yml']
 JSON_EXT = ['.json']
@@ -17,12 +20,16 @@ class AuthHandler:
     AuthHandler deals with authorizing incoming requests.
     """
 
-    def __init__(self, apath="auth.yml"):
+    def __init__(self, printh, apath="auth.yml"):
         """
         Args:
             apath - A path that points to the authorization file. 
             If not specified, it will default to auth.yml
         """
+
+        # Logging - this needs to be before all other methods are initailized
+        self._logger = printh.get_logger()
+        self._prints = AuthHandlerPrints(printh.Colors())
 
         # Get the absolute path for all use cases
         self._apath = os.path.abspath(apath)
@@ -32,13 +39,20 @@ class AuthHandler:
         self._auth_entries = initial_auth if initial_auth else dict()
 
 
+
     def refresh(self):
         """
         This refreshes the current variables with the new config.
         """
         # Fetch the apath and update it again
+        self._logger.info(self._prints.AUTH_REFRESH)
         refresh_auth = self._load_local_auth(self._apath)
-        self._auth_entries = refresh_auth if refresh_auth else dict()
+        if refresh_auth:
+            self._auth_entries = refresh_auth
+            self._logger.info(self._prints.AUTH_REFRESH_SUCCESS.format(self._apath))
+        else:
+            self._auth_entries = dict()
+            self._logger.info(self._prints.AUTH_REFRESH_SUCCESS.format("an empty dict"))
 
 
     def _load_local_auth(self, apath_abs):
@@ -58,18 +72,22 @@ class AuthHandler:
         if file_ext in YAML_EXT:
             with open(apath_abs, 'r') as atyml:
                 try:
-                    return yaml.load(atyml)
-                except Exception as e:
-                    pass
-                    # TODO: print statement here for loading config error
+                    auth = yaml.load(atyml)
+                    self._logger.info(self._prints.LOCAL_AUTH_YAML_SUCCESS.format(apath_abs))
+                    return auth
+                except:
+                    self._logger.error(self._prints.LOCAL_AUTH_YAML_ERROR.format(apath_abs))
+                    os._exit(2)
 
         elif file_ext in JSON_EXT:
             with open(apath_abs, 'r') as atjson:
                 try:
-                    return json.load(atjson)
+                    auth = json.load(atjson)
+                    self._logger.info(self._prints.LOCAL_AUTH_JSON_SUCCESS.format(apath_abs))
+                    return auth
                 except:
-                    pass
-                    # TODO: print statement here for loading config error
+                    self._logger.error(self._prints.LOCAL_AUTH_JSON_ERROR.format(apath_abs))
+                    os._exit(2)
 
         # If we've reached this point, then print some 
         # TODO: print statement for loading auth error
@@ -92,8 +110,10 @@ class AuthHandler:
         if not key:
             # Check if auth_entries has zero entries
             if not self._auth_entries:
+                self._logger.warning(self._prints.AUTH_SUCCESS_NO_ENTRIES_NO_KEY)
                 return True
             else:
+                self._logger.warning(self._prints.AUTH_FAILURE_YES_ENTRIES_NO_KEY)
                 return False
 
         else:
@@ -101,6 +121,7 @@ class AuthHandler:
             # but the instance does not have any registered,
             # still return false
             if not self._auth_entries:
+                self._logger.warning(self._prints.AUTH_FAILURE_NO_ENTRIES_YES_KEY)
                 return False
 
             # An authorization key was provided
@@ -108,7 +129,9 @@ class AuthHandler:
 
                 if key == group_key:
                     # A match was found, return true
+                    self._logger.warning(self._prints.AUTH_SUCCESS_YES_ENTRIES_YES_KEY) 
                     return True
 
         # No matches were found, return false
+        self._logger.warning(self._prints.AUTH_FAILURE_YES_ENTRIES_NO_MATCH)
         return False
