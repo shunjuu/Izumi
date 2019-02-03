@@ -33,7 +33,7 @@ episode_job_queue = Queue()
 
 c = ConfigHandler()
 p = PrintHandler(c)
-a = AuthHandler()
+a = AuthHandler(p)
 
 
 def encode_worker():
@@ -47,6 +47,7 @@ def encode_worker():
         new_request = episode_job_queue.get()
 
         # Process the encoding job here
+        """
         o = OSHandler(c, new_request)
         #o._create_temp_dir()
         o.download()
@@ -60,6 +61,7 @@ def encode_worker():
         n = NetworkHandler(c, new_request, ofile_name, ofile_size)
         n.notify_notifiers()
         n.notify_distributors()
+        """
 
         # Mark the job as done
         episode_job_queue.task_done()
