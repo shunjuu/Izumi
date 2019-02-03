@@ -22,6 +22,7 @@ from src.config_handler import ConfigHandler
 from src.auth_handler import AuthHandler
 from src.request_handler import RequestHandler
 from src.os_handler import OSHandler
+from src.network_handler import NetworkHandler
 from src.print_handler import PrintHandler
 
 # Let flask just use the default name
@@ -50,11 +51,15 @@ def encode_worker():
         #o._create_temp_dir()
         o.download()
         ofile_size = o.encode()
-        print(ofile_size)
         sleep(3)
-        o.upload()
+        ofile_name = o.upload()
         sleep(3)
         o.cleanup()
+
+        # Create the NetworkHandler to send out notifications
+        n = NetworkHandler(c, new_request, ofile_name, ofile_size)
+        n.notify_notifiers()
+        n.notify_distributors()
 
         # Mark the job as done
         episode_job_queue.task_done()

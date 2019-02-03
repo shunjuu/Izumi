@@ -186,6 +186,8 @@ class OSHandler:
         path. 
 
         Be sure to remove the src file, if it still exists (which it should).
+
+        Returns the name of the new (EXT) file, no path
         """
 
         # Remove the src file
@@ -197,6 +199,9 @@ class OSHandler:
 
         for dest in self._conf.get_upload_destinations():
             os.system(UPLOAD.format(self._temp_src_dir, dest, self._conf.get_upload_rclone_flags()))
+
+        # For now, return the new file name
+        return self._reqh.get_episode().replace(".mkv", EXT) 
 
 
     # Cleanup methods
