@@ -7,6 +7,7 @@ import json
 
 import pprint as pp 
 
+from src.prints.os_handler_prints import OSHandlerPrints
 from src.encode.h264_standard import H264Standard
 
 # The upload command to pull files
@@ -23,7 +24,7 @@ class OSHandler:
     Handles downloading, encoding, and uploading files. Uses rclone in system bin for now.
     """
 
-    def __init__(self, conf, reqh):
+    def __init__(self, conf, reqh, printh):
         """
         Args:
             conf - a ConfigHandler that should already be populated
@@ -32,6 +33,11 @@ class OSHandler:
 
         self._conf = conf 
         self._reqh = reqh
+
+        # Logging Tools
+        self._logger = printh.get_logger()
+        self._printh = printh
+        self._prints = OSHandlerPrints(printh.Colors())
 
         self._temp_src_dir = None # Store the temporary directory we're working in
         self._temp_src_file = None # Where the temporary src file downloaded is
@@ -51,10 +57,10 @@ class OSHandler:
             if not self._temp_src_dir.endswith("/"):
                 self._temp_src_dir += "/"
 
-            #self._logger.info(self._prints.TEMP_DIR_CREATE_SUCCESS.format(self._temp_src_dir))
+            self._logger.info(self._prints.TEMP_DIR_CREATE_SUCCESS.format(self._temp_src_dir))
+
         except Exception as e:
-            # TODO: print error messages
-            #self._logger.error(self._prints.TEMP_DIR_CREATE_ERROR)
+            self._logger.error(self._prints.TEMP_DIR_CREATE_ERROR)
             os._exit(2)
 
 
@@ -106,8 +112,13 @@ class OSHandler:
         # as "temp.mkv" and have no : or special chars in the path
         dest_file = self._temp_src_dir + "temp.mkv"
 
+        self._logger.warning(self._prints.DOWNLOAD_START.format(
+            self._reqh.get_episode(), source))
         #print(DOWNLOAD.format(source_file, dest_file, self._conf.get_download_rclone_flags()))
         os.system(DOWNLOAD.format(source_file, dest_file, self._conf.get_download_rclone_flags()))
+
+        self._logger.warning(self._prints.DOWNLOAD_COMPLETE.format(
+            self._reqh.get_episode(), source))
 
         return dest_file
 
@@ -123,12 +134,19 @@ class OSHandler:
         for source in self._conf.get_download_download_sources():
             if self._check_if_episode_exists(source):
                 # TODO: Print some stuff
+                self._logger.warning(self._prints.EPISODE_FOUND.format(
+                    self._reqh.get_episode(), source))
                 self._create_temp_dir()
                 self._temp_src_file = self._download_episode(source)
                 return True
             else:
                 # TODO: Print some stuff
                 continue
+
+        # If we've reached this point, the episode was not found
+        self._logger.error(self._prints.EPISODE_NOT_FOUND.format(
+            self._reqh.get_episode()))
+        sys.exit(5)
   
 
     def _create_temp_replica_fs(self):
@@ -141,9 +159,12 @@ class OSHandler:
         self._temp_out_dir = self._temp_src_dir + hardsub_folder + show_name
 
         os.makedirs(self._temp_out_dir)
+        self._logger.info(self._prints.TEMP_REPLICA_FS.format(self._temp_out_dir))
+
+        return
 
 
-    def _create_hardsub_file_path(self):
+    def _create_hardsub_file_name(self):
         """
         Create the full/absolute path for the to-be hardsub file (.mp4)
         /temp/"Airing [Hardsub]"/"$SHOW.mp4"
@@ -153,6 +174,7 @@ class OSHandler:
         # Generate the same name... as the hardsub type
         hardsub_file = filename + EXT
 
+        self._logger.info(self._prints.HARDSUB_FILE_NAME.format(hardsub_file))
         return hardsub_file
 
 
@@ -169,13 +191,14 @@ class OSHandler:
         Returns the filesize of the new file as an integer in bytes
         """
         self._create_temp_replica_fs()
-        self._temp_out_file = self._create_hardsub_file_path()
+        self._temp_out_file = self._create_hardsub_file_name()
 
-        encoder = H264Standard(self._conf, 
+        encoder = H264Standard(self._conf, self._printh, 
             self._temp_src_file, self._temp_out_dir, self._temp_out_file)
         encoder.encode()
 
         out_file_size = os.path.getsize(self._temp_out_dir + self._temp_out_file)
+        self._logger.info(self._prints.HARDSUB_FILE_SIZE.format(out_file_size))
         return out_file_size
 
 
@@ -191,14 +214,19 @@ class OSHandler:
         """
 
         # Remove the src file
-        print(self._temp_src_file)
         try:
             os.remove(self._temp_src_file)
+            self._logger.warning(self._prints.UPLOAD_REMOVE_SRC_FILE.format(
+                self._temp_src_file))
         except:
-            pass
+            self._logger.error(self._prints.UPLOAD_REMOVE_SRC_FILE_FAIL.format(
+                self._temp_src_file))
+            sys.exit(4)
 
         for dest in self._conf.get_upload_destinations():
+            self._logger.warning(self._prints.UPLOAD_START.format(dest))
             os.system(UPLOAD.format(self._temp_src_dir, dest, self._conf.get_upload_rclone_flags()))
+            self._logger.warning(self._prints.UPLOAD_COMPLETE.format(dest))
 
         # For now, return the new file name
         return self._reqh.get_episode().replace(".mkv", EXT) 
@@ -211,9 +239,14 @@ class OSHandler:
         Deletes the temporary directory and all of its children data.
         In other words, deletes all traces of temp whatsoever.
         """
+        self._logger.warning(self._prints.DELETE_TEMP_FOLDER.format(self._temp_src_dir))
         try:
             shutil.rmtree(self._temp_src_dir)
+            self._logger.warning(self._prints.DELETE_TEMP_FOLDER_SUCCESS.format(
+                self._temp_src_dir))
         except:
+            self._logger.error(self._prints.DELETE_TEMP_FOLDER_FAIL.format(
+                self._temp_src_dir))
             os._exit(2)
 
 

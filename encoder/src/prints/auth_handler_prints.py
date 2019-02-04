@@ -1,6 +1,6 @@
 class AuthHandlerPrints:
     """
-    This class tsores all the various print statements used by AuthHandler
+    This class stores all the various print statements used by AuthHandler
 
     Logger sets if printed or not.
     """

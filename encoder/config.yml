@@ -14,7 +14,7 @@ encoding:
 
   # The encoding flags for ffmpeg to use. 
   # To not use any flags, leave this as an empty string.
-  encode-flags: "-y -nostdin -strict -2"
+  encode-flags: "-y -nostdin -strict -2 -loglevel panic"
   # To specify number of threads for each job, also include it here.
 
   # This system supports encoding multiple videos at once (done by threads).
@@ -31,7 +31,6 @@ downloading:
   # [type: A list of strings]
   download-sources:
     - "rclone_config:source/"
-    - "airisu:/home/rocia/Desktop/"
 
   # This is an optional parameter to specify a source folder in case
   # all of the download soures have their final folders as the same name.
