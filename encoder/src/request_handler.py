@@ -7,17 +7,22 @@ import pprint as pp
 
 from flask import request
 
-SUB_TYPES = ['Hardsub', 'Softsub', 'None']
+from src.prints.request_handler_prints import RequestHandlerPrints
+
+SUB_TYPES = ['hardsub', 'softsub', 'none']
 
 class RequestHandler:
     """
     Parses requests and gets their data for encoder to use.
     """
 
-    def __init__(self, req):
+    def __init__(self, req, printh):
         """
         Args: None.
         """
+
+        self._logger = printh.get_logger()
+        self._prints = RequestHandlerPrints(printh.Colors())
 
         # Store the various attributes of the current request
         self.show = None # The name of the show (not the episode)
@@ -52,7 +57,10 @@ class RequestHandler:
         Returns: The show name, as a string in the request
         """
 
-        return rjson['show']
+        show = rjson['show']
+        self._logger.info(self._prints.LOADED_SHOW.format(show))
+
+        return show
 
     def _load_episode(self, rjson):
         """
@@ -64,7 +72,10 @@ class RequestHandler:
         Returns: The episode name as a string
         """
 
-        return rjson['episode']
+        episode = rjson['episode']
+        self._logger.info(self._prints.LOADED_EPISODE.format(episode))
+
+        return episode
 
     def _load_filesize(self, rjson):
         """
@@ -79,7 +90,10 @@ class RequestHandler:
         # Wrap the rjson as an integer just in case
         # Other applications may get filesizes may have overflow
         # and prefer to use strings instead.
-        return int(rjson['filesize'])
+        filesize = rjson['filesize']
+        self._logger.info(self._prints.LOADED_FILESIZE.format(filesize))
+
+        return filesize
 
     def _load_sub_type(self, rjson):
         """
@@ -92,10 +106,12 @@ class RequestHandler:
         """
 
         sub_type = rjson['sub']
+        self._logger.info(self._prints.LOADED_SUB_TYPE.format(sub_type))
         # Verify the sub type is correct
 
-        if sub_type not in SUB_TYPES:
+        if sub_type.lower() not in SUB_TYPES:
             # there is an error here
+            self._logger.info(self._prints.BAD_SUB_TYPE.format(sub_type))
             sys.exit(2)
 
         return sub_type

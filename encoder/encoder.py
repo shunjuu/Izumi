@@ -58,7 +58,7 @@ def encode_worker():
         o.cleanup()
 
         # Create the NetworkHandler to send out notifications
-        n = NetworkHandler(c, new_request, ofile_name, ofile_size)
+        n = NetworkHandler(c, new_request, p, ofile_name, ofile_size)
         n.notify_notifiers()
         n.notify_distributors()
         """
@@ -79,7 +79,7 @@ def encode():
     if not status:
         return "Unauthorized request", 403
 
-    r = RequestHandler(request)
+    r = RequestHandler(request, p)
     episode_job_queue.put(r)
 
     return str(status), 200
