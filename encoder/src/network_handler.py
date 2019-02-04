@@ -4,6 +4,8 @@ import os
 import pprint as pp
 import requests
 
+from src.prints.network_handler_prints import NetworkHandlerPrints
+
 class NetworkHandler:
     """
     NetworkHandler handles sending out various request to multiple endpoints
@@ -13,7 +15,7 @@ class NetworkHandler:
     NetworkHandler is designed to do so.
     """
 
-    def __init__(self, conf, reqh, fname, fsize):
+    def __init__(self, conf, reqh, printh, fname, fsize):
         """
         Args:
             conf - a ConfigHandler object that should be populated
@@ -36,6 +38,10 @@ class NetworkHandler:
         self._reqh = reqh
         self._fname = fname
         self._fsize = fsize
+
+        # Logging Tools
+        self._logger = printh.get_logger()
+        self._prints = NetworkHandlerPrints(printh.Colors())
 
         self.request = self._generate_request()
 

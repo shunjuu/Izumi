@@ -13,7 +13,7 @@ class AuthHandlerPrints:
 
         # Some temporary, frequent-use varialbes
         endc = colors.ENDC 
-        prefix = "[AuthHandler] "
+        prefix = "[Auth] "
 
         # When AuthHandler is refreshing the file
         self.AUTH_REFRESH = prefix + "Refreshing auth file..."
