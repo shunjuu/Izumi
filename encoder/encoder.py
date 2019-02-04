@@ -47,24 +47,22 @@ def encode_worker():
         new_request = episode_job_queue.get()
 
         # Process the encoding job here
-        """
-        o = OSHandler(c, new_request)
-        #o._create_temp_dir()
+        o = OSHandler(c, new_request, p)
         o.download()
         ofile_size = o.encode()
-        sleep(3)
+        #sleep(3)
         ofile_name = o.upload()
         sleep(3)
         o.cleanup()
 
         # Create the NetworkHandler to send out notifications
-        n = NetworkHandler(c, new_request, p, ofile_name, ofile_size)
-        n.notify_notifiers()
-        n.notify_distributors()
-        """
+        #n = NetworkHandler(c, new_request, p, ofile_name, ofile_size)
+        #n.notify_notifiers()
+        #n.notify_distributors()
 
         # Mark the job as done
         episode_job_queue.task_done()
+        print()
 
 
 @app.route("/encode", methods=['POST'])
