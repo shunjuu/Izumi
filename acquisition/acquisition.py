@@ -16,6 +16,8 @@ from time import sleep
 
 def main():
 
+    print()
+
     inote = sys.argv[1]
 
     c = ConfigHandler()
@@ -33,8 +35,7 @@ def main():
     n.notify_notifiers()
     n.notify_distributors()
 
-    print("-------")
-
+    print()
 
 if __name__ == "__main__":
     main()

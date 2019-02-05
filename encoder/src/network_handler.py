@@ -86,31 +86,31 @@ class NetworkHandler:
             headers['authorization'] = auth_key
 
         try:
-            #self._logger.info(self._prints.SENDING_REQUEST.format(url))
+            self._logger.info(self._prints.SENDING_REQUEST.format(url))
             res = requests.post(url, json=self.request, headers=headers, timeout=5)
         except requests.exceptions.ConnectionError:
             # When the internet has some kind of issue, just exit
-            #self._logger.warning(self._prints.SENDING_REQUEST_CONNECTION_ERROR) 
+            self._logger.warning(self._prints.SENDING_REQUEST_CONNECTION_ERROR) 
             return False
         except requests.exceptions.MissingSchema:
             # When http or https is missing
-            #self._logger.warning(self._prints.SENDING_REQUEST_SCHEMA_ERROR.format(url))
+            self._logger.warning(self._prints.SENDING_REQUEST_SCHEMA_ERROR.format(url))
             return False
         except request.exceptions.Timeout:
             # When the connection times out
-            #self._logger.warning(self._prints.SENDING_REQUEST_TIMEOUT_ERROR.format(url))
+            self._logger.warning(self._prints.SENDING_REQUEST_TIMEOUT_ERROR.format(url))
             return False
         except:
-            #self._logger.warning(self._prints.SENDING_REQUEST_FAIL.format(url))
+            self._logger.warning(self._prints.SENDING_REQUEST_FAIL.format(url))
             return False
 
         # Validate that the response header was within a 2XX
         if 200 > res.status_code or res.status_code >= 300:
-            #self._logger.info(self._prints.SENDING_REQUEST_BAD_CODE.format(
-                #url, res.status_code))
+            self._logger.info(self._prints.SENDING_REQUEST_BAD_CODE.format(
+                url, res.status_code))
             return False
 
-        #self._logger.info(self._prints.SENDING_REQUEST_SUCCESS.format(url))
+        self._logger.info(self._prints.SENDING_REQUEST_SUCCESS.format(url))
         return True
 
 
@@ -127,7 +127,7 @@ class NetworkHandler:
 
         # First, send out the requests to the always entries
 
-        # self._logger.info(self._prints.BODY_ALWAYS)
+        self._logger.info(self._prints.BODY_ALWAYS)
 
         for entry in always: 
             # Try to send with auth key, but if it doesn't have it send without
@@ -138,7 +138,7 @@ class NetworkHandler:
 
         # Second, keep trying the sequential until one is successful
 
-        #self._logger.info(self._prints.BODY_SEQUENTIAL)
+        self._logger.info(self._prints.BODY_SEQUENTIAL)
 
         # There are multiple groupings also supported
         for _, group in sequential.items():
@@ -160,7 +160,7 @@ class NetworkHandler:
         Sends out notifications to all the U3 Notifier modules
         """
 
-        #self._logger.info(self._prints.GROUP_NOTIFIERS)
+        self._logger.info(self._prints.GROUP_NOTIFIERS)
 
         # Call the general notifer, passing in the notifier functions
         self._notify(self._conf.get_notifiers_always(),
@@ -171,7 +171,7 @@ class NetworkHandler:
         Sends out notifications to all the U4 Distributor modules
         """
 
-        #self._logger.info(self._prints.GROUP_DISTRIBUTORS)
+        self._logger.info(self._prints.GROUP_DISTRIBUTORS)
 
         # Call the general notifier, passing in the distributor functions
         self._notify(self._conf.get_distributors_always(),
