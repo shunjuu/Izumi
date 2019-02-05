@@ -20,4 +20,4 @@ class DistributionPrints:
 
         self.NEW_REQUEST = prefix + distribution_color + "New request received." + endc
 
-        self.JOB_COMPLETE = prefix + encode_color + "Job completed." + endc
+        self.JOB_COMPLETE = prefix + distribution_color + "Job completed." + endc
