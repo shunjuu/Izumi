@@ -114,7 +114,7 @@ class RequestHandler:
             self._logger.info(self._prints.BAD_SUB_TYPE.format(sub_type))
             sys.exit(2)
 
-        return sub_type
+        return sub_type.lower()
 
     # Getter methods
 

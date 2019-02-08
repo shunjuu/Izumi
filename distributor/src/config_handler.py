@@ -43,13 +43,13 @@ class ConfigHandler:
         self.distributor_jobs = None # How many distribution jobs to run at once
         self.distributor_bwlimit = None # The speed at which distributions should occur
 
-        self.download_download_sources = None # The list of rclone sources to dl from
-        self.download_softsub_folder = None # The name of the softsub folder name
         self.download_rclone_flags = None # Flags for rclone to use when downloading
+        self.download_rclone_hardsub = None # rclone hardsub download sources
+        self.download_rclone_softsub = None # rclone softsub download sources
 
-        self.upload_destinations = None # List of rclone dests to upload to
-        self.upload_hardsub_folder = None # The name of the hardsub folder to upload to
         self.upload_rclone_flags = None # Flags for rclone to use when downloading
+        self.upload_rclone_hardsub = None # rclone hardsub download sources
+        self.upload_rclone_softsub = None # rclone softsub download sources
 
         self.notifiers_always = None # The notification endpoints, always
         self.notifiers_sequential = None # The notification endpoints, sequential
@@ -82,13 +82,13 @@ class ConfigHandler:
         self.distributor_jobs = self._load_distributor_jobs(self._conf, self._web_conf_use)
         self.distributor_bwlimit = self._load_distributor_bwlimit(self._conf, self._web_conf_use)
 
-        self.download_download_sources = self._load_download_download_sources(self._conf, self._web_conf_use)
-        self.download_softsub_folder = self._load_download_softsub_folder(self._conf, self._web_conf_use)
         self.download_rclone_flags = self._load_download_rclone_flags(self._conf, self._web_conf_use)
+        self.download_rclone_hardsub = self._load_download_rclone_hardsub(self._conf, self._web_conf_use)
+        self.download_rclone_softsub = self._load_download_rclone_softsub(self._conf, self._web_conf_use)
 
-        self.upload_destinations = self._load_upload_destinations(self._conf, self._web_conf_use)
-        self.upload_hardsub_folder = self._load_upload_hardsub_folder(self._conf, self._web_conf_use)
         self.upload_rclone_flags = self._load_upload_rclone_flags(self._conf, self._web_conf_use)
+        self.upload_rclone_hardsub = self._load_upload_rclone_hardsub(self._conf, self._web_conf_use)
+        self.upload_rclone_softsub = self._load_upload_rclone_softsub(self._conf, self._web_conf_use)
 
         self.notifiers_always = self._load_endpoints_notifiers_always(self._conf, self._web_conf_use)
         self.notifiers_sequential = self._load_endpoints_notifiers_sequential(self._conf, self._web_conf_use)
@@ -256,64 +256,6 @@ class ConfigHandler:
 
         return conf['distribution']['bwlimit']
 
-    def _load_download_download_sources(self, conf, web):
-        """
-        Gets the list of rclone download sources.
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns: A list of strings that are the rclone sources
-        All sources end with "/"
-        """
-
-        if web:
-            pass
-
-        # Return from the local config
-        folder = conf['downloading']['download-sources']
-
-        # The length of the folders must be at least 1 
-        # or else the config is bad
-        if len(folder) < 1:
-            # TODO: print an error and exit
-            sys.exit(1)
-
-        # Make sure each destination ends with a "/"
-        for src in range(len(folder)):
-            if not folder[src].endswith("/"):
-                folder[src] += "/"
-
-        return folder
-
-
-    def _load_download_softsub_folder(self, conf, web):
-        """
-        Gets the name of the softsub folder
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns the folder name, ending with a "/"
-        """
-
-        if web:
-            pass
-
-        folder = conf['downloading']['softsub-folder-name']
-
-        if folder:
-            if not folder.endswith("/"):
-                folder += "/"
-
-        return folder
-
 
     def _load_download_rclone_flags(self, conf, web):
         """
@@ -333,9 +275,10 @@ class ConfigHandler:
 
         return conf['downloading']['rclone-flags']
 
-    def _load_upload_destinations(self, conf, web):
+
+    def _load_download_rclone_hardsub(self, conf, web):
         """
-        Gets the reclone upload destinations by the downloader
+        Gets the download hardsub sources
 
 
         Params:
@@ -344,13 +287,13 @@ class ConfigHandler:
             web: A boolean value which indicates if the web conf
                 is being used (default: local)
 
-        Returns the rclone upload locations, each ending with a "/"
-        """
-
+        Returns the list of the sources, each ending with a "/"
+        """        
         if web:
             pass
 
-        folder = conf['uploading']['upload-destinations']
+        # Return from the local config
+        folder = conf['downloading']['hardsub']
 
         # The length of the folders must be at least 1 
         # or else the config is bad
@@ -359,15 +302,16 @@ class ConfigHandler:
             sys.exit(1)
 
         # Make sure each destination ends with a "/"
-        for dest in range(len(folder)):
-            if not folder[dest].endswith("/"):
-                folder[dest] += "/"
+        for src in range(len(folder)):
+            if not folder[src].endswith("/"):
+                folder[src] += "/"
 
-        return folder       
+        return folder
 
-    def _load_upload_hardsub_folder(self, conf, web):
+    def _load_download_rclone_softsub(self, conf, web):
         """
-        Gets the name of the hardsub folder
+        Gets the download softsub sources
+
 
         Params:
             conf: self._conf, which represents a dict object
@@ -375,19 +319,27 @@ class ConfigHandler:
             web: A boolean value which indicates if the web conf
                 is being used (default: local)
 
-        Returns the hardsub folder ending with a "/"
-        """
-
+        Returns the list of the sources, each ending with a "/"
+        """        
         if web:
             pass
 
-        folder = conf['uploading']['hardsub-folder-name']
+        # Return from the local config
+        folder = conf['downloading']['softsub']
 
-        if folder:
-            if not folder.endswith("/"):
-                folder += "/"
+        # The length of the folders must be at least 1 
+        # or else the config is bad
+        if len(folder) < 1:
+            # TODO: print an error and exit
+            sys.exit(1)
+
+        # Make sure each destination ends with a "/"
+        for src in range(len(folder)):
+            if not folder[src].endswith("/"):
+                folder[src] += "/"
 
         return folder
+
 
     def _load_upload_rclone_flags(self, conf, web):
         """
@@ -406,6 +358,73 @@ class ConfigHandler:
             pass
 
         return conf['uploading']['rclone-flags']
+
+
+    def _load_upload_rclone_hardsub(self, conf, web):
+        """
+        Gets the upload hardsub sources
+
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+                is being used (default: local)
+
+        Returns the list of the sources, each ending with a "/"
+        """        
+        if web:
+            pass
+
+        # Return from the local config
+        folder = conf['uploading']['hardsub']
+
+        # The length of the folders must be at least 1 
+        # or else the config is bad
+        if len(folder) < 1:
+            # TODO: print an error and exit
+            sys.exit(1)
+
+        # Make sure each destination ends with a "/"
+        for src in range(len(folder)):
+            if not folder[src].endswith("/"):
+                folder[src] += "/"
+
+        return folder
+
+
+    def _load_upload_rclone_softsub(self, conf, web):
+        """
+        Gets the upload softsub sources
+
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+                is being used (default: local)
+
+        Returns the list of the sources, each ending with a "/"
+        """        
+        if web:
+            pass
+
+        # Return from the local config
+        folder = conf['uploading']['softsub']
+
+        # The length of the folders must be at least 1 
+        # or else the config is bad
+        if len(folder) < 1:
+            # TODO: print an error and exit
+            sys.exit(1)
+
+        # Make sure each destination ends with a "/"
+        for src in range(len(folder)):
+            if not folder[src].endswith("/"):
+                folder[src] += "/"
+
+        return folder
+
 
     def _load_endpoints_notifiers_always(self, conf, web):
         """
@@ -540,42 +559,45 @@ class ConfigHandler:
         """
         return self.distributor_bwlimit
 
-    def get_download_download_sources(self):
-        """
-        Returns the rclone download sources list, each ending with "/"
-        """
-        return self.download_download_sources
-
-    def get_download_softsub_folder(self):
-        """
-        Returns the softsub folder as a string, with "/" ending
-        """
-        return self.download_softsub_folder
-
     def get_download_rclone_flags(self):
         """
         Returns the download rclone flags as a string
         """
         return self.download_rclone_flags
 
-    def get_upload_destinations(self):
+    def get_download_rclone_hardsub(self):
         """
-        Returns the upload destinations as a list of strings, all ending
-        with "/"
+        Returns the download rclone hardsub sources as a list of strings
+        ending in "/"
         """
-        return self.upload_destinations
+        return self.download_rclone_hardsub
 
-    def get_upload_hardsub_folder(self):
+    def get_download_rclone_softsub(self):
         """
-        Returns the upload hardsub folder, ending with a "/"
+        Returns the download rclone softsub sources as a list of strings
+        ending in "/"
         """
-        return self.upload_hardsub_folder
+        return self.download_rclone_softsub
 
     def get_upload_rclone_flags(self):
         """
         Returns the string representing the upload rclone flags
         """
         return self.upload_rclone_flags
+
+    def get_upload_rclone_hardsub(self):
+        """
+        Returns the upload rclone hardsub sources as a list of strings
+        ending in "/"
+        """
+        return self.upload_rclone_hardsub
+
+    def get_upload_rclone_softsub(self):
+        """
+        Returns the upload rclone softsub sources as a list of strings
+        ending in "/"
+        """
+        return self.upload_rclone_softsub
 
     def get_notifiers(self):
         """
