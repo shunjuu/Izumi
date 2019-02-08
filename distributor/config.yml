@@ -34,6 +34,7 @@ downloading:
   # Softsub sources
   softsub:
     - "rclone_config:softsub_folder"
+    - "airisu:/home/rocia/Desktop/Airing"
 
 # Grouping body to specify the names when uploading files
 uploading:
@@ -43,11 +44,11 @@ uploading:
 
   # Hardsub sources
   hardsub:
-    - "rclone_config:folder/"
+    - "rclone_config:folderh/"
 
   # Softsub sources
   softsub:
-    - "rclone_config:folder"
+    - "rclone_config:folders"
 
 # Grouping body to list endpoints for other Izumi modules for this app to talk to.
 endpoints:
