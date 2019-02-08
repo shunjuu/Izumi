@@ -24,37 +24,30 @@ distribution:
 # Grouping body to specify where to download files from
 downloading:
 
-  # A list of rclone strings for Encoding to attempt to download the episode
-  # from. The first listing that's marked to have the file will be downloaded
-  # from.
-  # [type: A list of strings]
-  download-sources:
-    - "rclone_config:source/"
-
-  # This is an optional parameter to specify a source folder in case
-  # all of the download soures have their final folders as the same name.
-  softsub-folder-name: "Airing"
-
   # Flags to be used in the rclone uploading prompt. Determines verbosity of rclone.
   rclone-flags: "--stats 1s --stats-one-line --progress"
+
+  # Hardsub sources
+  hardsub:
+    - "rclone_config:hardsub_folder/"
+
+  # Softsub sources
+  softsub:
+    - "rclone_config:softsub_folder"
 
 # Grouping body to specify the names when uploading files
 uploading:
 
-  # A list of rclone strings for Encoding to upload the completed encode to
-  # There must be at least one destination listed. Usually this is just
-  # one element, but multiple are supported in lieu of Distribution.
-  # [type: A list of strings]
-  upload-destinations:
-    - "rclone_config:folder/"
-
-  # This is an optional parameter which allows you to specify the name of
-  # an "Airing [Hardsub]" folder. It's recommended you use this parameter
-  # instead of tacking it onto each upload-destination.
-  hardsub-folder-name: "Airing [Hardsub]"
-
   # Flags to be used in the rclone uploading prompt. Determines verbosity of rclone.
   rclone-flags: "--stats 1s --stats-one-line --progress"
+
+  # Hardsub sources
+  hardsub:
+    - "rclone_config:folder/"
+
+  # Softsub sources
+  softsub:
+    - "rclone_config:folder"
 
 # Grouping body to list endpoints for other Izumi modules for this app to talk to.
 endpoints:
