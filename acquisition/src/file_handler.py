@@ -45,6 +45,7 @@ class FileHandler:
         self.episode = None # A string representation, the name of the new file with file extension
         self.episode_new = None # String rep of the new filename after Anitopy cleans it up
         self.show = None # A string representation of the show of the new file. No "/" at the end
+        self.show_clean = None # self.show, but with : replaced with " - "
         self.filesize = None # An integer representation of the size of the file, in bytes
         self.sub_type = None # One of "hardsub" or "softsub", determined by file extension solely
 
@@ -56,6 +57,7 @@ class FileHandler:
         self.episode = self._load_episode(conf, args)
         self.episode_new = self._generate_new_episode(self.episode)
         self.show = self._load_show(args)
+        self.show_clean = self.show.replace(":", " - ")
         self.filesize = self._load_filesize(conf, args)
         self.sub_type = self._load_sub_type(self.episode)
 
@@ -249,6 +251,12 @@ class FileHandler:
         Get's the file's show as a string
         """
         return self.show
+
+    def get_show_clean(self):
+        """
+        Get's the file's show name, but clenaed up
+        """
+        return self.show_clean
 
     def get_filesize(self):
         """

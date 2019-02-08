@@ -58,13 +58,15 @@ class OSHandler:
         would be uploaded, under the temp folder. For example:
 
         temp/"Airing"/"$SHOW"/"$EPISODE"
+
+        For FS replacement also replaces ":" with " - "
         """
 
         # We need to first create the temporary directory to store everything in
         self._create_temp_dir()
 
         airing = self._conf.get_airing_folder_name()
-        show = self._fileh.get_show()
+        show = self._fileh.get_show_clean()
         episode = self._fileh.get_episode_new()
 
         path = self.temp_dir + airing + show + "/" 
