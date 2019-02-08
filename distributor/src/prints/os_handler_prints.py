@@ -37,7 +37,7 @@ class OSHandlerPrints:
 
         # RequestHandler's hardsub searching
         reqh_fail_color = colors.FAIL
-        self.REQH_SOFTSUB = prefix  + "Sub type " + reqh_fail_color + "{}" + endc + \
+        self.REQH_FAILURE = prefix  + "Sub type " + reqh_fail_color + "{}" + endc + \
             " not recognized, exiting..."
 
         # Upload colors
