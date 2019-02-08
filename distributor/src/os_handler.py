@@ -177,8 +177,8 @@ class OSHandler:
 
         for dest in dests:
             self._logger.warning(self._prints.UPLOAD_START.format(dest))
-            print(UPLOAD.format(self._temp_src_dir, dest, self._conf.get_upload_rclone_flags()))
-            #os.system(UPLOAD.format(self._temp_src_dir, dest, self._conf.get_upload_rclone_flags()))
+            #print(UPLOAD.format(self._temp_src_dir, dest, self._conf.get_upload_rclone_flags()))
+            os.system(UPLOAD.format(self._temp_src_dir, dest, self._conf.get_upload_rclone_flags()))
             self._logger.warning(self._prints.UPLOAD_COMPLETE.format(dest))
 
     # Cleanup methods
