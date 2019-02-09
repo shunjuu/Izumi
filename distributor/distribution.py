@@ -22,6 +22,7 @@ from src.config_handler import ConfigHandler
 from src.auth_handler import AuthHandler
 from src.request_handler import RequestHandler
 from src.os_handler import OSHandler
+from src.network_handler import NetworkHandler
 from src.print_handler import PrintHandler
 from src.prints.distribution_prints import DistributionPrints
 
@@ -48,6 +49,9 @@ def distribute_worker():
         o.download()
         o.upload()
         o.cleanup()
+
+        n = NetworkHandler(c, new_request, p)
+        n.notify_notifiers()
 
         episode_job_queue.task_done()
         logger.warning(dp.JOB_COMPLETE)
