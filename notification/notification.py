@@ -24,6 +24,8 @@ import pprint as pp
 # Custom imports
 from src.config_handler import ConfigHandler
 from src.auth_handler import AuthHandler
+from src.request_handler import RequestHandler
+from src.module_handler import ModuleHandler
 from src.print_handler import PrintHandler
 from src.prints.notification_prints import NotificationPrints
 
@@ -44,7 +46,13 @@ def encode_worker():
     Once it finds one, it takes it and processes it.
     """
     while True:
-        pass
+        new_request = notify_job_queue.get()
+
+        m = ModuleHandler(c, new_request, p)
+        m.notify_all()
+
+        notify_job_queue.task_done()
+        print()
 
 @app.route("/notify", methods=['POST'])
 def distribute():
@@ -61,6 +69,9 @@ def distribute():
     if not status:
         return "Unauthorized request", 403
 
+    r = RequestHandler(request, p)
+    notify_job_queue.put(r)
+
     return "Request accepted", 200
 
 if __name__ == "__main__":
@@ -72,6 +83,7 @@ if __name__ == "__main__":
         encode = Thread(target=encode_worker)
         encode.daemon = True
         encode.start()
+
 
     # Start the Flask server
     app.run(host='0.0.0.0', port=c.get_listen_port(), debug=True)

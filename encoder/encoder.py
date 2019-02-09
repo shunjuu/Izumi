@@ -53,9 +53,7 @@ def encode_worker():
         o = OSHandler(c, new_request, p)
         o.download()
         ofile_size = o.encode()
-        #sleep(3)
         ofile_name = o.upload()
-        sleep(3)
         o.cleanup()
 
         # Create the NetworkHandler to send out notifications

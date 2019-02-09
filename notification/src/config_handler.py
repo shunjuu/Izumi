@@ -44,6 +44,8 @@ class ConfigHandler:
 
         self.discord_webhook = None # The Discord webhook list
 
+        self.dev_discord_webhook = None # Discord webhooks, for dev use
+
         self.use_dev = None # Boolean to use dev or not
         
         self.name = None # The name of this application insance
@@ -76,6 +78,8 @@ class ConfigHandler:
         self.discord_webhook = self._load_discord_webhook(self._conf, self._web_conf_use)
 
         self.use_dev = self._load_use_dev(self._conf, self._web_conf_use)
+
+        self.dev_discord_webhook = self._load_dev_discord_webhook(self._conf, self._web_conf_use)
 
         self.name = self._load_system_name(self._conf, self._web_conf_use)
         self.verbose = self._load_system_verbose(self._conf, self._web_conf_use)
@@ -244,9 +248,33 @@ class ConfigHandler:
         # Default template to 1
         for hook in range(len(webhooks)):
             if 'template' not in webhooks[hook]:
-                webhooks[hook]['url'] = default
+                webhooks[hook]['template'] = default
 
         return webhooks
+
+    def _load_dev_discord_webhook(self, conf, web, default=1):
+        """
+        Get the Discord webhooks
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+                is being used (default: local)
+
+        Return the discord webhook list of dicts
+        """
+
+        if web:
+            pass
+
+        webhook = conf['dev']['discord-webhook']
+
+        # Default template to 1
+        if 'template' not in webhook:
+            webhook['template'] = default
+
+        return webhook
 
     def _load_use_dev(self, conf, web):
         """
@@ -357,6 +385,12 @@ class ConfigHandler:
         Returns the Discord webhook jobs
         """
         return self.discord_webhook
+
+    def get_dev_discord_webhook(self):
+        """
+        Returns the Discord dev webhook job
+        """
+        return self.dev_discord_webhook
 
     def get_use_dev(self):
         """
