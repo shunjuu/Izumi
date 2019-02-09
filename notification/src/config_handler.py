@@ -40,19 +40,12 @@ class ConfigHandler:
 
         self.listen_port = None # The port Flask will listen to
 
-        self.distributor_jobs = None # How many distribution jobs to run at once
+        self.notification_jobs = None # How many distribution jobs to run at once
 
-        self.download_rclone_flags = None # Flags for rclone to use when downloading
-        self.download_rclone_hardsub = None # rclone hardsub download sources
-        self.download_rclone_softsub = None # rclone softsub download sources
+        self.discord_webhook = None # The Discord webhook list
 
-        self.upload_rclone_flags = None # Flags for rclone to use when downloading
-        self.upload_rclone_hardsub = None # rclone hardsub download sources
-        self.upload_rclone_softsub = None # rclone softsub download sources
-
-        self.notifiers_always = None # The notification endpoints, always
-        self.notifiers_sequential = None # The notification endpoints, sequential
-
+        self.use_dev = None # Boolean to use dev or not
+        
         self.name = None # The name of this application insance
         self.verbose = False # Whether or not we are printing verbosely
 
@@ -78,18 +71,11 @@ class ConfigHandler:
         # ---------------- #
         self.listen_port = self._load_listen_port(self._conf, self._web_conf_use)
 
-        self.distributor_jobs = self._load_distributor_jobs(self._conf, self._web_conf_use)
+        self.notification_jobs = self._load_notification_jobs(self._conf, self._web_conf_use)
 
-        self.download_rclone_flags = self._load_download_rclone_flags(self._conf, self._web_conf_use)
-        self.download_rclone_hardsub = self._load_download_rclone_hardsub(self._conf, self._web_conf_use)
-        self.download_rclone_softsub = self._load_download_rclone_softsub(self._conf, self._web_conf_use)
+        self.discord_webhook = self._load_discord_webhook(self._conf, self._web_conf_use)
 
-        self.upload_rclone_flags = self._load_upload_rclone_flags(self._conf, self._web_conf_use)
-        self.upload_rclone_hardsub = self._load_upload_rclone_hardsub(self._conf, self._web_conf_use)
-        self.upload_rclone_softsub = self._load_upload_rclone_softsub(self._conf, self._web_conf_use)
-
-        self.notifiers_always = self._load_endpoints_notifiers_always(self._conf, self._web_conf_use)
-        self.notifiers_sequential = self._load_endpoints_notifiers_sequential(self._conf, self._web_conf_use)
+        self.use_dev = self._load_use_dev(self._conf, self._web_conf_use)
 
         self.name = self._load_system_name(self._conf, self._web_conf_use)
         self.verbose = self._load_system_verbose(self._conf, self._web_conf_use)
@@ -219,7 +205,7 @@ class ConfigHandler:
         # Return from the local config
         return int(conf['listen-port'])
 
-    def _load_distributor_jobs(self, conf, web):
+    def _load_notification_jobs(self, conf, web):
         """
         Retrieve the number of jobs that the system should run
 
@@ -235,12 +221,11 @@ class ConfigHandler:
         if web:
             pass
 
-        return int(conf['distribution']['jobs'])
+        return int(conf['notification']['jobs'])
 
-
-    def _load_download_rclone_flags(self, conf, web):
+    def _load_discord_webhook(self, conf, web, default=1):
         """
-        Gets the rclone flags used by the downloader
+        Get the Discord webhooks
 
         Params:
             conf: self._conf, which represents a dict object
@@ -248,19 +233,24 @@ class ConfigHandler:
             web: A boolean value which indicates if the web conf
                 is being used (default: local)
 
-        Returns the rclone flags as a string
+        Return the discord webhook list of dicts
         """
 
         if web:
             pass
 
-        return conf['downloading']['rclone-flags']
+        webhooks = conf['modules']['discord-webhook']
 
+        # Default template to 1
+        for hook in range(len(webhooks)):
+            if 'template' not in webhooks[hook]:
+                webhooks[hook]['url'] = default
 
-    def _load_download_rclone_hardsub(self, conf, web):
+        return webhooks
+
+    def _load_use_dev(self, conf, web):
         """
-        Gets the download hardsub sources
-
+        Gets whether or not to use dev for this app
 
         Params:
             conf: self._conf, which represents a dict object
@@ -268,184 +258,12 @@ class ConfigHandler:
             web: A boolean value which indicates if the web conf
                 is being used (default: local)
 
-        Returns the list of the sources, each ending with a "/"
-        """        
-        if web:
-            pass
-
-        # Return from the local config
-        folder = conf['downloading']['hardsub']
-
-        # The length of the folders must be at least 1 
-        # or else the config is bad
-        if len(folder) < 1:
-            # TODO: print an error and exit
-            sys.exit(1)
-
-        # Make sure each destination ends with a "/"
-        for src in range(len(folder)):
-            if not folder[src].endswith("/"):
-                folder[src] += "/"
-
-        return folder
-
-    def _load_download_rclone_softsub(self, conf, web):
-        """
-        Gets the download softsub sources
-
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns the list of the sources, each ending with a "/"
-        """        
-        if web:
-            pass
-
-        # Return from the local config
-        folder = conf['downloading']['softsub']
-
-        # The length of the folders must be at least 1 
-        # or else the config is bad
-        if len(folder) < 1:
-            # TODO: print an error and exit
-            sys.exit(1)
-
-        # Make sure each destination ends with a "/"
-        for src in range(len(folder)):
-            if not folder[src].endswith("/"):
-                folder[src] += "/"
-
-        return folder
-
-
-    def _load_upload_rclone_flags(self, conf, web):
-        """
-        Gets the rclone flags to be used when uploading
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns the rclone flags as a string
-        """
-
-        if web:
-            pass
-
-        return conf['uploading']['rclone-flags']
-
-
-    def _load_upload_rclone_hardsub(self, conf, web):
-        """
-        Gets the upload hardsub sources
-
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns the list of the sources, each ending with a "/"
-        """        
-        if web:
-            pass
-
-        # Return from the local config
-        folder = conf['uploading']['hardsub']
-
-        # The length of the folders must be at least 1 
-        # or else the config is bad
-        if len(folder) < 1:
-            # TODO: print an error and exit
-            sys.exit(1)
-
-        # Make sure each destination ends with a "/"
-        for src in range(len(folder)):
-            if not folder[src].endswith("/"):
-                folder[src] += "/"
-
-        return folder
-
-
-    def _load_upload_rclone_softsub(self, conf, web):
-        """
-        Gets the upload softsub sources
-
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns the list of the sources, each ending with a "/"
-        """        
-        if web:
-            pass
-
-        # Return from the local config
-        folder = conf['uploading']['softsub']
-
-        # The length of the folders must be at least 1 
-        # or else the config is bad
-        if len(folder) < 1:
-            # TODO: print an error and exit
-            sys.exit(1)
-
-        # Make sure each destination ends with a "/"
-        for src in range(len(folder)):
-            if not folder[src].endswith("/"):
-                folder[src] += "/"
-
-        return folder
-
-
-    def _load_endpoints_notifiers_always(self, conf, web):
-        """
-        Finds the ALWAYS notification endpoints.
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns: A list of lists, where each inside list represents one endpoint
-            entry. Index 0 is URL, Index 1 (optional) is an Authorization key.
+        Returns: The setting as a boolean
         """
         if web:
             pass
 
-        # Return from the local config
-        return conf['endpoints']['notifiers']['always']
-
-    def _load_endpoints_notifiers_sequential(self, conf, web):
-        """
-        Finds the SEQUENTIAL notification endpoints.
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns: A list of list of lists. 
-        For x in root list, y in x in order represents URLs in order to 
-        try until a single request succeeds.
-        Follows standard index 0/1 url/auth key(opt)
-        """
-        if web:
-            pass
-
-        # Return from the local config
-        return conf['endpoints']['notifiers']['sequential']
+        return conf['system']['use-dev']
 
     def _load_system_name(self, conf, web):
         """
@@ -528,69 +346,23 @@ class ConfigHandler:
         """
         return self.listen_port
 
-    def get_distributor_jobs(self):
+    def get_notification_jobs(self):
         """
         Returns the number of simultaneous jobs to run as a string
         """
-        return self.distributor_jobs
+        return self.notification_jobs
 
-    def get_download_rclone_flags(self):
+    def get_discord_webhook(self):
         """
-        Returns the download rclone flags as a string
+        Returns the Discord webhook jobs
         """
-        return self.download_rclone_flags
+        return self.discord_webhook
 
-    def get_download_rclone_hardsub(self):
+    def get_use_dev(self):
         """
-        Returns the download rclone hardsub sources as a list of strings
-        ending in "/"
+        Returns whether or not to use dev as a boolean
         """
-        return self.download_rclone_hardsub
-
-    def get_download_rclone_softsub(self):
-        """
-        Returns the download rclone softsub sources as a list of strings
-        ending in "/"
-        """
-        return self.download_rclone_softsub
-
-    def get_upload_rclone_flags(self):
-        """
-        Returns the string representing the upload rclone flags
-        """
-        return self.upload_rclone_flags
-
-    def get_upload_rclone_hardsub(self):
-        """
-        Returns the upload rclone hardsub sources as a list of strings
-        ending in "/"
-        """
-        return self.upload_rclone_hardsub
-
-    def get_upload_rclone_softsub(self):
-        """
-        Returns the upload rclone softsub sources as a list of strings
-        ending in "/"
-        """
-        return self.upload_rclone_softsub
-
-    def get_notifiers(self):
-        """
-        Returns the notifiers as a tuple (always, sequential)
-        """
-        return (self.notifiers_always, self.notifiers_sequential)
-
-    def get_notifiers_always(self):
-        """
-        Returns the always notifier endpoints as a list of dicts
-        """
-        return self.notifiers_always
-
-    def get_notifiers_sequential(self):
-        """
-        Returns the sequential notifier endpoints as a dict of list of dicts
-        """
-        return self.notifiers_sequential
+        return self.use_dev
 
     def get_name(self):
         """

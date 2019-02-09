@@ -87,7 +87,7 @@ def encode():
     r = RequestHandler(request, p)
     episode_job_queue.put(r)
 
-    return str(status), 200
+    return "Request accepted", 200
 
 if __name__ == "__main__":
 

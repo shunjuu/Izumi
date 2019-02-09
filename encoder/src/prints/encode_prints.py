@@ -6,7 +6,7 @@ class EncodePrints:
     def __init__(self, colors):
         """
         Params:
-            colors - prnit_handler.Colors() module
+            colors - print_handler.Colors() module
         """
 
         # Some temporary, frequent-use variables

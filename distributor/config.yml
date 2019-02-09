@@ -16,11 +16,6 @@ distribution:
   # [type: Integer]
   jobs: 1
 
-  # If the transfers should be limited to a specifc bandwidth
-  # To not use this, leave it blank
-  # [type: String]
-  bwlimit: "5M"
-
 # Grouping body to specify where to download files from
 downloading:
 
