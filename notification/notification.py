@@ -48,10 +48,15 @@ def encode_worker():
     while True:
         new_request = notify_job_queue.get()
 
-        m = ModuleHandler(c, new_request, p)
-        m.notify_all()
+        try:
+            # We need to ignore any errors to keep the queue empty
+            m = ModuleHandler(c, new_request, p)
+            m.notify_all()
+        except:
+            pass
 
         notify_job_queue.task_done()
+        logger.warning(np.JOB_COMPLETE)
         print()
 
 @app.route("/notify", methods=['POST'])
