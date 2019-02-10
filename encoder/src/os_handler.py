@@ -13,7 +13,7 @@ from src.encode.h264_standard import H264Standard
 # The upload command to pull files
 DOWNLOAD = "rclone copyto \"{}\" \"{}\" {}"
 # The upload command that is used to upload files
-UPLOAD = "rclone copy {} {} {}"
+UPLOAD = "rclone copy \"{}\" \"{}\" {}"
 # The first two are source and dest, the third is the user-specified flags
 LIST = 'rclone lsjson -R \"{}{}\" 2>/dev/null'
 # The video extension
