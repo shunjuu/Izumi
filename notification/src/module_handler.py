@@ -11,7 +11,7 @@ from lib import hisha2a
 from src.prints.module_handler_prints import ModuleHandlerPrints
 
 # Individual modules
-from src.modules.discord.webhook_module import DiscordWebhookModule
+from src.modules.discord.discord_webhook_module import DiscordWebhookModule
 
 class ModuleHandler:
     """
@@ -29,6 +29,7 @@ class ModuleHandler:
 
         self._conf = conf
         self._reqh = reqh
+        self._printh = printh
 
         # Logging things
         self._logger = printh.get_logger()
@@ -44,8 +45,13 @@ class ModuleHandler:
             show - the name of the show in the request
         """
 
+        self._logger.info(self._prints.FETCHING_INFO_START)
+
         info = hisha2a.hisha2a(show)
         info['idKitsu'] = hisha2a.hitsu2a(show)['data'][0]['id']
+
+        self._logger.info(self._prints.FETCHING_INFO_END)
+
         return info
 
 
@@ -54,8 +60,11 @@ class ModuleHandler:
         Initiates sending out requests to Discord.
         """
 
-        dw = DiscordWebhookModule(self._conf, self._reqh, self._info)
-        #pp.pprint(dw._template_1.format(**fmt))
+        self._logger.info(self._prints.MODULE_START.format("Discord"))
+        dw = DiscordWebhookModule(self._conf, self._reqh, self._printh, self._info)
+        fmt = dw.generate_fmt()
+        dw.send_notifications(fmt)
+        self._logger.info(self._prints.MODULE_END.format("Discord"))
 
 
     def notify_all(self):
@@ -63,4 +72,6 @@ class ModuleHandler:
         Calls all the module notification triggers
         """
 
+        self._logger.warning(self._prints.NOTIFY_ALL_START)
         self.discord_webhook_notify()
+        self._logger.warning(self._prints.NOTIFY_ALL_END)

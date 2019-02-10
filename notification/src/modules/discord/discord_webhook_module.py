@@ -6,6 +6,7 @@ import pprint as pp
 import requests
 import shutil
 import tempfile
+import json
 
 import datetime
 import time
@@ -13,7 +14,9 @@ import time
 from hurry.filesize import size
 from colorthief import ColorThief
 
-from src.modules.discord.webhook_templates import DiscordWebhookTemplates
+from src.modules.discord.discord_webhook_templates import DiscordWebhookTemplates
+
+from src.prints.modules.discord.discord_webhook_module_prints import DiscordWebhookModulePrints
 
 MAL_ANI_BASE = "https://myanimelist.net/anime/"
 ANI_ANI_BASE = "https://anilist.co/anime/"
@@ -24,8 +27,10 @@ class DiscordWebhookModule:
     DiscordModule handles sending out webhook notifications
     """
 
-    def __init__(self, conf, reqh, info):
+    def __init__(self, conf, reqh, printh, info):
 
+        self._logger = printh.get_logger()
+        self._prints = DiscordWebhookModulePrints(printh.Colors())
 
         self._conf = conf
         self._reqh = reqh
@@ -38,12 +43,6 @@ class DiscordWebhookModule:
         self._webhook_templates = DiscordWebhookTemplates()
         self._template_1 = self._webhook_templates.get_template_1()
 
-        self._fmt = self.generate_fmt()
-
-        pp.pprint(self._template_1.format(**self._fmt))
-        #print()
-
-
     def generate_fmt(self):
         """
         Generate the dictionary that contains the variable information
@@ -55,7 +54,8 @@ class DiscordWebhookModule:
         fmt['mins'] = self._load_duration()
         fmt['size'] = self._load_size()
         fmt['sub_type'] = self._load_sub_type()
-        fmt['color'] = self._generate_colors()
+        #fmt['color'] = self._generate_colors()
+        fmt['color'] = self._pick_colors()
         fmt['timestamp'] = self._generate_timestamp()
         fmt['show_original'] = self._load_original_show()
         fmt['thumbnail_url'] = self._load_thumbnail()
@@ -67,6 +67,44 @@ class DiscordWebhookModule:
         fmt['kitsu_url'] = self._load_kitsu_url()
 
         return fmt
+
+    def send_notifications(self, fmt):
+        """
+        Sends the notifications to the Discord endpoints
+        """
+
+        use_dev = self._conf.get_use_dev()
+
+        if not use_dev:
+            # Send notifications out to the configured outpoints
+
+            self._logger.info(self._prints.DEV_DISABLED)
+
+            for hook in self._conf.get_discord_webhook():
+                if hook['template'] == 1:
+                    body = self._template_1.format(**fmt)
+                    try:
+                        self._logger.info(self._prints.SENDING_REQUEST_START.format(hook['name'], 1))
+                        requests.post(hook['url'], json=json.loads(body))
+                        self._logger.info(self._prints.SENDING_REQUEST_SUCCESS.format(hook['name']))
+                    except:
+                        self._logger.warning(self._prints.SENDING_REQUEST_FAIL.format(hook['name']))
+
+        elif use_dev:
+            # Send notifications to the dev hook
+
+            self._logger.info(self._prints.DEV_ENABLED)
+
+            hook = self._conf.get_dev_discord_webhook()
+            if hook['template'] == 1:
+                body = self._template_1.format(**fmt) 
+                try:
+                    self._logger.info(self._prints.SENDING_REQUEST_START.format(hook['name'], 1))
+                    requests.post(hook['url'], json=json.loads(body))
+                    self._logger.info(self._prints.SENDING_REQUEST_SUCCESS.format(hook['name']))
+                except:
+                    self._logger.warning(self._prints.SENDING_REQUEST_FAIL.format(hook['name']))
+
 
     def _load_title(self):
         """
@@ -103,6 +141,16 @@ class DiscordWebhookModule:
         Returns it as a string, with the first letter capitalized
         """
         return self._reqh.get_sub_type().capitalize()
+
+    def _pick_colors(self):
+        """
+        Returns the predefined decimal colors
+        """
+        sub_type = self._reqh.get_sub_type().lower()
+        if sub_type == "softsub":
+            return 65535
+        elif sub_type == "hardsub":
+            return 65280
 
     def _generate_timestamp(self):
         """
