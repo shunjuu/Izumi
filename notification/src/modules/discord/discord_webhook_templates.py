@@ -5,12 +5,12 @@ TEMPLATE_1 = '''
 {{
     "embeds": [
         {{
-            "title": "{title}"
+            "title": "{title}",
             "description": "{mins} mins, {size} [{sub_type}]",
             "color": {color:d},
             "timestamp": "{timestamp}",
             "footer": {{
-                "text": "© Aeri | {show_original}",
+                "text": "© Aeri | {show_original}"
             }},
             "thumbnail": {{
                 "url": "{thumbnail_url}"
