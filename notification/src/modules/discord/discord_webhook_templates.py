@@ -5,8 +5,6 @@ TEMPLATE_1 = '''
 {{
     "embeds": [
         {{
-            "title": "{title}",
-            "description": "{mins} mins, {size} [{sub_type}]",
             "color": {color:d},
             "timestamp": "{timestamp}",
             "footer": {{
@@ -16,6 +14,10 @@ TEMPLATE_1 = '''
                 "url": "{thumbnail_url}"
             }},
             "fields": [
+                {{
+                    "name": "{title}",
+                    "value": "{mins} mins, {size} [{sub_type}]"
+                }},
                 {{
                     "name": "Information",
                     "value": "Score: {score}/100, Pop: {popularity}, Total: {eps} Eps."
