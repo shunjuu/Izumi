@@ -65,6 +65,7 @@ class FileHandler:
             # Generally in this case, it means an ISDIR event occured, and a filenotfound error
             # was thrown cause the og file was deleted in the previous call.
             self._logger.error(self._prints.ISDIR_FILE_NOT_FOUND)
+            os._exit(7)
 
 
     def _load_episode(self, conf, args):
