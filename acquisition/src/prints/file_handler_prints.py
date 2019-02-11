@@ -5,7 +5,7 @@ class FileHandlerPrints:
     Logger sets if printed or not.
     """
 
-    def __init__(self, colors):
+    def __init__(self, colors, conf):
         """
         Params:
             colors - print_handler.Colors() module
@@ -42,3 +42,7 @@ class FileHandlerPrints:
         sub_color = colors.LCYAN
         self.SUB_TYPE = prefix + "Sub Type: " + sub_color + \
             "{}" + endc
+
+        # Second ISDIR
+        self.ISDIR_FILE_NOT_FOUND = prefix + colors.FAIL + \
+            conf.get_name() + endc + " failed, this was likely due to a previous ISDIR event."
