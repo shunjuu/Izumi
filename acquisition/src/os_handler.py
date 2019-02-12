@@ -9,7 +9,7 @@ import pprint as pp
 from src.prints.os_handler_prints import OSHandlerPrints
 
 # The upload command that is used to upload files.
-UPLOAD = "rclone copy \"{}\" \"{}\" {}"
+UPLOAD = "rclone copy -L \"{}\" \"{}\" {}"
 
 class OSHandler:
     """
