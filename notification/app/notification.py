@@ -29,11 +29,11 @@ from src.module_handler import ModuleHandler
 from src.print_handler import PrintHandler
 from src.prints.notification_prints import NotificationPrints
 
-c = ConfigHandler()
+c = ConfigHandler(cpath="/conf/config.yml")
 p = PrintHandler(c)
 logger = p.get_logger()
 np = NotificationPrints(p.Colors())
-a = AuthHandler(p)
+a = AuthHandler(p, apath="/conf/auth.yml")
 
 app = Flask(__name__)
 
