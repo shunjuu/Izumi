@@ -40,7 +40,7 @@ class H264Standard:
         self._logger.warning(self._prints.ENCODE_START.format(self._end_file))
         
         os.system(ENCODE.format(
-            self._ffmpeg_8bit,
+            "/ffmpeg/ffmpeg",
             self._src_file, self._src_file,
             self._conf.get_encode_encode_flags(),
             full_end_file))
@@ -65,7 +65,8 @@ class H264Standard:
         """
 
         path = self._get_root_directory_calling_path() + "bin/ffmpeg"
-        self._logger.info(self._prints.FFMPEG_8_PATH.format(path))
+        #self._logger.info(self._prints.FFMPEG_8_PATH.format(path))
+        self._logger.info(self._prints.FFMPEG_8_PATH.format("/ffmpeg/ffmpeg"))
 
         return path
 

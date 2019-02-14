@@ -1,6 +1,6 @@
 # This is the port this application will listen on.
 # [type: Integer]
-listen-port: 8080
+listen-port: 80
 
 # You can optionally load a global config from a web source
 # If you do not, leave this as an empty-string.

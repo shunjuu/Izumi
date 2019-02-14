@@ -10,12 +10,13 @@ import pprint as pp
 from src.prints.os_handler_prints import OSHandlerPrints
 from src.encode.h264_standard import H264Standard
 
+RCLONE_SOURCE = '/ffmpeg/rclone --config=\"/conf/rclone.conf\" '
 # The upload command to pull files
-DOWNLOAD = "rclone copyto \"{}\" \"{}\" {}"
+DOWNLOAD = RCLONE_SOURCE + "copyto \"{}\" \"{}\" {}"
 # The upload command that is used to upload files
-UPLOAD = "rclone copy \"{}\" \"{}\" {}"
+UPLOAD = RCLONE_SOURCE + "copy \"{}\" \"{}\" {}"
 # The first two are source and dest, the third is the user-specified flags
-LIST = 'rclone lsjson -R \"{}{}\" 2>/dev/null'
+LIST = RCLONE_SOURCE + "lsjson -R \"{}{}\" 2>/dev/null"
 # The video extension
 EXT = ".mp4"
 
@@ -52,7 +53,8 @@ class OSHandler:
         """
         try:
             # tempfile.mkdtemp returns the absolute path
-            self._temp_src_dir = tempfile.mkdtemp(dir=sys.path[0])
+            #self._temp_src_dir = tempfile.mkdtemp(dir=sys.path[0])
+            self._temp_src_dir = tempfile.mkdtemp(dir="/src")
             # Append a "/" if it's not already there
             if not self._temp_src_dir.endswith("/"):
                 self._temp_src_dir += "/"
