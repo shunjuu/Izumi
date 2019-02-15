@@ -30,11 +30,11 @@ app = Flask(__name__)
 
 episode_job_queue = Queue()
 
-c = ConfigHandler()
+c = ConfigHandler(cpath="/conf/config.yml")
 p = PrintHandler(c)
 logger = p.get_logger()
 dp = DistributionPrints(p.Colors())
-a = AuthHandler(p)
+a = AuthHandler(p, apath="/conf/auth.yml")
 
 def distribute_worker():
     """
