@@ -1,0 +1,92 @@
+# This is the port the application will listen on.
+# [type: Integer]
+listen-port: 80
+
+# Authorization files must be stored locally
+
+# You can optionally load a global config from a web source
+# If you do not, leave this as an empty string
+# [type: string]
+web-config: ""
+
+# Grouping body for distribution specifics
+distribution:
+
+  # How many distribution jobs should be run at one given time 
+  # [type: Integer]
+  jobs: 1
+
+# Grouping body to specify where to download files from
+downloading:
+
+  # Flags to be used in the rclone uploading prompt. Determines verbosity of rclone.
+  rclone-flags: "--stats 1s --stats-one-line --progress"
+
+  # Hardsub sources
+  hardsub:
+    - "rclone_config:hardsub_folder/"
+
+  # Softsub sources
+  softsub:
+    - "rclone_config:softsub_folder"
+    - "airisu:/home/rocia/Desktop/Airing"
+
+# Grouping body to specify the names when uploading files
+uploading:
+
+  # Flags to be used in the rclone uploading prompt. Determines verbosity of rclone.
+  rclone-flags: "--stats 1s --stats-one-line --progress"
+
+  # Hardsub sources
+  hardsub:
+    - "rclone_config:folderh/"
+
+  # Softsub sources
+  softsub:
+    - "rclone_config:folders"
+
+# Grouping body to list endpoints for other Izumi modules for this app to talk to.
+endpoints:
+
+  # The endpoints to send U3 Notification requests.
+  # url represents the URL to request to. It should contain http header
+  # auth is an optional authorization key to send the request to.
+  # auth can be ommitted.
+  # To specify none, simply have always/sequential as empty lists ([])
+  notifiers:
+
+    # These urls will always be notified, regardless of their failure state
+    always:
+      - url: "https://endpoint1.url/notify"
+        auth: "authorization_key1"
+      - url: "https://endpoint2.url/notify"
+
+    # For each group, try each url until one is successful
+    sequential:
+      group1:
+        - url: "https://endpoint1.url/notify"
+          auth: "authorization_key1"
+        - url: "https://endpoint2.url/notify"
+      group2:
+        - url: "https://endpoint3.url/notify"
+          auth: "authorization_key3"
+        - url: "https://endpoint4.url/notify"
+
+# Application-specifc settings
+system:
+
+  # The identifier for this system
+  # [type: String]
+  name: "izumi"
+
+  # Whether or not hte application should print more information
+  # [type: Boolean]
+  verbose: yes
+
+  # Logging settings
+  logging:
+
+    # The style of the log output messages, using %(var)s style
+    logfmt: "[%(name)s] (%(levelname)s) %(asctime)s: %(message)s"
+    # The strftime-style format for %(asctime)s
+    datefmt: "%a|%b%y %X %Z"
