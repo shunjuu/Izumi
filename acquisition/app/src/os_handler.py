@@ -9,7 +9,7 @@ import pprint as pp
 from src.prints.os_handler_prints import OSHandlerPrints
 
 # The upload command that is used to upload files.
-UPLOAD = "rclone copy -L \"{}\" \"{}\" {}"
+UPLOAD = "/rclone/rclone --config=\"/conf/rclone.conf\" copy -L \"{}\" \"{}\" {}"
 
 class OSHandler:
     """
@@ -42,7 +42,7 @@ class OSHandler:
         Creates a temporary directory and sets the class variable to it.
         """
         try:
-            self.temp_dir = tempfile.mkdtemp(dir=sys.path[0])
+            self.temp_dir = tempfile.mkdtemp(dir="/src")
             if not self.temp_dir.endswith("/"):
                 self.temp_dir += "/"
 
@@ -83,10 +83,15 @@ class OSHandler:
         self._logger.info(self._prints.FS_PATH_LINK_1.format(source_file))
         self._logger.info(self._prints.FS_PATH_LINK_2.format(new_episode_path))
 
-        os.link(source_file, new_episode_path)
+        try:
+            # We want to hardlink here because it's instant and 
+            # doesn't tax our FS, but for Docker it may not be possible
+            os.link(source_file, new_episode_path)
+        except:
+            # For cases in Docker where -v is a separate filesystem, 
+            # we have no choice but to copy it.
+            shutil.move(source_file, new_episode_path)
 
-        # We want to hardlink here because it's instant and 
-        # doesn't tax our FS
 
 
     def __get_source_file(self):
@@ -127,7 +132,13 @@ class OSHandler:
         that triggered this entire application.
         """
         self._delete_temp_all()
-        self._delete_src_object()
+
+        # Bcause shutil.move may be used instead of link, there is a chance
+        # the source file might not exist - because it's been moved
+        try:
+            self._delete_src_object()
+        except:
+            pass
 
     def _delete_src_object(self):
         """
@@ -156,15 +167,15 @@ class OSHandler:
 
             if args_watch_folder == conf_watch_folder:
                 src_file_path = os.path.abspath(args[0] + args[2])
-                self._logger.warning(self._prints.CLEANUP_SRC_OBJ_FILE_ONLY.format(src_file_path))
                 os.remove(src_file_path)
+                self._logger.warning(self._prints.CLEANUP_SRC_OBJ_FILE_ONLY.format(src_file_path))
 
             # If we reached this else point, it means a folder/show name
             # was provded at the start, which means it will be args[0]
             else:
                 src_folder_path = os.path.abspath(args[0])
-                self._logger.warning(self._prints.CLEANUP_SRC_OBJ_FOLDER_PROVIDED.format(src_folder_path))
                 shutil.rmtree(src_folder_path)
+                self._logger.warning(self._prints.CLEANUP_SRC_OBJ_FOLDER_PROVIDED.format(src_folder_path))
 
 
     def _delete_temp_all(self):

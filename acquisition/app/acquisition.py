@@ -20,7 +20,7 @@ def main():
 
     inote = sys.argv[1]
 
-    c = ConfigHandler()
+    c = ConfigHandler("/conf/config.yml")
     p = PrintHandler(c)
     a = ArgumentHandler(c, p, inote)
     f = FileHandler(c, a, p, inote)

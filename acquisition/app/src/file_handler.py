@@ -61,9 +61,10 @@ class FileHandler:
             self.show_clean = self.show.replace(":", " -")
             self.filesize = self._load_filesize(conf, args)
             self.sub_type = self._load_sub_type(self.episode)
-        except:
+        except Exception as e:
             # Generally in this case, it means an ISDIR event occured, and a filenotfound error
             # was thrown cause the og file was deleted in the previous call.
+            self._logger.error(e)
             self._logger.error(self._prints.ISDIR_FILE_NOT_FOUND)
             os._exit(7)
 
