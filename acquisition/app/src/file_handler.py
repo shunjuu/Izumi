@@ -58,7 +58,7 @@ class FileHandler:
             self.episode = self._load_episode(conf, args)
             self.episode_new = self._generate_new_episode(self.episode)
             self.show = self._load_show(args)
-            self.show_clean = self.show.replace(":", " -")
+            self.show_clean = self.show.replace(": ", " - ")
             self.filesize = self._load_filesize(conf, args)
             self.sub_type = self._load_sub_type(self.episode)
         except Exception as e:
