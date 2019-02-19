@@ -13,4 +13,7 @@ RUN pip3 install requests hurry.filesize anitopy pyyaml
 COPY app/ /src/
 COPY bin/ /rclone/
 
+RUN chmod 700 /rclone/*
+RUN chmod 700 /src/bin/yq
+
 ENTRYPOINT ["sh", "-c", "/src/watch.sh"]
