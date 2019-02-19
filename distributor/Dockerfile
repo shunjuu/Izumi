@@ -12,4 +12,6 @@ RUN pip3 install flask requests pyyaml
 COPY app/ /src/
 COPY bin/ /rclone/
 
+RUN chmod 700 /rclone/*
+
 ENTRYPOINT ["sh", "-c", "python3 /src/distribution.py"]

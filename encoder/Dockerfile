@@ -12,4 +12,6 @@ RUN pip3 install flask requests pyyaml hurry.filesize anitopy
 COPY app/ /src/
 COPY bin/ /ffmpeg/
 
+RUN chmod 700 /ffmpeg/*
+
 ENTRYPOINT ["sh", "-c", "python3 /src/encoder.py"]
