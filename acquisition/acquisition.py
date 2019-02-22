@@ -27,13 +27,19 @@ def main():
     n = NetworkHandler(c, f, p)
     o = OSHandler(c, a, f, p)
 
-    o.create_temp_replica_fs()
-    o.upload()
-    o.cleanup()
+    try:
+        o.create_temp_replica_fs()
+        o.upload()
 
-    n.notify_encoders()
-    n.notify_notifiers()
-    n.notify_distributors()
+        n.notify_encoders()
+        n.notify_notifiers()
+        n.notify_distributors()
+
+    except:
+        pass
+        
+    finally:
+        o.cleanup()
 
     print()
 
