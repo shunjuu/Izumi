@@ -205,12 +205,12 @@ def _hisha(names):
                         except requests.exceptions.ConnectionError:
                             print("There appears to be no internet connection.")
                             print("Now exiting...")
-                            sys.exit(4)
+                            raise Exception()
 
                         except:
                             print("An exception occured when attempting to contact Anilist.")
                             print("Now exiting...")
-                            sys.exit(5)
+                            raise Exception()
 
     # If we've reachedt his point, we didn't find a result
     raise Exception("No result found.")
@@ -235,7 +235,7 @@ def hisha(episode, title="userPreferred"):
     except:
         # An exception will be thrown if nothing was found. We exit if that's the case.
         print("No show was found when searching. The system will now exit.")
-        sys.exit(1)
+        raise Exception()
 
     # Backwards-compatability: Hisha will return the title
     return res.json()['data']['Media']['title'][title]
@@ -253,7 +253,7 @@ def hisha2(episode):
     except:
         # An exception will be thrown if nothing was found. We exit if that's the case.
         print("No show was found when searching. The system will now exit.")
-        sys.exit(1)
+        raise Exception()
     return res.json()
 
 def hisha2a(show):
@@ -269,7 +269,7 @@ def hisha2a(show):
         return res.json()['data']['Media']
     except:
         print("No show was found when searching. The system will now exit.")
-        sys.exit(1)
+        raise Exception()
 
 
 
@@ -290,12 +290,12 @@ def hitsu(episode):
     except requests.exceptions.ConnectionError:
         print("There appears to be no internet connection.")
         print("Now exiting...")
-        sys.exit(4)
+        raise Exception()
 
     except:
         print("Fatal exception encountered when attempting to contact Kitsu.")
         print("Now exiting...")
-        sys.exit(4)
+        raise Exception()
 
     # Hitsu is in beta, right now we don't want an Exeption()
     return None
@@ -316,12 +316,12 @@ def hitsu2a(show):
     except requests.exceptions.ConnectionError:
         print("There appears to be no internet connection.")
         print("Now exiting...")
-        sys.exit(4)
+        raise Exception()
 
     except:
         print("Fatal exception encountered when attempting to contact Kitsu.")
         print("Now exiting...")
-        sys.exit(4)
+        raise Exception()
 
     # Hitsu is in beta, right now we don't want an Exeption()
     return None
