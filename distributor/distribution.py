@@ -45,13 +45,19 @@ def distribute_worker():
     while True:
         new_request = episode_job_queue.get()
 
-        o = OSHandler(c, new_request, p)
-        o.download()
-        o.upload()
-        o.cleanup()
+        try:
+            o = OSHandler(c, new_request, p)
+            o.download()
+            o.upload()
 
-        n = NetworkHandler(c, new_request, p)
-        n.notify_notifiers()
+            n = NetworkHandler(c, new_request, p)
+            n.notify_notifiers()
+
+        except:
+            pass
+
+        finally:
+            o.cleanup()
 
         episode_job_queue.task_done()
         logger.warning(dp.JOB_COMPLETE)
@@ -66,16 +72,21 @@ def distribute():
     print()
     logger.warning(dp.NEW_REQUEST)
 
-    a.refresh()
-    status = a.authorize(request.headers)
+    try:
+        a.refresh()
+        status = a.authorize(request.headers)
 
-    if not status:
-        return "Unauthorized request", 403
+        if not status:
+            return "Unauthorized request", 401
 
-    r = RequestHandler(request, p)
-    episode_job_queue.put(r)
+        r = RequestHandler(request, p)
+        episode_job_queue.put(r)
 
-    return "Request accepted", 200
+        return "Request accepted", 200
+
+    except:
+        return "Error with request", 400
+
 
 if __name__ == "__main__":
 
