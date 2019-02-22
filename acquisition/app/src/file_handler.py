@@ -66,7 +66,7 @@ class FileHandler:
             # was thrown cause the og file was deleted in the previous call.
             self._logger.error(e)
             self._logger.error(self._prints.ISDIR_FILE_NOT_FOUND)
-            os._exit(7)
+            raise Exception()
 
 
     def _load_episode(self, conf, args):
@@ -104,7 +104,7 @@ class FileHandler:
         if len(episode_folder_contents) != 1:
             ## TODO: We need to print an error message here and end with it.
             self._logger.error(self._prints.EPISODE_LOADED_ERROR)
-            sys.exit(1)
+            raise Exception()
 
         # If there's only one file within the folder, then we know the new episode
         # has to be that specific file (also ending in .mkv)
