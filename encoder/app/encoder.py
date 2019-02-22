@@ -50,21 +50,24 @@ def encode_worker():
         new_request = episode_job_queue.get()
 
         # Process the encoding job here
-        o = OSHandler(c, new_request, p)
-        o.download()
-        ofile_size = o.encode()
-        ofile_name = o.upload()
-        o.cleanup()
+        try:
+            o = OSHandler(c, new_request, p)
+            o.download()
+            ofile_size = o.encode()
+            ofile_name = o.upload()
 
-        # Create the NetworkHandler to send out notifications
-        n = NetworkHandler(c, new_request, p, ofile_name, ofile_size)
-        n.notify_notifiers()
-        n.notify_distributors()
+            # Create the NetworkHandler to send out notifications
+            n = NetworkHandler(c, new_request, p, ofile_name, ofile_size)
+            n.notify_notifiers()
+            n.notify_distributors()
+        except:
+            pass
+        finally:
+            o.cleanup()
 
         # Mark the job as done
         episode_job_queue.task_done()
         logger.warning(ep.JOB_COMPLETE)
-        print()
 
 
 @app.route("/encode", methods=['POST'])
@@ -73,19 +76,21 @@ def encode():
     # Headers must be passed in separately, so the request isn't processed
     # before it's confirmed to be authorized
 
-    print()
     logger.warning(ep.NEW_REQUEST)
 
-    a.refresh() # Refresh in case any auths were made
-    status = a.authorize(request.headers)
+    try:
+        a.refresh() # Refresh in case any auths were made
+        status = a.authorize(request.headers)
 
-    if not status:
-        return "Unauthorized request", 403
+        if not status:
+            return "Unauthorized request", 403
 
-    r = RequestHandler(request, p)
-    episode_job_queue.put(r)
+        r = RequestHandler(request, p)
+        episode_job_queue.put(r)
 
-    return "Request accepted", 200
+        return "Request accepted", 200
+    except:
+        return "Error with request", 400
 
 if __name__ == "__main__":
 

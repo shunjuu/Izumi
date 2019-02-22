@@ -63,7 +63,7 @@ class OSHandler:
 
         except Exception as e:
             self._logger.error(self._prints.TEMP_DIR_CREATE_ERROR)
-            os._exit(2)
+            raise Exception()
 
 
     def _check_if_episode_exists(self, source):
@@ -148,7 +148,7 @@ class OSHandler:
         # If we've reached this point, the episode was not found
         self._logger.error(self._prints.EPISODE_NOT_FOUND.format(
             self._reqh.get_episode()))
-        sys.exit(5)
+        raise Exception()
   
 
     def _create_temp_replica_fs(self):
@@ -223,7 +223,7 @@ class OSHandler:
         except:
             self._logger.error(self._prints.UPLOAD_REMOVE_SRC_FILE_FAIL.format(
                 self._temp_src_file))
-            sys.exit(4)
+            raise Exception()
 
         for dest in self._conf.get_upload_destinations():
             self._logger.warning(self._prints.UPLOAD_START.format(dest))
@@ -249,7 +249,7 @@ class OSHandler:
         except:
             self._logger.error(self._prints.DELETE_TEMP_FOLDER_FAIL.format(
                 self._temp_src_dir))
-            os._exit(2)
+            # Don't raise an exception or exit - just leave it in the logs
 
 
     def cleanup(self):
