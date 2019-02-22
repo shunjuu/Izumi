@@ -62,6 +62,6 @@ class OSHandlerPrints:
         self.DELETE_TEMP_FOLDER_SUCCESS = prefix + colors.GREEN + "Success" + \
             endc + ": Deleted the temporary folder at " + \
             temp_color + "{}" + endc
-        self.DELETE_TEMP_FOLDER_FAIL = prefix + colors.FAIL + "Failure:" + endc + \
-            "Could not delete the temporary folder at " + \
+        self.DELETE_TEMP_FOLDER_FAIL = prefix + colors.FAIL + "Failure" + endc + \
+            ": Could not delete the temporary folder at " + \
             temp_color + "{}" + endc
