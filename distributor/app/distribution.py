@@ -45,17 +45,22 @@ def distribute_worker():
     while True:
         new_request = episode_job_queue.get()
 
-        o = OSHandler(c, new_request, p)
-        o.download()
-        o.upload()
-        o.cleanup()
+        try:
+            o = OSHandler(c, new_request, p)
+            o.download()
+            o.upload()
 
-        n = NetworkHandler(c, new_request, p)
-        n.notify_notifiers()
+            n = NetworkHandler(c, new_request, p)
+            n.notify_notifiers()
+        except:
+            pass
+        finally:
+            # Always attempt to clean up
+            o.cleanup()
+
 
         episode_job_queue.task_done()
         logger.warning(dp.JOB_COMPLETE)
-        print()
 
 @app.route("/distribute", methods=['POST'])
 def distribute():
@@ -63,19 +68,20 @@ def distribute():
     # Headers must be passed in separately, so the request isn't processeed
     # before it's confirmed to be authorized
 
-    print()
     logger.warning(dp.NEW_REQUEST)
 
     a.refresh()
     status = a.authorize(request.headers)
 
     if not status:
-        return "Unauthorized request", 403
+        return "Unauthorized request", 401
 
-    r = RequestHandler(request, p)
-    episode_job_queue.put(r)
-
-    return "Request accepted", 200
+    try:
+        r = RequestHandler(request, p)
+        episode_job_queue.put(r)
+        return "Request accepted", 200
+    except:
+        return "Error with request", 400
 
 if __name__ == "__main__":
 

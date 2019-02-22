@@ -45,3 +45,6 @@ class AuthHandlerPrints:
             "Request denied - auth entries exist but no key matched"
         self.AUTH_FAILURE_NO_ENTRIES_YES_KEY = prefix + failure + "Failure: " + endc + \
             "Request denied - no auth entries but key was provided"
+
+        self.AUTH_FAILURE_NO_JSON_OR_YAML = prefix + failure + "Failure: " + endc + \
+            "Request denied - auth config file is neither json nor yaml"
