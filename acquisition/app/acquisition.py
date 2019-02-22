@@ -16,8 +16,6 @@ from time import sleep
 
 def main():
 
-    print()
-
     inote = sys.argv[1]
 
     c = ConfigHandler("/conf/config.yml")
@@ -27,15 +25,19 @@ def main():
     n = NetworkHandler(c, f, p)
     o = OSHandler(c, a, f, p)
 
-    o.create_temp_replica_fs()
-    o.upload()
-    o.cleanup()
+    try:
+        o.create_temp_replica_fs()
+        o.upload()
 
-    n.notify_encoders()
-    n.notify_notifiers()
-    n.notify_distributors()
+        n.notify_encoders()
+        n.notify_notifiers()
+        n.notify_distributors()
 
-    print()
+    except:
+        pass
+
+    finally:
+        o.cleanup()
 
 if __name__ == "__main__":
     main()

@@ -48,9 +48,8 @@ class OSHandler:
 
             self._logger.info(self._prints.TEMP_DIR_CREATE_SUCCESS.format(self.temp_dir))
         except Exception as e:
-            # TODO: print error messages
             self._logger.error(self._prints.TEMP_DIR_CREATE_ERROR)
-            os._exit(2)
+            raise Exception()
 
     def create_temp_replica_fs(self):
         """
@@ -131,7 +130,10 @@ class OSHandler:
         Removes the temporary directory files, as well as the source file
         that triggered this entire application.
         """
-        self._delete_temp_all()
+        try:
+            self._delete_temp_all()
+        except:
+            pass
 
         # Bcause shutil.move may be used instead of link, there is a chance
         # the source file might not exist - because it's been moved
@@ -157,7 +159,7 @@ class OSHandler:
                 self._logger.warning(self._prints.CLEANUP_SRC_OBJ_ISDIR.format(src_folder))
             except:
                 self._logger.error(self._prints.CLEANUP_SRC_OBJ_ISDIR_ERROR.format(src_folder))
-                os._exit(2)
+                raise Exception()
 
         # It wasn't a directory created
         else:
@@ -188,7 +190,7 @@ class OSHandler:
             self._logger.warning(self._prints.CLEANUP_TEMP_ALL.format(self.get_temp_dir()))
         except:
             self._logger.error(self._prints.CLEANUP_TEMP_ALL_ERROR.format(self.get_temp_dir()))
-            os._exit(2)
+            raise Exception()
 
 
     def get_temp_dir(self):
