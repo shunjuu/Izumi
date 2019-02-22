@@ -204,12 +204,12 @@ def _hisha(names):
                         except requests.exceptions.ConnectionError:
                             print("There appears to be no internet connection.")
                             print("Now exiting...")
-                            os._exit(4)
+                            raise Exception()
 
                         except:
                             print("An exception occured when attempting to contact Anilist.")
                             print("Now exiting...")
-                            os._exit(5)
+                            raise Exception()
 
     # If we've reachedt his point, we didn't find a result
     raise Exception("No result found.")
@@ -240,7 +240,7 @@ def hisha(episode, title="userPreferred"):
     except:
         # An exception will be thrown if nothing was found. We exit if that's the case.
         print("No show was found when searching. The system will now exit.")
-        os._exit(1)
+        raise Exception()
 
     # Backwards-compatability: Hisha will return the title
     return res.json()['data']['Media']['title'][title]
@@ -258,7 +258,7 @@ def hisha2(episode):
     except:
         # An exception will be thrown if nothing was found. We exit if that's the case.
         print("No show was found when searching. The system will now exit.")
-        os._exit(1)
+        raise Exception()
     return res.json()
  
 
