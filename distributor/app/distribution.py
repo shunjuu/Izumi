@@ -30,6 +30,7 @@ app = Flask(__name__)
 
 episode_job_queue = Queue()
 
+# Don't try any of this here - startup configs should fail immediately
 c = ConfigHandler(cpath="/conf/config.yml")
 p = PrintHandler(c)
 logger = p.get_logger()
@@ -70,13 +71,13 @@ def distribute():
 
     logger.warning(dp.NEW_REQUEST)
 
-    a.refresh()
-    status = a.authorize(request.headers)
-
-    if not status:
-        return "Unauthorized request", 401
-
     try:
+        a.refresh()
+        status = a.authorize(request.headers)
+
+        if not status:
+            return "Unauthorized request", 401
+
         r = RequestHandler(request, p)
         episode_job_queue.put(r)
         return "Request accepted", 200
