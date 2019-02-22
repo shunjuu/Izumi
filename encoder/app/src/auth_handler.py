@@ -91,7 +91,7 @@ class AuthHandler:
 
         # If we've reached this point, then print some 
         # TODO: print statement for loading auth error
-        self._logger.error(AUTH_FAILURE_NO_JSON_OR_YAML)
+        self._logger.error(self._prints.AUTH_FAILURE_NO_JSON_OR_YAML)
         raise Exception()
 
     def authorize(self, headers):

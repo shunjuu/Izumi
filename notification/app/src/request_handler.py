@@ -114,7 +114,7 @@ class RequestHandler:
         if sub_type.lower() not in SUB_TYPES:
             # there is an error here
             self._logger.info(self._prints.BAD_SUB_TYPE.format(sub_type))
-            sys.exit(2)
+            raise Exception()
 
         return sub_type
 

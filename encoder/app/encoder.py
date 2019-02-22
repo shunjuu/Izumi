@@ -83,7 +83,7 @@ def encode():
         status = a.authorize(request.headers)
 
         if not status:
-            return "Unauthorized request", 403
+            return "Unauthorized request", 401
 
         r = RequestHandler(request, p)
         episode_job_queue.put(r)
