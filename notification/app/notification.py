@@ -57,7 +57,6 @@ def encode_worker():
 
         notify_job_queue.task_done()
         logger.warning(np.JOB_COMPLETE)
-        print()
 
 @app.route("/notify", methods=['POST'])
 def distribute():
@@ -65,19 +64,21 @@ def distribute():
     # Headers must be passed in separately, so the request isn't processed
     # before it's confirmed to be authorization.
 
-    print()
     logger.warning(np.NEW_REQUEST)
 
-    a.refresh()
-    status = a.authorize(request.headers)
+    try:
+        a.refresh()
+        status = a.authorize(request.headers)
 
-    if not status:
-        return "Unauthorized request", 403
+        if not status:
+            return "Unauthorized request", 401
 
-    r = RequestHandler(request, p)
-    notify_job_queue.put(r)
+        r = RequestHandler(request, p)
+        notify_job_queue.put(r)
 
-    return "Request accepted", 200
+        return "Request accepted", 200
+    except:
+        return "Error with request", 400
 
 if __name__ == "__main__":
 

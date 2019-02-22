@@ -77,7 +77,7 @@ class AuthHandler:
                     return auth
                 except:
                     self._logger.error(self._prints.LOCAL_AUTH_YAML_ERROR.format(apath_abs))
-                    os._exit(2)
+                    raise Exception()
 
         elif file_ext in JSON_EXT:
             with open(apath_abs, 'r') as atjson:
@@ -87,10 +87,11 @@ class AuthHandler:
                     return auth
                 except:
                     self._logger.error(self._prints.LOCAL_AUTH_JSON_ERROR.format(apath_abs))
-                    os._exit(2)
+                    raise Exception()
 
         # If we've reached this point, then print some 
-        # TODO: print statement for loading auth error
+        self._logger.error(self._prints.AUTH_FAILURE_NO_JSON_OR_YAML)
+        raise Exception()
 
     def authorize(self, headers):
         """
