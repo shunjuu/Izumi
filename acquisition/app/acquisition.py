@@ -18,14 +18,17 @@ def main():
 
     inote = sys.argv[1]
 
-    c = ConfigHandler("/conf/config.yml")
-    p = PrintHandler(c)
-    a = ArgumentHandler(c, p, inote)
-    f = FileHandler(c, a, p, inote)
-    n = NetworkHandler(c, f, p)
-    o = OSHandler(c, a, f, p)
+    try:
+        c = ConfigHandler("/conf/config.yml")
+        p = PrintHandler(c)
+        a = ArgumentHandler(c, p, inote)
+        f = FileHandler(c, a, p, inote)
+        n = NetworkHandler(c, f, p)
+    except:
+        pass
 
     try:
+        o = OSHandler(c, a, f, p)
         o.create_temp_replica_fs()
         o.upload()
 
