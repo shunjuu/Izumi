@@ -5,8 +5,8 @@ import json
 
 import pprint as pp
 
-# Temp hisha2a for fetching info
-from lib import hisha2a
+# Temp hisha3 for fetching info
+from lib import hisha3
 
 from src.prints.module_handler_prints import ModuleHandlerPrints
 
@@ -39,7 +39,7 @@ class ModuleHandler:
 
     def _get_show_info(self, show):
         """ 
-        Uses hisha2a to fetch the information 
+        Uses hisha3 to fetch the information 
 
         Params:
             show - the name of the show in the request
@@ -47,8 +47,11 @@ class ModuleHandler:
 
         self._logger.info(self._prints.FETCHING_INFO_START)
 
-        info = hisha2a.hisha2a(show)
-        info['idKitsu'] = hisha2a.hitsu2a(show)['data'][0]['id']
+        info = hisha3.hisha2a(show)
+        try:
+            info['idKitsu'] = hisha2a.hitsu2a(show)['data'][0]['id']
+        except:
+            info['idKitsu'] = None
 
         self._logger.info(self._prints.FETCHING_INFO_END)
 

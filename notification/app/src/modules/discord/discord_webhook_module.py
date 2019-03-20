@@ -21,6 +21,7 @@ from src.prints.modules.discord.discord_webhook_module_prints import DiscordWebh
 MAL_ANI_BASE = "https://myanimelist.net/anime/"
 ANI_ANI_BASE = "https://anilist.co/anime/"
 KIT_ANI_BASE = "https://kitsu.io/anime/"
+KIT_DOWN = "https://kitsu.io/"
 
 class DiscordWebhookModule:
     """
@@ -224,7 +225,11 @@ class DiscordWebhookModule:
         Gets the Kitsu url and returns it as a string
         """
 
-        return KIT_ANI_BASE + str(self._info['idKitsu'])
+        # Kitsu may be down - only return if so
+        if self._info['idKitsu']:
+            return KIT_ANI_BASE + str(self._info['idKitsu'])
+
+        return KIT_DOWN
 
 # -------------------------------------------------------------------- #
 
