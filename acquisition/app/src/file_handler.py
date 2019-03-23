@@ -7,7 +7,7 @@ import anitopy
 
 from time import sleep 
 
-from bin import hisha2
+from bin import hisha3
 from src.prints.file_handler_prints import FileHandlerPrints
 
 class FileHandler:
@@ -134,7 +134,7 @@ class FileHandler:
 
         # If the show wasn't included, this means the episode was included on its own.
         # What's nice about this? The Hisha library takes care of it for us.
-        show = hisha2.hisha(self.episode)
+        show = hisha3.hisha(self.episode)
         self._logger.info(self._prints.SHOW_LOADED_HISHA.format(show))
 
         # There should be a case where Hisha doesn't find it
