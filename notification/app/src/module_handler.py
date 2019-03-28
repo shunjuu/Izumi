@@ -6,7 +6,7 @@ import json
 import pprint as pp
 
 # Temp hisha3 for fetching info
-from lib import hisha3
+from lib import hisha2a
 
 from src.prints.module_handler_prints import ModuleHandlerPrints
 
@@ -47,7 +47,7 @@ class ModuleHandler:
 
         self._logger.info(self._prints.FETCHING_INFO_START)
 
-        info = hisha3.hisha2a(show)
+        info = hisha2a.hisha2a(show)
         try:
             info['idKitsu'] = hisha2a.hitsu2a(show)['data'][0]['id']
         except:
