@@ -208,6 +208,8 @@ class ConfigHandler:
                 is being used (default: local)
 
         Returns: The watch folder string, which ends with a "/"
+
+        Automatically returns "/watch" if Docker use is detected
         """
 
         # TODO: Return if web
@@ -215,7 +217,15 @@ class ConfigHandler:
             pass
 
         # Return the local, since we're not using the web conf
-        folder = conf['watch-folder']
+        if 'DOCKER' not in os.environ:
+            folder = conf['watch-folder']
+        else:
+            USAGE = bool(os.environ.get("DOCKER"))
+            if USAGE:
+                folder = "/watch"
+            else:
+                folder = conf['watch-folder']
+                
         # And append a "/" if it's not added in by the user
         folder = folder if folder.endswith("/") else folder + "/"
 
