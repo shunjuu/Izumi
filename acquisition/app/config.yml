@@ -1,7 +1,7 @@
 # This is the folder the application will watch for new files. 
 # [type: String-URL]
 # This MUST be included in this config, and not the web-config.
-watch-folder: "/watch"
+watch-folder: "/home/rocia/Desktop/watch"
 
 # You can optionally load a global config from a web source.
 # If you do not, leave this as an empty string.

@@ -14,20 +14,33 @@ from src.print_handler import PrintHandler
 
 from time import sleep
 
+def _get_config_handler():
+    """ 
+    Gets the config path based on if Docker is used or not
+    Checks environment for DOCKER='true' 
+    Returns appropriate ConfigHandler
+    """
+    if 'DOCKER' not in os.environ:
+        return ConfigHandler()
+    else:
+        USAGE = bool(os.environ.get("DOCKER"))
+        if USAGE: 
+            return ConfigHandler("/src/config.yml")
+        else: 
+            return ConfigHandler()
+
 def main():
 
     inote = sys.argv[1]
 
     try:
-        c = ConfigHandler("/conf/config.yml")
+
+        c = _get_config_handler()
         p = PrintHandler(c)
         a = ArgumentHandler(c, p, inote)
         f = FileHandler(c, a, p, inote)
         n = NetworkHandler(c, f, p)
-    except:
-        pass
 
-    try:
         o = OSHandler(c, a, f, p)
         o.create_temp_replica_fs()
         o.upload()
@@ -36,11 +49,14 @@ def main():
         n.notify_notifiers()
         n.notify_distributors()
 
-    except:
+    except Exception as e:
+        print(e)
         pass
 
     finally:
         o.cleanup()
+
+    print()
 
 if __name__ == "__main__":
     main()

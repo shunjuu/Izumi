@@ -9,7 +9,8 @@ import pprint as pp
 from src.prints.os_handler_prints import OSHandlerPrints
 
 # The upload command that is used to upload files.
-UPLOAD = "/rclone/rclone --config=\"/conf/rclone.conf\" copy -L \"{}\" \"{}\" {}"
+UPLOAD = "rclone copy -L \"{}\" \"{}\" {}"
+UPLOAD_DOCKER = "/rclone/rclone --config=\"/rclone/rclone.conf\" copy -L \"{}\" \"{}\" {}"
 
 class OSHandler:
     """
@@ -42,7 +43,7 @@ class OSHandler:
         Creates a temporary directory and sets the class variable to it.
         """
         try:
-            self.temp_dir = tempfile.mkdtemp(dir="/src")
+            self.temp_dir = tempfile.mkdtemp(dir=sys.path[0])
             if not self.temp_dir.endswith("/"):
                 self.temp_dir += "/"
 
@@ -113,6 +114,20 @@ class OSHandler:
 
         return episode_path
 
+    def _get_upload(self):
+        """
+        Determines which upload command to use based on environment variables
+        Returns the UPLOAD constant as a string
+        """
+        if 'DOCKER' not in os.environ:
+            return UPLOAD
+        else:
+            USAGE = bool(os.environ.get("DOCKER"))
+            if USAGE:
+                return UPLOAD_DOCKER
+            else:
+                return UPLOAD
+
     def upload(self):
         """
         Uploads the existing files into the various rclone upload destinations.
@@ -120,9 +135,10 @@ class OSHandler:
         Because we've generated an example FS, we'll simply copy the root
         of that folder online as is.
         """
+        UPLOAD_COMMAND = self._get_upload()
         for dest in self._conf.get_destinations():
             self._logger.info(self._prints.RCLONE_UPLOAD_START.format(dest))
-            os.system(UPLOAD.format(self.temp_dir, dest, self._conf.get_rclone_flags()))
+            os.system(UPLOAD_COMMAND.format(self.temp_dir, dest, self._conf.get_rclone_flags()))
             self._logger.info(self._prints.RCLONE_UPLOAD_END.format(dest))
 
     def cleanup(self):
