@@ -1,6 +1,7 @@
 # This is the folder the application will watch for new files. 
 # [type: String-URL]
 # This MUST be included in this config, and not the web-config.
+# Will automatically be changed in Docker
 watch-folder: "/home/rocia/Desktop/watch"
 
 # You can optionally load a global config from a web source.
