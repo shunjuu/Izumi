@@ -53,7 +53,12 @@ def main():
         pass
 
     finally:
-        o.cleanup()
+
+        try:
+            # A bit hacky, just to clean up if possible
+            o.cleanup()
+        except:
+            pass
 
     print()
 
