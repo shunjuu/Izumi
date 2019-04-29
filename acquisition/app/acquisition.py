@@ -49,8 +49,7 @@ def main():
         n.notify_notifiers()
         n.notify_distributors()
 
-    except Exception as e:
-        print(e)
+    except:
         pass
 
     finally:
