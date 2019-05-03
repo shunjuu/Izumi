@@ -209,6 +209,7 @@ class ConfigHandler:
     def _load_listen_port(self, conf, web):
         """
         Retrieve the port for Flask to listen to.
+        If the app is detected to be Docker, returns port 80
 
         Params:
             conf: self._conf, which represents a dict object
@@ -222,10 +223,12 @@ class ConfigHandler:
         if web:
             pass
 
+        # If runtime is Docker, then return 80 by default
+        if 'DOCKER' in os.environ and bool(os.environ.get("DOCKER")):
+            return 80
+
         # Return from the local config
         return int(conf['listen-port'])
-
-        self.encode_encode_jobs = self._load_encode_encode_jobs(self._conf, self._web_conf_use)
 
     def _load_encode_encode_flags(self, conf, web):
         """
