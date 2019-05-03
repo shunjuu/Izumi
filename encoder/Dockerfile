@@ -10,8 +10,8 @@ RUN apt-get update -y && \
 RUN pip3 install flask requests pyyaml hurry.filesize anitopy 
 
 COPY app/ /src/
-COPY bin/ /ffmpeg/
+COPY bin/ /bin2/
 
-RUN chmod 700 /ffmpeg/*
+RUN chmod 700 /bin2/*
 
 ENTRYPOINT ["sh", "-c", "python3 /src/encoder.py"]
