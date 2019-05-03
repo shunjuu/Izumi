@@ -10,7 +10,9 @@ import pprint as pp
 from src.prints.os_handler_prints import OSHandlerPrints
 from src.encode.h264_standard import H264Standard
 
-RCLONE_SOURCE = '/ffmpeg/rclone --config=\"/conf/rclone.conf\" '
+RCLONE_SOURCE = ('/bin2/rclone --config=\"/bin2/rclone.conf\" '
+                if 'DOCKER' in os.environ and bool(os.environ.get("DOCKER"))
+                else "rclone ")
 # The upload command to pull files
 DOWNLOAD = RCLONE_SOURCE + "copyto \"{}\" \"{}\" {}"
 # The upload command that is used to upload files
@@ -54,7 +56,7 @@ class OSHandler:
         try:
             # tempfile.mkdtemp returns the absolute path
             #self._temp_src_dir = tempfile.mkdtemp(dir=sys.path[0])
-            self._temp_src_dir = tempfile.mkdtemp(dir="/src")
+            self._temp_src_dir = tempfile.mkdtemp(dir=sys.path[0])
             # Append a "/" if it's not already there
             if not self._temp_src_dir.endswith("/"):
                 self._temp_src_dir += "/"
