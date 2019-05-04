@@ -35,7 +35,7 @@ episode_job_queue = Queue()
 c = None # Represents a ConfigHandler
 p = None # Represents PrintHandler
 logger = None # Represents the logger object
-ep = None # Represents the EncodePrints object
+dp = None # Represents the EncodePrints object
 a = None # Represents the authandler object
 
 def _get_config_handler():
@@ -126,7 +126,7 @@ if __name__ == "__main__":
     c = _get_config_handler()
     p = PrintHandler(c)
     logger = p.get_logger()
-    ep = EncodePrints(p.Colors())
+    dp = DistributionPrints(p.Colors())
     a = _get_auth_handler(p)
 
     logger.warning(dp.WORKER_SPAWN.format(c.get_distributor_jobs()))
