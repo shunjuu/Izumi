@@ -10,8 +10,8 @@ RUN apt-get update -y && \
 RUN pip3 install flask requests pyyaml 
 
 COPY app/ /src/
-COPY bin/ /rclone/
+COPY bin/ /bin2/
 
-RUN chmod 700 /rclone/*
+RUN chmod 700 /bin2/*
 
 ENTRYPOINT ["sh", "-c", "python3 /src/distribution.py"]

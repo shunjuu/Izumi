@@ -31,11 +31,45 @@ app = Flask(__name__)
 episode_job_queue = Queue()
 
 # Don't try any of this here - startup configs should fail immediately
-c = ConfigHandler(cpath="/conf/config.yml")
-p = PrintHandler(c)
-logger = p.get_logger()
-dp = DistributionPrints(p.Colors())
-a = AuthHandler(p, apath="/conf/auth.yml")
+# Initialize in __main__ if
+c = None # Represents a ConfigHandler
+p = None # Represents PrintHandler
+logger = None # Represents the logger object
+ep = None # Represents the EncodePrints object
+a = None # Represents the authandler object
+
+def _get_config_handler():
+    """
+    Gets the config path based on if Docker is used or not
+    Checks environment for DOCKER='true'
+    Returns the appropriate ConfigHandler
+    """
+    if 'DOCKER' not in os.environ:
+        return ConfigHandler()
+    else:
+        USAGE = bool(os.environ.get("DOCKER"))
+        if USAGE:
+            return ConfigHandler("/src/config.yml")
+        else:
+            return ConfigHandler()
+
+def _get_auth_handler(printh):
+    """
+    Gets the auth path based on if Docker is used or not
+    Checks environment for DOCKER='true'
+    Returns the appropriate AuthHandler (refresh() not supported)
+    Args:
+        printh - represents a printh object
+    """
+    if 'DOCKER' not in os.environ:
+        return AuthHandler(printh)
+    else:
+        USAGE = bool(os.environ.get("DOCKER"))
+        if USAGE:
+            return AuthHandler(printh, "/src/auth.yml")
+        else:
+            return AuthHandler(printh)
+
 
 def distribute_worker():
     """
@@ -57,7 +91,10 @@ def distribute_worker():
             pass
         finally:
             # Always attempt to clean up
-            o.cleanup()
+            try:
+                o.cleanup()
+            except:
+                pass
 
 
         episode_job_queue.task_done()
@@ -85,6 +122,12 @@ def distribute():
         return "Error with request", 400
 
 if __name__ == "__main__":
+
+    c = _get_config_handler()
+    p = PrintHandler(c)
+    logger = p.get_logger()
+    ep = EncodePrints(p.Colors())
+    a = _get_auth_handler(p)
 
     logger.warning(dp.WORKER_SPAWN.format(c.get_distributor_jobs()))
 
