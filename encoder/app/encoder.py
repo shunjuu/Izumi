@@ -93,10 +93,16 @@ def encode_worker():
             n = NetworkHandler(c, new_request, p, ofile_name, ofile_size)
             n.notify_notifiers()
             n.notify_distributors()
+            
         except:
             pass
+
         finally:
-            o.cleanup()
+
+            try:
+                o.cleanup()
+            except:
+                pass
 
         # Mark the job as done
         episode_job_queue.task_done()
