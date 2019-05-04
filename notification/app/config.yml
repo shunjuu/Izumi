@@ -1,6 +1,7 @@
 # This is the port the application will listen on.
 # [type: Integer]
-listen-port: 80
+# Automatically set to 80 if Docker is active
+listen-port: 8080
 
 # Authorization files must be stored locally
 
