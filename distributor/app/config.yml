@@ -1,6 +1,6 @@
 # This is the port the application will listen on.
 # [type: Integer]
-listen-port: 80
+listen-port: 8080
 
 # Authorization files must be stored locally
 
