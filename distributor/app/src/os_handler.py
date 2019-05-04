@@ -11,7 +11,7 @@ from src.prints.os_handler_prints import OSHandlerPrints
 
 RCLONE_SOURCE = ('/bin2/rclone --config=\"/bin2/rclone.conf\" '
                 if 'DOCKER' in os.environ and bool(os.environ.get("DOCKER"))
-                else "rclone")
+                else "rclone ")
 # The upload command to pull files
 DOWNLOAD = RCLONE_SOURCE + "copyto \"{}\" \"{}\" {}"
 # The upload command that is used to upload files
