@@ -67,8 +67,9 @@ Alternatively, you can use [Sonarr](https://sonarr.tv/) to handle new downloads,
 
 Izumi makes use of rclone to upload new files. Upload destinations can be specified as a list in uploading/upload-destinations.
 Include the full path of the rclone destination you would like to upload new files to. (It does not matter if your destination ends with a `/` or not).
+You can also specify an "airing folder name" that gets append to the end of all the upload-destinations.
 
-**If you want to have new episodes mass-distributed to various destinations, there is also a Distributor module to handle this**. You can also specify an "airing folder name" that gets append to the end of all the upload-destinations.
+**If you want to have new episodes mass-distributed to various destinations, there is also a Distributor module to handle this**. This can also be handy if you want to domain-separate uploader access, or have multiple distributors. See [docs/decentralization](/docs/decentralization) for more information.
 
 For example, if a rclone destination is set to `dest:Anime` with `airing-folder-name="Airing"`, then new episodes will be uploaded to:
 ```
