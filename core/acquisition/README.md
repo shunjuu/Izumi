@@ -18,7 +18,7 @@ Acquisition can be run either as an interactive program (e.g., in tmux), or as a
 
 Acquisition is intended to be a complement to ruTorrent and the Autotools plugin. There are plans in the future to make Acquisition executable with command-line arguments, too. 
 
-Note: **All configurations are in config.yml**
+Note: **All configurations are in [config.yml](./app/config.yml)**
 
 Please first read [Autotools Documentation](https://github.com/Novik/ruTorrent/wiki/PluginAutotools). The rest of this writeup will make much more sense.
 
@@ -47,8 +47,10 @@ Acquisition will automatically detect any episodes under this path to be from th
 ```
 # A new episode is first written (incomplete download) to:
 /home/rutorrent/incompleted/5-Toubun no Hanayome/5-Toubun no Hanayome - 01 [1080p].mkv
+
 # When it's done downloading, Autotools will move it to:
 /home/rutorrent/completed/5-Toubun no Hanayome/5-Toubun no Hanayome - 01 [1080p].mkv
+
 # At this point, Acquisition will detect the new episode and start processing it.
 ```
 As you can see above, it is important to note that Autotools copies the entire folder structure to the watch folder. This is critical to passing correct invocation information. 
@@ -58,6 +60,23 @@ As you can see above, it is important to note that Autotools copies the entire f
 | Show | Save Path | Example Regex |
 | --- | --- | --- |
 | 5-Toubun no Hanayome | /home/rutorrent/incompleted/5-Toubun no Hanayome | /.*(5-Toubun no Hanayome).*(1080p).*/i |
+
 Alternatively, you can use [Sonarr](https://sonarr.tv/) to handle new downloads, and simply specify their save paths.
 
 ### Configuring Upload Destinations
+
+Izumi makes use of rclone to upload new files. Upload destinations can be specified as a list in uploading/upload-destinations.
+Include the full path of the rclone destination you would like to upload new files to. (It does not matter if your destination ends with a `/` or not).
+
+**If you want to have new episodes mass-distributed to various destinations, there is also a Distributor module to handle this**. You can also specify an "airing folder name" that gets append to the end of all the upload-destinations.
+
+For example, if a rclone destination is set to `dest:Anime` with `airing-folder-name="Airing"`, then new episodes will be uploaded to:
+```
+dest:Anime/Airing/$SHOW_NAME/$EPISODE
+
+# Example:
+mega:Anime/Airing/5-Toubun no Hanayome/5-Toubun no Hanayome - 01 [1080p].mkv
+```
+The folder that represents the show is added automatically (or specified above). There is no way to turn this off.
+
+### Configuring Endpoints
