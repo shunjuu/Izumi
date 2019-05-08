@@ -18,13 +18,13 @@ Acquisition can be run either as an interactive program (e.g., in tmux), or as a
 
 Acquisition is intended to be a complement to ruTorrent and the Autotools plugin. There are plans in the future to make Acquisition executable with command-line arguments, too. 
 
-Note: **All configurations are in [config.yml](./app/config.yml)**
+Note: **Acquisition configurations are in [config.yml](./app/config.yml)**
 
 Please first read [Autotools Documentation](https://github.com/Novik/ruTorrent/wiki/PluginAutotools). The rest of this writeup will make much more sense.
 
 There are several paths that are of importance. They are:
-- `rutorrent.rc directory path`: This is the folder Autotools will copy new downloads from (the entire new download file structure is copied).
-- `Autotools folder`: This folder is where new **completed** downloads are moved to. 
+- `rutorrent.rc directory path`: This is the folder Autotools will copy new downloads from (the entire new download file structure is copied). This is not an Acquisition config.
+- `Autotools folder`: This folder is where new **completed** downloads are moved to. This is the "path to finished downloads" in Autotools.
 - `watch-folder`: A folder in the configuration where Acquisition where watch for new files. This should be the same as `Autotools folder`.
 
 When saving new files (manually or in RSS), you should save them to the `rutorrent.rc directory path`. For example purposes, let us assume this path is `/home/rutorrent/incompleted/`, and that the `Autotools folder` is `/home/rutorrent/completed`.
@@ -69,7 +69,7 @@ Izumi makes use of rclone to upload new files. Upload destinations can be specif
 Include the full path of the rclone destination you would like to upload new files to. (It does not matter if your destination ends with a `/` or not).
 You can also specify an "airing folder name" that gets append to the end of all the upload-destinations.
 
-**If you want to have new episodes mass-distributed to various destinations, there is also a Distributor module to handle this**. This can also be handy if you want to domain-separate uploader access, or have multiple distributors. See [docs/decentralization](/docs/decentralization) for more information.
+**If you want to have new episodes mass-distributed to various destinations, there is also a Distributor module to handle this**. This can also be handy if you want to domain-separate uploader access, or have multiple distributors. See [docs/decentralization](/docs/decentralization.md) for more information.
 
 For example, if a rclone destination is set to `dest:Anime` with `airing-folder-name="Airing"`, then new episodes will be uploaded to:
 ```
