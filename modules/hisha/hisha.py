@@ -83,8 +83,8 @@ class HishaInfo:
 
     def __init__(self):
         # Set the default values here
-        self._id = 0
-        self._idMal = 0
+        self._id = -1
+        self._idMal = -1
         self._episodes = -1
         self._duration = -1
         self._popularity = -1
