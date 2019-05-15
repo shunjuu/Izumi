@@ -35,7 +35,7 @@ class FileHandler:
         self._inote = inote
 
         # Logging Tools
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = FileHandlerPrints(printh.Colors(), self._conf)
 
         # -------------------

@@ -40,7 +40,7 @@ class NetworkHandler:
         self._fileh = fileh
 
         # Logging Tools
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = NetworkHandlerPrints(printh.Colors())
 
         # Variables

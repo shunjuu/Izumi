@@ -34,7 +34,7 @@ class OSHandler:
         self.temp_dir = None # This stores the path of the temporary directory
 
         # Logging Tools
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = OSHandlerPrints(printh.Colors())
 
 
