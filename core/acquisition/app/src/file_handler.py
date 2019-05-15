@@ -35,32 +35,32 @@ class FileHandler:
         self._inote = inote
 
         # Logging Tools
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = FileHandlerPrints(printh.Colors(), self._conf)
 
         # -------------------
         # Variables
         # -------------------
 
-        self.episode = None # A string representation, the name of the new file with file extension
-        self.episode_new = None # String rep of the new filename after Anitopy cleans it up
-        self.show = None # A string representation of the show of the new file. No "/" at the end
-        self.show_clean = None # self.show, but with : replaced with " - "
-        self.filesize = None # An integer representation of the size of the file, in bytes
-        self.sub_type = None # One of "hardsub" or "softsub", determined by file extension solely
+        self._episode = None # A string representation, the name of the new file with file extension
+        self._episode_new = None # String rep of the new filename after Anitopy cleans it up
+        self._show = None # A string representation of the show of the new file. No "/" at the end
+        self._show_clean = None # self._show, but with : replaced with " - "
+        self._filesize = None # An integer representation of the size of the file, in bytes
+        self._sub_type = None # One of "hardsub" or "softsub", determined by file extension solely
 
         # -------------------
         # Populate the variables
         # -------------------
 
         try:
-            # self.episode NEEDS to be run before self._load_show()
-            self.episode = self._load_episode(conf, args)
-            self.episode_new = self._generate_new_episode(self.episode)
-            self.show = self._load_show(args)
-            self.show_clean = self.show.replace(": ", " - ")
-            self.filesize = self._load_filesize(conf, args)
-            self.sub_type = self._load_sub_type(self.episode)
+            # self._episode NEEDS to be run before self._load_show()
+            self._episode = self._load_episode(conf, args)
+            self._episode_new = self._generate_new_episode(self._episode)
+            self._show = self._load_show(args)
+            self._show_clean = self._show.replace(": ", " - ")
+            self._filesize = self._load_filesize(conf, args)
+            self._sub_type = self._load_sub_type(self._episode)
         except Exception as e:
             # Generally in this case, it means an ISDIR event occured, and a filenotfound error
             # was thrown cause the og file was deleted in the previous call.
@@ -81,7 +81,7 @@ class FileHandler:
         """
 
         # If the inote event was not ISDIR, then ArgumentHandler will already have the episode 
-        episode = args.get_episode()
+        episode = args.episode
         if episode:
             self._logger.info(self._prints.EPISODE_LOADED_ARG.format(episode))
             return episode
@@ -97,7 +97,7 @@ class FileHandler:
         # We will also wait one second for hardlink buffering
         sleep(1)
 
-        episode_folder = conf.get_watch_folder() + args.get_show() + "/"
+        episode_folder = conf.watch_folder + args.show + "/"
         episode_folder_contents = os.listdir(episode_folder)
         episode_folder_contents = [f for f in episode_folder_contents if f.endswith('.mkv')]
 
@@ -127,14 +127,14 @@ class FileHandler:
         """
 
         # Args may already have determined the show from the passed-in args. If so, just return that.
-        show = args.get_show()
+        show = args.show
         if show:
             self._logger.info(self._prints.SHOW_LOADED_ARG.format(show))
             return show
 
         # If the show wasn't included, this means the episode was included on its own.
         # What's nice about this? The Hisha library takes care of it for us.
-        show = hisha2.hisha(self.episode)
+        show = hisha2.hisha(self._episode)
         self._logger.info(self._prints.SHOW_LOADED_HISHA.format(show))
 
         # There should be a case where Hisha doesn't find it
@@ -164,7 +164,7 @@ class FileHandler:
 
         # ISDiR event:
         if 'isdir' in sys.argv[1].lower():
-            episode_path = conf.get_watch_folder() + args.get_show() + "/" + self.episode
+            episode_path = conf.watch_folder + args.show + "/" + self._episode
             size = os.path.getsize(episode_path)
             self._logger.info(self._prints.FILESIZE_DISPLAY.format(size))
             return size
@@ -172,7 +172,7 @@ class FileHandler:
         # In either case where there is no ISDIR event, then the inote will point
         # us directly to the file. It's easier to use it directly instead of 
         # pulling it from the args.
-        delimiter = self._conf.get_delimiter()
+        delimiter = self._conf.delimiter
         args = self._inote.split(delimiter)
 
         episode_path = args[0] + args[2]
@@ -241,38 +241,33 @@ class FileHandler:
     # Getters!
     # --------------------
 
-    def get_episode(self):
-        """
-        Gets the file's episode name as a string
-        """
-        return self.episode
+    @property
+    def episode(self):
+        """Gets the file's episode name as a string"""
+        return self._episode
 
-    def get_episode_new(self):
-        """
-        Gets the file's cleaned name as a string
-        """
-        return self.episode_new
+    @property
+    def episode_new(self):
+        """Gets the file's cleaned name as a string"""
+        return self._episode_new
 
-    def get_show(self):
-        """
-        Get's the file's show as a string
-        """
-        return self.show
+    @property
+    def show(self):
+        """Get's the file's show as a string"""
+        return self._show
+    
+    @property
+    def show_clean(self):
+        """Get's the file's show name, but cleaned up"""
+        return self._show_clean
+    
+    @property
+    def filesize(self):
+        """Get's the file's size in bytes as an integer"""
+        return self._filesize
 
-    def get_show_clean(self):
-        """
-        Get's the file's show name, but clenaed up
-        """
-        return self.show_clean
-
-    def get_filesize(self):
-        """
-        Get's the file's size in bytes as an integer
-        """
-        return self.filesize
-
-    def get_sub_type(self):
-        """
-        Gets the file's sub type as a string
-        """
-        return self.sub_type
+    @property
+    def sub_type(self):
+        """Gets the file's sub type as a string"""
+        return self._sub_type
+    
