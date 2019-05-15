@@ -66,8 +66,8 @@ class OSHandler:
         self._create_temp_dir()
 
         airing = self._conf.get_airing_folder_name()
-        show = self._fileh.get_show_clean()
-        episode = self._fileh.get_episode_new()
+        show = self._fileh.show_clean
+        episode = self._fileh.episode_new
 
         path = self.temp_dir + airing + show + "/" 
 
@@ -103,7 +103,7 @@ class OSHandler:
         args = sys.argv[1].split(self._conf.get_delimiter())
 
         if 'isdir' in sys.argv[1].lower():
-            episode_path = args[0] + args[2] + "/" + self._fileh.get_episode()
+            episode_path = args[0] + args[2] + "/" + self._fileh.episode
         else:
             episode_path = args[0] + args[2]
 

@@ -58,10 +58,10 @@ class NetworkHandler:
         Returns: The request JSON as a dict object
         """
         req = dict()
-        req['show'] = fileh.get_show_clean()
-        req['episode'] = fileh.get_episode_new()
-        req['filesize'] = fileh.get_filesize()
-        req['sub'] = fileh.get_sub_type()
+        req['show'] = fileh.show_clean
+        req['episode'] = fileh.episode_new
+        req['filesize'] = fileh.filesize
+        req['sub'] = fileh.sub_type
 
         """
         We'll be ignoring the signature body for now, and duration 
