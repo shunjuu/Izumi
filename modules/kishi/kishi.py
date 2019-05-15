@@ -1,6 +1,7 @@
 import os
 import sys
 
+import re
 import requests
 import logging
 import pprint
@@ -20,6 +21,7 @@ query ($userName: String) {
             name
             entries {
                 media {
+                    id
                     title {
                         romaji
                         english
@@ -50,6 +52,46 @@ class Kishi:
 
         # No need for an inner class that represents each show
 
+    def _check_equality_regex(self, str1, str2):
+        """
+        Checks for equality of two strings without considering punctuation
+        Returns a boolean to indicate equality
+        """
+
+        self._logger.debug("Comparing {} and {} without punctuation".format(str1, str2))
+
+        try:
+            re_str1 = re.sub(r'[^\w\s]','', str1)
+            re_str2 = re.sub(r'[^\w\s]','', str2)
+            return bool(re_str1 == re_str2)
+        except:
+            return False
+
+    def _add_list_entries(self, list_name, list_json):
+        """
+        Helper method to add all list entries into a medialist (watching/paused/ptw)
+        Params:
+            list_name: the name that the list appears to be from Anilist ("Watching")
+            list_json: anilist's raw api response (json format) {'data':'MediaListCollection'}
+
+        Returns: A list with populated Anilist Media entries (a list of dicts)
+        """
+        try:
+
+            entries = list()
+
+            media_lists = list_json['data']['MediaListCollection']['lists']
+            for media_list in media_lists:
+                if list_name.lower() == media_list['name'].lower():
+                    for entry in media_list['entries']:
+                        entries.append(entry['media'])
+
+            return entries
+
+        except:
+            self._logger.warning("Kishi was unable to process list entries for {}".format(list_name))
+            raise Exception()
+
     def _kishi_list(self, user):
         """
         Helper method to get all of a user's anime list.
@@ -61,11 +103,13 @@ class Kishi:
             The first list is all the Watching
             The second list is all the PTW
             The third list is all the Paused
+
+        Throws an exception if anything goes wrong. This should be caught by any method using this.
         """
 
         watching = list()
-        ptw = list()
         paused = list()
+        ptw = list()
  
         # Anilist API is much nicer to play with. 
         try:
@@ -83,14 +127,105 @@ class Kishi:
                 self._logger.error("Anilist returned a response that was not parseable into JSON")
                 raise Exception()
 
+            watching = self._add_list_entries("Watching", anilist_res_json)
+            paused = self._add_list_entries("Paused", anilist_res_json)
+            ptw = self._add_list_entries("Planning", anilist_res_json)
+
         except:
             self._logger.critical("Kishi was unable to properly contact Anilist")
             raise Exception()
             
+        return (watching, paused, ptw)
 
 
+    def is_user_watching_names(self, user, show_name):
+        """
+        Determines whether or not an Anilist user is watching a show
+        Checks by show name
+
+        Params:
+            user: username to look up
+            show_name: name of the show to look up. this should already be the anilist name.
+
+        Returns: a boolean - True if watching, False if not
+        """
+        try:
+            watching, paused, ptw = self._kishi_list(user)
+
+            for show in watching:
+                for title in show['title'].values():
+                    if self._check_equality_regex(title, show_name):
+                        self._logger.info("Matched {} to {} in {}".format(title, show_name, "watching"))
+                        return True 
+
+            for show in paused:
+                for title in show['title'].values():
+                    if self._check_equality_regex(title, show_name):
+                        self._logger.info("Matched {} to {} in {}".format(title, show_name, "paused"))
+                        return True 
+
+            for show in ptw:
+                for title in show['title'].values():
+                    if self._check_equality_regex(title, show_name):
+                        self._logger.info("Matched {} to {} in {}".format(title, show_name, "planning"))
+                        return True 
+
+            self._logger.debug("Didn't find a match for {}".format(show_name))
+            return False
+
+        except:
+            # If any errors are encountered, return True (default assumption)
+            self._logger.warning("An error was encountered while contacting Anilist. Defaulting to TRUE")
+            return True
+
+    def is_user_watching_id(self, user, show_id):
+        """
+        Determines whether or not an Anilist user is watching a show
+        Checks by show ID
+
+        Params:
+            user: username to look up
+            id: id of the show to look up
+
+        Returns: a boolean - True if watching, False if not
+        """
+
+        try:
+            show_id = int(show_id) # Get the int equivalent value of the ID
+        except:
+            # Why would you not pass an integer in?
+            self._logger.critical("Kishi ID search requires an input that can be converted to an int. Returning FALSE")
+            return False
+
+        try:
+
+            watching, paused, ptw = self._kishi_list(user)
+
+            for show in watching:
+                if show_id == show['id']:
+                    self._logger.info("Found show ID {} in {}".format(show_id, "watching"))
+                    return True
+
+            for show in paused:
+                if show_id == show['id']:
+                    self._logger.info("Found show ID {} in {}".format(show_id, "paused"))
+                    return True
+
+            for show in ptw:
+                if show_id == show['id']:
+                    self._logger.info("Found show ID {} in {}".format(show_id, "planning"))
+                    return True
+
+            self._logger.debug("Didn't find a match for {}".format(show_id))
+            return False
+
+        except:
+            # If any errors are encountered, return True (default assumption)
+            self._logger.warning("An error was encountered while contacting Anilist. Defaulting to TRUE")
+            return True
 
 
 if __name__ == "__main__":
-    k = Kishi()
-    k._kishi_list("aleytia")
+    k = Kishi(loglevel=logging.DEBUG)
+    print(k.is_user_watching_id(sys.argv[1], sys.argv[2]))
+
