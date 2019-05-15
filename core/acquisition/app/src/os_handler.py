@@ -180,7 +180,7 @@ class OSHandler:
         # It wasn't a directory created
         else:
             # If the episode was provided without a show, the watch folders will match.
-            conf_watch_folder = os.path.abspath(self._conf.watch_folder
+            conf_watch_folder = os.path.abspath(self._conf.watch_folder)
             args_watch_folder = os.path.abspath(args[0])
 
             if args_watch_folder == conf_watch_folder:
