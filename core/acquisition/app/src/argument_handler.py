@@ -33,18 +33,18 @@ class ArgumentHandler:
         self._inote = None # The current _inote to process
 
         # Either of these could be none because ISDIR isn't guaranteed to happen
-        self.show = None # The show name if provided, else None
-        self.episode = None # The name of the episode if provided, else None
+        self._show = None # The show name if provided, else None
+        self._episode = None # The name of the episode if provided, else None
 
         # Load inote if it's provided
         if inote:
-            self.load_inote(inote)
+            self._load_inote(inote)
 
 
-    def load_inote(self, inote):
+    def _load_inote(self, inote):
         """
         Loads a new inote into the class. It then automatically 
-        sets the self.show and self.episode variables appropriately.
+        sets the self._show and self._episode variables appropriately.
 
         Params:
             inote: An inote string that this application was executed with.
@@ -54,8 +54,8 @@ class ArgumentHandler:
         self._logger.warning(self._prints.DISPLAY_INOTE.format(inote))
 
         self._inote = inote
-        self.show = self._load_show(inote)
-        self.episode = self._load_episode(inote)
+        self._show = self._load_show(inote)
+        self._episode = self._load_episode(inote)
 
 
     def _load_show(self, inote):
@@ -144,21 +144,21 @@ class ArgumentHandler:
     # Getters!
     # --------------------
 
-    def get_show(self):
+    @property
+    def show(self):
         """
         A getter method to return the show for the provided inote
-
         Returns:
             The show name as a string, or None if there wasn't a show
             If there is a show, it will not have a "/" at the end.
         """
-        return self.show
+        return self._show
 
-    def get_episode(self):
+    @property
+    def episode(self):
         """
         A getter method to return the episode for the provided inote
-
         Returns:
             The episode name as a string, or None if not provided
         """
-        return self.episode
+        return self._episode

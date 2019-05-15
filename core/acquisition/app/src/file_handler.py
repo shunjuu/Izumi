@@ -81,7 +81,7 @@ class FileHandler:
         """
 
         # If the inote event was not ISDIR, then ArgumentHandler will already have the episode 
-        episode = args.get_episode()
+        episode = args.episode
         if episode:
             self._logger.info(self._prints.EPISODE_LOADED_ARG.format(episode))
             return episode
@@ -97,7 +97,7 @@ class FileHandler:
         # We will also wait one second for hardlink buffering
         sleep(1)
 
-        episode_folder = conf.get_watch_folder() + args.get_show() + "/"
+        episode_folder = conf.get_watch_folder() + args.show + "/"
         episode_folder_contents = os.listdir(episode_folder)
         episode_folder_contents = [f for f in episode_folder_contents if f.endswith('.mkv')]
 
@@ -127,7 +127,7 @@ class FileHandler:
         """
 
         # Args may already have determined the show from the passed-in args. If so, just return that.
-        show = args.get_show()
+        show = args.show
         if show:
             self._logger.info(self._prints.SHOW_LOADED_ARG.format(show))
             return show
@@ -164,7 +164,7 @@ class FileHandler:
 
         # ISDiR event:
         if 'isdir' in sys.argv[1].lower():
-            episode_path = conf.get_watch_folder() + args.get_show() + "/" + self.episode
+            episode_path = conf.get_watch_folder() + args.show + "/" + self.episode
             size = os.path.getsize(episode_path)
             self._logger.info(self._prints.FILESIZE_DISPLAY.format(size))
             return size
