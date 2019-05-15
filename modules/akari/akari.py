@@ -30,7 +30,7 @@ class Akari:
 
     def _akari_list(self, user, listurl, listname):
         """
-        Helper method that gets a user's watching anime list
+        Helper method that gets a user's specific anime list
         !! Doesn't handle the random errors thrown by Jikan.moe
 
         Params:
