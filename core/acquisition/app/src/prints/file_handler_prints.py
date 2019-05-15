@@ -45,4 +45,4 @@ class FileHandlerPrints:
 
         # Second ISDIR
         self.ISDIR_FILE_NOT_FOUND = prefix + colors.FAIL + \
-            conf.get_name() + endc + " failed, this was likely due to a previous ISDIR event."
+            conf.name + endc + " failed, this was likely due to a previous ISDIR event."

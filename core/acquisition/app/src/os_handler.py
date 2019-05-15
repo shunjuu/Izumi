@@ -65,7 +65,7 @@ class OSHandler:
         # We need to first create the temporary directory to store everything in
         self._create_temp_dir()
 
-        airing = self._conf.get_airing_folder_name()
+        airing = self._conf.airing_folder
         show = self._fileh.show_clean
         episode = self._fileh.episode_new
 
@@ -100,7 +100,7 @@ class OSHandler:
 
         Used to create the replica FS and also to delete the original file
         """
-        args = sys.argv[1].split(self._conf.get_delimiter())
+        args = sys.argv[1].split(self._conf.delimiter)
 
         if 'isdir' in sys.argv[1].lower():
             episode_path = args[0] + args[2] + "/" + self._fileh.episode
@@ -136,9 +136,9 @@ class OSHandler:
         of that folder online as is.
         """
         UPLOAD_COMMAND = self._get_upload()
-        for dest in self._conf.get_destinations():
+        for dest in self._conf.destinations:
             self._logger.info(self._prints.RCLONE_UPLOAD_START.format(dest))
-            os.system(UPLOAD_COMMAND.format(self.temp_dir, dest, self._conf.get_rclone_flags()))
+            os.system(UPLOAD_COMMAND.format(self.temp_dir, dest, self._conf.rclone_flags))
             self._logger.info(self._prints.RCLONE_UPLOAD_END.format(dest))
 
     def cleanup(self):
@@ -164,7 +164,7 @@ class OSHandler:
         original file provided to the system.
         """
 
-        args = sys.argv[1].split(self._conf.get_delimiter())
+        args = sys.argv[1].split(self._conf.delimiter)
 
         # If the created object was an ISDIR, then purge the isdir directory
         if 'isdir' in sys.argv[1].lower():
@@ -180,7 +180,7 @@ class OSHandler:
         # It wasn't a directory created
         else:
             # If the episode was provided without a show, the watch folders will match.
-            conf_watch_folder = os.path.abspath(self._conf.get_watch_folder())
+            conf_watch_folder = os.path.abspath(self._conf.watch_folder
             args_watch_folder = os.path.abspath(args[0])
 
             if args_watch_folder == conf_watch_folder:

@@ -72,7 +72,7 @@ class ArgumentHandler:
         """
 
         # Get the delimiter and split the args. 
-        delimiter = self._conf.get_delimiter()
+        delimiter = self._conf.delimiter
         args = inote.split(delimiter)
 
         # If this is an ISDIR event (directory was created), then the third
@@ -92,7 +92,7 @@ class ArgumentHandler:
         # However, the show name could be contained within the watch folder.
         # We can detremine this by removing the watch folder from the inote index 0
         # string and see if the string isn't length 0
-        removed_watch_path = args[0].replace(self._conf.get_watch_folder(), "")
+        removed_watch_path = args[0].replace(self._conf.watch_folder, "")
         if len(removed_watch_path) != 0:
             # something besides the watch folder is there, so this is the show folder
 
@@ -125,7 +125,7 @@ class ArgumentHandler:
         """
 
         # Get the delimiter and split the args.
-        delimiter = self._conf.get_delimiter()
+        delimiter = self._conf.delimiter
         args = inote.split(delimiter)
 
         # If this is an ISDIR event (directory was created), then no episode

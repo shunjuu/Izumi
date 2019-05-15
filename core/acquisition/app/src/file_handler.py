@@ -97,7 +97,7 @@ class FileHandler:
         # We will also wait one second for hardlink buffering
         sleep(1)
 
-        episode_folder = conf.get_watch_folder() + args.show + "/"
+        episode_folder = conf.watch_folder + args.show + "/"
         episode_folder_contents = os.listdir(episode_folder)
         episode_folder_contents = [f for f in episode_folder_contents if f.endswith('.mkv')]
 
@@ -164,7 +164,7 @@ class FileHandler:
 
         # ISDiR event:
         if 'isdir' in sys.argv[1].lower():
-            episode_path = conf.get_watch_folder() + args.show + "/" + self._episode
+            episode_path = conf.watch_folder + args.show + "/" + self._episode
             size = os.path.getsize(episode_path)
             self._logger.info(self._prints.FILESIZE_DISPLAY.format(size))
             return size
@@ -172,7 +172,7 @@ class FileHandler:
         # In either case where there is no ISDIR event, then the inote will point
         # us directly to the file. It's easier to use it directly instead of 
         # pulling it from the args.
-        delimiter = self._conf.get_delimiter()
+        delimiter = self._conf.delimiter
         args = self._inote.split(delimiter)
 
         episode_path = args[0] + args[2]
