@@ -39,25 +39,25 @@ class ConfigHandler:
         self._conf = None # The real config to parse all other vars from
         self._web_conf_use = False # Whether or not using web-style conf
 
-        self.watch_folder = None # The watch folder of the string
+        self._watch_folder = None # The watch folder of the string
 
-        self.destinations = None # A list of rclone destinations
-        self.airing_folder = None # The name of an airing folder to store to
-        self.rclone_flags = None # Flags used by rclone to determine its output
+        self._destinations = None # A list of rclone destinations
+        self._airing_folder = None # The name of an airing folder to store to
+        self._rclone_flags = None # Flags used by rclone to determine its output
 
-        self.encoders_always = None # The encoding endpoints, always
-        self.encoders_sequential = None # The encoding endpoints, sequential
-        self.notifiers_always = None # The notification endpoints, always
-        self.notifiers_sequential = None # The notification endpoints, sequential
-        self.distributors_always = None # The distribution endpoints, always
-        self.distributors_sequential = None # The distribution endpoints, sequential
+        self._encoders_always = None # The encoding endpoints, always
+        self._encoders_sequential = None # The encoding endpoints, sequential
+        self._notifiers_always = None # The notification endpoints, always
+        self._notifiers_sequential = None # The notification endpoints, sequential
+        self._distributors_always = None # The distribution endpoints, always
+        self._distributors_sequential = None # The distribution endpoints, sequential
 
-        self.name = None # The name of this application insance
-        self.delimiter = None # The delimiter used by inotify !!IMPORTANT
-        self.verbose = False # Whether or not we are printing verbosely
+        self._name = None # The name of this application insance
+        self._delimiter = None # The delimiter used by inotify !!IMPORTANT
+        self._verbose = False # Whether or not we are printing verbosely
 
-        self.logging_logfmt = None # The format string for the logger to use
-        self.logging_datefmt = None # If logging strings include asctime (strftime format)
+        self._logging_logfmt = None # The format string for the logger to use
+        self._logging_datefmt = None # If logging strings include asctime (strftime format)
 
         # ---------------- #
 
@@ -76,25 +76,119 @@ class ConfigHandler:
         # ---------------- #
         # Populate the rest of the variables now
         # ---------------- #
-        self.watch_folder = self._load_watch_folder(self._conf, self._web_conf_use)
+        self._watch_folder = self._load_watch_folder(self._conf, self._web_conf_use)
 
-        self.destinations = self._load_destinations(self._conf, self._web_conf_use)
-        self.airing_folder = self._load_airing_folder(self._conf, self._web_conf_use)
-        self.rclone_flags = self._load_rclone_flags(self._conf, self._web_conf_use)
+        self._destinations = self._load_destinations(self._conf, self._web_conf_use)
+        self._airing_folder = self._load_airing_folder(self._conf, self._web_conf_use)
+        self._rclone_flags = self._load_rclone_flags(self._conf, self._web_conf_use)
 
-        self.encoders_always = self._load_endpoints_encoders_always(self._conf, self._web_conf_use)
-        self.encoders_sequential = self._load_endpoints_encoders_sequential(self._conf, self._web_conf_use)
-        self.notifiers_always = self._load_endpoints_notifiers_always(self._conf, self._web_conf_use)
-        self.notifiers_sequential = self._load_endpoints_notifiers_sequential(self._conf, self._web_conf_use)
-        self.distributors_always = self._load_endpoints_distributors_always(self._conf, self._web_conf_use)
-        self.distributors_sequential = self._load_endpoints_distributors_sequential(self._conf, self._web_conf_use)
+        self._encoders_always = self._load_endpoints_encoders_always(self._conf, self._web_conf_use)
+        self._encoders_sequential = self._load_endpoints_encoders_sequential(self._conf, self._web_conf_use)
+        self._notifiers_always = self._load_endpoints_notifiers_always(self._conf, self._web_conf_use)
+        self._notifiers_sequential = self._load_endpoints_notifiers_sequential(self._conf, self._web_conf_use)
+        self._distributors_always = self._load_endpoints_distributors_always(self._conf, self._web_conf_use)
+        self._distributors_sequential = self._load_endpoints_distributors_sequential(self._conf, self._web_conf_use)
 
-        self.name = self._load_system_name(self._conf, self._web_conf_use)
-        self.delimiter = self._load_system_delimiter(self._conf, self._web_conf_use)
-        self.verbose = self._load_system_verbose(self._conf, self._web_conf_use)
+        self._name = self._load_system_name(self._conf, self._web_conf_use)
+        self._delimiter = self._load_system_delimiter(self._conf, self._web_conf_use)
+        self._verbose = self._load_system_verbose(self._conf, self._web_conf_use)
         
-        self.logging_logfmt = self._load_logging_logfmt(self._conf, self._web_conf_use)
-        self.logging_datefmt = self._load_logging_datefmt(self._conf, self._web_conf_use)
+        self._logging_logfmt = self._load_logging_logfmt(self._conf, self._web_conf_use)
+        self._logging_datefmt = self._load_logging_datefmt(self._conf, self._web_conf_use)
+
+    # Getter methods
+
+    @property
+    def watch_folder(self):
+        """Returns the watch folder, as a string. The path will end with a "/" """
+        return self._watch_folder
+
+    @property
+    def destinations(self):
+        """Returns the upload destinations, as a list of strings"""
+        return self._destinations
+
+    @property
+    def airing_folder(self):
+        """Returns the airing folder name as a String. Contains a "/" at the end"""
+        return self._airing_folder
+
+    @property
+    def rclone_flags(self):
+        """Returns the flags used by rclone as a single string."""
+        return self._rclone_flags
+
+    @property
+    def encoders(self):
+        """Returns the encoders as a tuple (always, sequential)"""
+        return (self._encoders_always, self._encoders_sequential)
+    
+    @property
+    def encoders_always(self):
+        """Returns the always encoder endpoints as a list of dicts"""
+        return self._encoders_always
+    
+    @property
+    def encoders_sequential(self):
+        """Returns the sequential encoder endpoints as a dict of list of dicts"""
+        return self._encoders_sequential
+
+    @property
+    def notifiers(self):
+        """Returns the notifiers as a tuple (always, sequential)"""
+        return (self._notifiers_always, self._notifiers_sequential)
+    
+    @property
+    def notifiers_always(self):
+        """Returns the always notifier endpoints as a list of dicts"""
+        return self._notifiers_always
+    
+    @property
+    def notifiers_sequential(self):
+        """Returns the sequential notifier endpoints as a dict of list of dicts"""
+        return self._notifiers_sequential
+
+    @property
+    def distributors(self):
+        """Returns the distributors as a tuple (always, sequential)"""
+        return (self._distributors_always, self._distributors_sequential)
+    
+    @property
+    def distributors_always(self):
+        """Returns the always distributors endpoints as a list of dicts"""
+        return self._distributors_always
+    
+    @property
+    def distributors_sequential(self):
+        """Returns the sequential distributors endpoints as a dict of list of dicts"""
+        return self._distributors_sequential
+
+    @property
+    def name(self):
+        """Returns the name for this application specified by the user"""
+        return self._name
+    
+    @property
+    def delimiter(self):
+        """Returns the delimiter used by inotify as a string"""
+        return self._delimiter
+
+    @property
+    def verbose(self):
+        """Returns a boolean representing whether or not to verbose print"""
+        return self._verbose
+
+    @property
+    def logging_logfmt(self):
+        """Returns a string reprsentation for the logfmt"""
+        return self._logging_logfmt
+
+    @property
+    def logging_datefmt(self):
+        return self._logging_datefmt
+
+
+    # Loading methods
 
     def _load_local_config(self, cpath_abs):
         """
@@ -143,7 +237,7 @@ class ConfigHandler:
         return conf['web-config']
 
 
-    def __determine_url_extension(self, url):
+    def _determine_url_extension(self, url):
         """
         Determines the file extension from the URL of the web.
         Because we're not using headers, we need to manually scan the
@@ -178,7 +272,7 @@ class ConfigHandler:
         """
 
         # Figure out what extension we're working with
-        file_ext = self.__determine_url_extension(url)
+        file_ext = self._determine_url_extension(url)
         # Fetch the request itself
         webconf = requests.get(url)
 
@@ -527,115 +621,3 @@ class ConfigHandler:
 
         # Return from the local config
         return conf['system']['logging']['datefmt']
-
-    # Getter methods
-
-    def get_watch_folder(self):
-        """
-        Returns the watch folder, as a string
-        The path will end with a "/"
-        """
-        return self.watch_folder
-
-    def get_destinations(self):
-        """
-        Returns the upload destinations, as a list of strings
-        """
-        return self.destinations
-
-    def get_airing_folder_name(self):
-        """
-        Returns the airing folder name as a String
-        Contains a "/" at the end
-        """
-        return self.airing_folder
-
-    def get_rclone_flags(self):
-        """
-        Returns the flags used by rclone as a single string.
-        """
-        return self.rclone_flags
-
-    def get_encoders(self):
-        """
-        Returns the encoders as a tuple (always, sequential)
-        """
-        return (self.encoders_always, self.encoders_sequential)
-
-    def get_encoders_always(self):
-        """
-        Returns the always encoder endpoints as a list of dicts
-        """
-        return self.encoders_always
-
-    def get_encoders_sequential(self):
-        """
-        Returns the sequential encoder endpoints as a dict of list of dicts
-        """
-        return self.encoders_sequential
-
-    def get_notifiers(self):
-        """
-        Returns the notifiers as a tuple (always, sequential)
-        """
-        return (self.notifiers_always, self.notifiers_sequential)
-
-    def get_notifiers_always(self):
-        """
-        Returns the always notifier endpoints as a list of dicts
-        """
-        return self.notifiers_always
-
-    def get_notifiers_sequential(self):
-        """
-        Returns the sequential notifier endpoints as a dict of list of dicts
-        """
-        return self.notifiers_sequential
-
-    def get_distributors(self):
-        """
-        Returns the distributors as a tuple (always, sequential)
-        """
-        return (self.distributors_always, self.distributors_sequential)
-
-    def get_distributors_always(self):
-        """
-        Returns the always distributors endpoints as a list of dicts
-        """
-        return self.distributors_always
-
-    def get_distributors_sequential(self):
-        """
-        Returns the sequential distributors endpoints as a dict of list of dicts
-        """
-        return self.distributors_sequential
-
-    def get_name(self):
-        """
-        Returns the name for this application specified by the user
-        """
-        return self.name
-
-    def get_delimiter(self):
-        """
-        Returns the delimiter used by inotify as a string
-        """
-        return self.delimiter
-
-    def get_verbose(self):
-        """
-        Returns a boolean representing whether or not to verbose print
-        """
-        return self.verbose
-
-    def get_logging_logfmt(self):
-        """
-        Returns a string reprsentation for the logfmt
-        """
-        return self.logging_logfmt
-
-    def get_logging_datefmt(self):
-        """
-        Returns a string reprsentation for the datefmt
-        """
-        return self.logging_datefmt

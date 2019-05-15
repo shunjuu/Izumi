@@ -40,11 +40,11 @@ class NetworkHandler:
         self._fileh = fileh
 
         # Logging Tools
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = NetworkHandlerPrints(printh.Colors())
 
         # Variables
-        self.request = self._generate_request(fileh) # A dict representing the JSOn request
+        self._request = self._generate_request(fileh) # A dict representing the JSON request
 
 
     def _generate_request(self, fileh):
@@ -58,10 +58,10 @@ class NetworkHandler:
         Returns: The request JSON as a dict object
         """
         req = dict()
-        req['show'] = fileh.get_show_clean()
-        req['episode'] = fileh.get_episode_new()
-        req['filesize'] = fileh.get_filesize()
-        req['sub'] = fileh.get_sub_type()
+        req['show'] = fileh.show_clean
+        req['episode'] = fileh.episode_new
+        req['filesize'] = fileh.filesize
+        req['sub'] = fileh.sub_type
 
         """
         We'll be ignoring the signature body for now, and duration 
@@ -92,7 +92,7 @@ class NetworkHandler:
 
         try:
             self._logger.info(self._prints.SENDING_REQUEST.format(url))
-            res = requests.post(url, json=self.request, headers=headers, timeout=5)
+            res = requests.post(url, json=self._request, headers=headers, timeout=5)
         except requests.exceptions.ConnectionError:
             # When the internet has some kind of issue, just exit
             self._logger.warning(self._prints.SENDING_REQUEST_CONNECTION_ERROR) 
@@ -167,8 +167,7 @@ class NetworkHandler:
         self._logger.info(self._prints.GROUP_ENCODERS)
 
         # Call the general notifier, passing in the encoder functions
-        self._notify(self._conf.get_encoders_always(), 
-                        self._conf.get_encoders_sequential())
+        self._notify(self._conf.encoders_always, self._conf.encoders_sequential)
 
     def notify_notifiers(self):
         """
@@ -178,8 +177,7 @@ class NetworkHandler:
         self._logger.info(self._prints.GROUP_NOTIFIERS)
 
         # Call the general notifer, passing in the notifier functions
-        self._notify(self._conf.get_notifiers_always(),
-                        self._conf.get_notifiers_sequential())
+        self._notify(self._conf.notifiers_always, self._conf.notifiers_sequential)
 
     def notify_distributors(self):
         """
@@ -189,5 +187,4 @@ class NetworkHandler:
         self._logger.info(self._prints.GROUP_DISTRIBUTORS)
 
         # Call the general notifier, passing in the distributor functions
-        self._notify(self._conf.get_distributors_always(),
-                        self._conf.get_distributors_sequential())
+        self._notify(self._conf.distributors_always, self._conf.distributors_sequential)
