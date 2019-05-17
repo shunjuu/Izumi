@@ -28,7 +28,7 @@ class AuthHandler:
         """
 
         # Logging - this needs to be before all other methods are initailized
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = AuthHandlerPrints(printh.Colors())
 
         # Get the absolute path for all use cases
