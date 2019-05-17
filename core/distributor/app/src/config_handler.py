@@ -19,7 +19,7 @@ class ConfigHandler:
     This class does not print anything through the logger.
     """
 
-    def __init__(self,  cpath="config.yml"):
+    def __init__(self, cpath="config.yml"):
         """
         Args:
             cpath - A path that points to the config file. If not specified,
