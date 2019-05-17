@@ -40,10 +40,10 @@ class NetworkHandler:
         self._fsize = fsize
 
         # Logging Tools
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = NetworkHandlerPrints(printh.Colors())
 
-        self.request = self._generate_request()
+        self._request = self._generate_request()
 
     def _generate_request(self):
         """
@@ -53,7 +53,7 @@ class NetworkHandler:
         """
 
         req = dict()
-        req['show'] = self._reqh.get_show()
+        req['show'] = self._reqh.show
         req['episode'] = self._fname
         req['filesize'] = self._fsize
         req['sub'] = "hardsub"
@@ -87,7 +87,7 @@ class NetworkHandler:
 
         try:
             self._logger.info(self._prints.SENDING_REQUEST.format(url))
-            res = requests.post(url, json=self.request, headers=headers, timeout=5)
+            res = requests.post(url, json=self._request, headers=headers, timeout=5)
         except requests.exceptions.ConnectionError:
             # When the internet has some kind of issue, just exit
             self._logger.warning(self._prints.SENDING_REQUEST_CONNECTION_ERROR) 
@@ -163,8 +163,7 @@ class NetworkHandler:
         self._logger.info(self._prints.GROUP_NOTIFIERS)
 
         # Call the general notifer, passing in the notifier functions
-        self._notify(self._conf.get_notifiers_always(),
-                        self._conf.get_notifiers_sequential())
+        self._notify(self._conf.notifiers_always, self._conf.notifiers_sequential)
 
     def notify_distributors(self):
         """
@@ -174,5 +173,4 @@ class NetworkHandler:
         self._logger.info(self._prints.GROUP_DISTRIBUTORS)
 
         # Call the general notifier, passing in the distributor functions
-        self._notify(self._conf.get_distributors_always(),
-                        self._conf.get_distributors_sequential())
+        self._notify(self._conf.distributors_always, self._conf.distributors_sequential)
