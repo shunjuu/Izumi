@@ -53,7 +53,7 @@ class NetworkHandler:
         """
 
         req = dict()
-        req['show'] = self._reqh.get_show()
+        req['show'] = self._reqh.show
         req['episode'] = self._fname
         req['filesize'] = self._fsize
         req['sub'] = "hardsub"
