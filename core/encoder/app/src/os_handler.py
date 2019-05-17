@@ -38,8 +38,8 @@ class OSHandler:
         self._reqh = reqh
 
         # Logging Tools
-        self._logger = printh.get_logger()
         self._printh = printh
+        self._logger = printh.logger
         self._prints = OSHandlerPrints(printh.Colors())
 
         self._temp_src_dir = None # Store the temporary directory we're working in
@@ -81,13 +81,13 @@ class OSHandler:
 
         # If a softsub folder was mentioned, add it here.
         try:
-            rsource = source + self._conf.get_download_softsub_folder()
-            episode_list = os.popen(LIST.format(rsource, self._reqh.get_show())).read()
+            rsource = source + self._conf.download_softsub_folder
+            episode_list = os.popen(LIST.format(rsource, self._reqh.show)).read()
             episode_list = json.loads(episode_list)
 
             # If one of the episodes is the episode we want, return True
             for episode in episode_list:
-                if episode['Name'] == self._reqh.get_episode():
+                if episode['Name'] == self._reqh.episode:
                     return True
 
             # If the path exists but none of them are the episode, return False
@@ -109,20 +109,19 @@ class OSHandler:
         """
 
         # Get the command for the source file location
-        source_file = source + self._conf.get_download_softsub_folder() + \
-            self._reqh.get_show() + "/" + self._reqh.get_episode()
+        source_file = source + self._conf.download_softsub_folder + \
+            self._reqh.show + "/" + self._reqh.episode
 
         # Because of ffmpeg limitations, the file needs to be downloaded first
         # as "temp.mkv" and have no : or special chars in the path
         dest_file = self._temp_src_dir + "temp.mkv"
 
         self._logger.warning(self._prints.DOWNLOAD_START.format(
-            self._reqh.get_episode(), source))
-        #print(DOWNLOAD.format(source_file, dest_file, self._conf.get_download_rclone_flags()))
-        os.system(DOWNLOAD.format(source_file, dest_file, self._conf.get_download_rclone_flags()))
+            self._reqh.episode, source))
+        os.system(DOWNLOAD.format(source_file, dest_file, self._conf.download_rclone_flags))
 
         self._logger.warning(self._prints.DOWNLOAD_COMPLETE.format(
-            self._reqh.get_episode(), source))
+            self._reqh.episode, source))
 
         return dest_file
 
@@ -135,21 +134,19 @@ class OSHandler:
         """
 
         # First step: Find which rclone source has the file
-        for source in self._conf.get_download_download_sources():
+        for source in self._conf.download_download_sources:
             if self._check_if_episode_exists(source):
-                # TODO: Print some stuff
                 self._logger.warning(self._prints.EPISODE_FOUND.format(
-                    self._reqh.get_episode(), source))
+                    self._reqh.episode, source))
                 self._create_temp_dir()
                 self._temp_src_file = self._download_episode(source)
                 return True
             else:
-                # TODO: Print some stuff
                 continue
 
         # If we've reached this point, the episode was not found
         self._logger.error(self._prints.EPISODE_NOT_FOUND.format(
-            self._reqh.get_episode()))
+            self._reqh.episode))
         raise Exception()
   
 
@@ -158,8 +155,8 @@ class OSHandler:
         Create the temp replica FS:
         temp/"Airing [Hardsub]"/"$SHOW"
         """
-        hardsub_folder = self._conf.get_upload_hardsub_folder()
-        show_name = self._reqh.get_show() + "/" # Show doesn't end with "/"
+        hardsub_folder = self._conf.upload_hardsub_folder
+        show_name = self._reqh.show + "/" # Show doesn't end with "/"
         self._temp_out_dir = self._temp_src_dir + hardsub_folder + show_name
 
         os.makedirs(self._temp_out_dir)
@@ -174,7 +171,7 @@ class OSHandler:
         /temp/"Airing [Hardsub]"/"$SHOW.mp4"
         """
         # Get the parts of the filename
-        filename, ext = os.path.splitext(self._reqh.get_episode())
+        filename, ext = os.path.splitext(self._reqh.episode)
         # Generate the same name... as the hardsub type
         hardsub_file = filename + EXT
 
@@ -227,13 +224,13 @@ class OSHandler:
                 self._temp_src_file))
             raise Exception()
 
-        for dest in self._conf.get_upload_destinations():
+        for dest in self._conf.upload_destinations:
             self._logger.warning(self._prints.UPLOAD_START.format(dest))
-            os.system(UPLOAD.format(self._temp_src_dir, dest, self._conf.get_upload_rclone_flags()))
+            os.system(UPLOAD.format(self._temp_src_dir, dest, self._conf.upload_rclone_flags))
             self._logger.warning(self._prints.UPLOAD_COMPLETE.format(dest))
 
         # For now, return the new file name
-        return self._reqh.get_episode().replace(".mkv", EXT) 
+        return self._reqh.episode.replace(".mkv", EXT) 
 
 
     # Cleanup methods
