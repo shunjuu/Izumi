@@ -46,7 +46,7 @@ class ConfigHandler:
 
         self._dev_discord_webhook = None # Discord webhooks, for dev use
 
-        self.use_dev = None # Boolean to use dev or not
+        self._use_dev = None # Boolean to use dev or not
         
         self._name = None # The name of this application insance
         self._verbose = False # Whether or not we are printing verbosely
@@ -77,7 +77,7 @@ class ConfigHandler:
 
         self._discord_webhook = self._load_discord_webhook(self._conf, self._web_conf_use)
 
-        self.use_dev = self._load_use_dev(self._conf, self._web_conf_use)
+        self._use_dev = self._load_use_dev(self._conf, self._web_conf_use)
 
         self._dev_discord_webhook = self._load_dev_discord_webhook(self._conf, self._web_conf_use)
 
