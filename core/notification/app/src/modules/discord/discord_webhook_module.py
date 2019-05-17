@@ -30,7 +30,7 @@ class DiscordWebhookModule:
 
     def __init__(self, conf, reqh, printh, info):
 
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = DiscordWebhookModulePrints(printh.Colors())
 
         self._conf = conf
@@ -42,7 +42,7 @@ class DiscordWebhookModule:
 
         # Load the templates
         self._webhook_templates = DiscordWebhookTemplates()
-        self._template_1 = self._webhook_templates.get_template_1()
+        self._template_1 = self._webhook_templates.TEMPLATE_1
 
     def generate_fmt(self):
         """
@@ -74,14 +74,14 @@ class DiscordWebhookModule:
         Sends the notifications to the Discord endpoints
         """
 
-        use_dev = self._conf.get_use_dev()
+        use_dev = self._conf.use_dev
 
         if not use_dev:
             # Send notifications out to the configured outpoints
 
             self._logger.info(self._prints.DEV_DISABLED)
 
-            for hook in self._conf.get_discord_webhook():
+            for hook in self._conf.discord_webhook:
                 if hook['template'] == 1:
                     body = self._template_1.format(**fmt)
                     try:
@@ -96,7 +96,7 @@ class DiscordWebhookModule:
 
             self._logger.info(self._prints.DEV_ENABLED)
 
-            hook = self._conf.get_dev_discord_webhook()
+            hook = self._conf.dev_discord_webhook
             if hook['template'] == 1:
                 body = self._template_1.format(**fmt) 
                 try:
@@ -113,7 +113,7 @@ class DiscordWebhookModule:
         Returns the title as a string
         """
 
-        return self._reqh.get_episode()
+        return self._reqh.episode
 
     def _load_duration(self):
         """
@@ -134,20 +134,20 @@ class DiscordWebhookModule:
         Returns the size as a string (using Hurry)
         """
 
-        return size(self._reqh.get_filesize())
+        return size(self._reqh.filesize)
 
     def _load_sub_type(self):
         """
         Gets the sub type
         Returns it as a string, with the first letter capitalized
         """
-        return self._reqh.get_sub_type().capitalize()
+        return self._reqh.sub_type.capitalize()
 
     def _pick_colors(self):
         """
         Returns the predefined decimal colors
         """
-        sub_type = self._reqh.get_sub_type().lower()
+        sub_type = self._reqh.sub_type.lower()
         if sub_type == "softsub":
             return 65535
         elif sub_type == "hardsub":
