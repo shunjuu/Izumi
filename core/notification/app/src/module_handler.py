@@ -35,7 +35,7 @@ class ModuleHandler:
         self._logger = printh.get_logger()
         self._prints = ModuleHandlerPrints(printh.Colors())
 
-        self._info = self._get_show_info(self._reqh.get_show())
+        self._info = self._get_show_info(self._reqh.show)
 
     def _get_show_info(self, show):
         """ 

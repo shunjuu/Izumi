@@ -113,7 +113,7 @@ class DiscordWebhookModule:
         Returns the title as a string
         """
 
-        return self._reqh.get_episode()
+        return self._reqh.episode
 
     def _load_duration(self):
         """
@@ -134,20 +134,20 @@ class DiscordWebhookModule:
         Returns the size as a string (using Hurry)
         """
 
-        return size(self._reqh.get_filesize())
+        return size(self._reqh.filesize)
 
     def _load_sub_type(self):
         """
         Gets the sub type
         Returns it as a string, with the first letter capitalized
         """
-        return self._reqh.get_sub_type().capitalize()
+        return self._reqh.sub_type.capitalize()
 
     def _pick_colors(self):
         """
         Returns the predefined decimal colors
         """
-        sub_type = self._reqh.get_sub_type().lower()
+        sub_type = self._reqh.sub_type.lower()
         if sub_type == "softsub":
             return 65535
         elif sub_type == "hardsub":

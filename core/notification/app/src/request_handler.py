@@ -27,27 +27,40 @@ class RequestHandler:
         self._prints = RequestHandlerPrints(printh.Colors())
 
         # Store the various attributes of the current request
-        self.show = None # The name of the show (not the episode)
-        self.episode = None # The name of the episode
-        self.filesize = None # The size of the file
-        self.sub_type = None # The subtitle type 
-        # No signature body will be processed
-
         rjson = req.get_json()
+        self._show = self._load_show(rjson) # The name of the show (not the episode)
+        self._episode = self._load_episode(rjson) # The name of the episode
+        self._filesize = self._load_filesize(rjson) # The size of the file
+        self._sub_type = self._load_sub_type(rjson) # The subtitle type 
 
-        self.show = self._load_show(rjson)
-        self.episode = self._load_episode(rjson)
-        self.filesize = self._load_filesize(rjson)
-        self.sub_type = self._load_sub_type(rjson)
+    @property
+    def show(self):
+        """Returns the episode of the request as a string"""
+        return self._show
+    
+    @property
+    def episode(self):
+        """Returns the episode of the request as a string"""
+        return self._episode
+
+    @property
+    def filesize(self):
+        """Returns the filesize in the request as an int"""
+        return self._filesize
+
+    @property
+    def sub_type(self):
+        """Returns the sub type as a string"""
+        return self._sub_type
 
     def clear(self):
         """
         Clears the current variables.
         """
-        self.show = None
-        self.episode = None 
-        self.filesize = None
-        self.sub_type = None
+        self._show = None
+        self._episode = None 
+        self._filesize = None
+        self._sub_type = None
 
     def _load_show(self, rjson):
         """
@@ -117,29 +130,3 @@ class RequestHandler:
             raise Exception()
 
         return sub_type
-
-    # Getter methods
-
-    def get_show(self):
-        """
-        Returns the show of the request as a string
-        """
-        return self.show
-
-    def get_episode(self):
-        """
-        Returns the episode of the request as a string
-        """
-        return self.episode
-
-    def get_filesize(self):
-        """
-        Returns the filesize in the request as an int
-        """
-        return self.filesize
-
-    def get_sub_type(self):
-        """
-        Returns the sub type as a string
-        """
-        return self.sub_type
