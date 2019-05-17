@@ -21,7 +21,7 @@ class H264Standard:
         """
 
         # Logging Tools
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = H264StandardPrints(printh.Colors())
 
         self._conf = conf

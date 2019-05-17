@@ -136,7 +136,7 @@ if __name__ == "__main__":
     # Set the variables
     c = _get_config_handler()
     p = PrintHandler(c)
-    logger = p.get_logger()
+    logger = p.logger
     ep = EncodePrints(p.Colors())
     a = _get_auth_handler(p)
 

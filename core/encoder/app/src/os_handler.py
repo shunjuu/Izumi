@@ -38,8 +38,8 @@ class OSHandler:
         self._reqh = reqh
 
         # Logging Tools
-        self._logger = printh.get_logger()
         self._printh = printh
+        self._logger = printh.logger
         self._prints = OSHandlerPrints(printh.Colors())
 
         self._temp_src_dir = None # Store the temporary directory we're working in
