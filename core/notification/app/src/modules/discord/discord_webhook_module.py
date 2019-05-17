@@ -42,7 +42,7 @@ class DiscordWebhookModule:
 
         # Load the templates
         self._webhook_templates = DiscordWebhookTemplates()
-        self._template_1 = self._webhook_templates.get_template_1()
+        self._template_1 = self._webhook_templates.TEMPLATE_1
 
     def generate_fmt(self):
         """

@@ -40,10 +40,9 @@ class DiscordWebhookTemplates:
 
     def __init__(self):
 
-        self.template_1 = TEMPLATE_1
+        self.TEMPLATE_1 = TEMPLATE_1
 
-
-    def get_template_1(self):
-        return self.template_1
-
-
+    @property
+    def TEMPLATE_1(self):
+        return self._TEMPLATE_1
+    
