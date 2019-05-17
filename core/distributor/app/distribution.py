@@ -129,12 +129,12 @@ if __name__ == "__main__":
     dp = DistributionPrints(p.Colors())
     a = _get_auth_handler(p)
 
-    logger.warning(dp.WORKER_SPAWN.format(c.get_distributor_jobs()))
+    logger.warning(dp.WORKER_SPAWN.format(c.distributor_jobs))
 
     # Spawn the number of worker threads in the background
-    for _ in range(c.get_distributor_jobs()):
+    for _ in range(c.distributor_jobs):
         distribute = Thread(target=distribute_worker)
         distribute.daemon = True
         distribute.start()
 
-    app.run(host='0.0.0.0', port=c.get_listen_port(), debug=True)
+    app.run(host='0.0.0.0', port=c.listen_port, debug=True)

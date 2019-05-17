@@ -171,6 +171,6 @@ class NetworkHandler:
         self._logger.info(self._prints.GROUP_NOTIFIERS)
 
         # Call the general notifer, passing in the notifier functions
-        self._notify(self._conf.get_notifiers_always(),
-                        self._conf.get_notifiers_sequential())
+        self._notify(self._conf.notifiers_always,
+                        self._conf.notifiers_sequential)
 

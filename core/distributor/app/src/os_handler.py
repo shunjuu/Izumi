@@ -115,8 +115,7 @@ class OSHandler:
 
         self._logger.warning(self._prints.DOWNLOAD_START.format(
             self._reqh.episode, source))
-        #print(DOWNLOAD.format(source_file, dest_file, self._conf.get_download_rclone_flags()))
-        os.system(DOWNLOAD.format(source_file, dest_file, self._conf.get_download_rclone_flags()))
+        os.system(DOWNLOAD.format(source_file, dest_file, self._conf.download_rclone_flags))
 
         self._logger.warning(self._prints.DOWNLOAD_COMPLETE.format(
             self._reqh.episode, source))
@@ -134,9 +133,9 @@ class OSHandler:
         # First step: Find which rclone source has the file
 
         if self._reqh.sub_type == "softsub":
-            sources = self._conf.get_download_rclone_softsub()
+            sources = self._conf.download_rclone_softsub
         elif self._reqh.sub_type == "hardsub":
-            sources = self._conf.get_download_rclone_hardsub()
+            sources = self._conf.download_rclone_hardsub
         else:
             self._logger.error(self._prints.REQH_FAILURE.format(self._reqh.sub_type))
             raise Exception()
@@ -170,17 +169,16 @@ class OSHandler:
 
         # Remove the src file
         if self._reqh.sub_type == "softsub":
-            dests = self._conf.get_upload_rclone_softsub()
+            dests = self._conf.upload_rclone_softsub
         elif self._reqh.sub_type == "hardsub":
-            dests = self._conf.get_upload_rclone_hardsub()
+            dests = self._conf.upload_rclone_hardsub
         else:
             self._logger.error(self._prints.REQH_FAILURE.format(self._reqh.sub_type))
             raise Exception()
 
         for dest in dests:
             self._logger.warning(self._prints.UPLOAD_START.format(dest))
-            #print(UPLOAD.format(self._temp_src_dir, dest, self._conf.get_upload_rclone_flags()))
-            os.system(UPLOAD.format(self._temp_src_dir, dest, self._conf.get_upload_rclone_flags()))
+            os.system(UPLOAD.format(self._temp_src_dir, dest, self._conf.upload_rclone_flags))
             self._logger.warning(self._prints.UPLOAD_COMPLETE.format(dest))
 
     # Cleanup methods
