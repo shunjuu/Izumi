@@ -45,14 +45,30 @@ class PrintHandler():
         self._conf = conf
         self._verbose = self._get_verbosity(self._conf)
 
-        self.logger = self._create_logger(self._conf)
+        self._logger = self._create_logger(self._conf)
 
+    @property
+    def verbose(self):
+        """
+        Returns whether or not we're working verbosely.
+        Designed to be called with super().verbose()
+        """
+        return self._verbose
+    
+    @property
+    def logger(self):
+        """
+        Gets the logger object that the system will be printing with.
+        Alternatively, it should be possible to simply call it with 
+        logging.getLogger(conf.name)
+        """
+        return self._logger
 
     def _get_verbosity(self, conf):
         """
         A method to get whether or not to use verbose prints.
         """
-        return conf.get_verbose()
+        return conf.verbose
 
     def _create_logger(self, conf):
         """
@@ -60,37 +76,20 @@ class PrintHandler():
         """
 
         # Set the basic config before we create a Logger.
-        logging.basicConfig(format=conf.get_logging_logfmt(), 
-                            datefmt=conf.get_logging_datefmt())
+        logging.basicConfig(format=conf.logging_logfmt, 
+                            datefmt=conf.logging_datefmt)
 
         # Link it under a name so changes are shared across modules
-        logger = logging.getLogger(conf.get_name())
+        logger = logging.getLogger(conf.name)
 
         # Set its level based on verbosity
         # If this is verbose, logger will display Logger.INFO level messages
         # Else, display warning and above
-        if conf.get_verbose():
+        if conf.verbose:
             logger.setLevel(logging.INFO)
         else:
             # For clarity's sake
             logger.setLevel(logging.WARNING)
 
         return logger
-
-    # Getters
-
-    def verbose(self):
-        """
-        Returns whether or not we're worknig verbosely.
-        Designed to be called with super().verbose()
-        """
-        return self._verbose
-
-    def get_logger(self):
-        """
-        Gets the logger object that the system will be printing with.
-        Alternatively, it should be possible to simply call it with 
-        logging.getLogger(conf.get_name())
-        """
-        return self.logger
 
