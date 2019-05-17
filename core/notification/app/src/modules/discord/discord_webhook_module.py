@@ -74,14 +74,14 @@ class DiscordWebhookModule:
         Sends the notifications to the Discord endpoints
         """
 
-        use_dev = self._conf.get_use_dev()
+        use_dev = self._conf.use_dev
 
         if not use_dev:
             # Send notifications out to the configured outpoints
 
             self._logger.info(self._prints.DEV_DISABLED)
 
-            for hook in self._conf.get_discord_webhook():
+            for hook in self._conf.discord_webhook:
                 if hook['template'] == 1:
                     body = self._template_1.format(**fmt)
                     try:
@@ -96,7 +96,7 @@ class DiscordWebhookModule:
 
             self._logger.info(self._prints.DEV_ENABLED)
 
-            hook = self._conf.get_dev_discord_webhook()
+            hook = self._conf.dev_discord_webhook
             if hook['template'] == 1:
                 body = self._template_1.format(**fmt) 
                 try:
