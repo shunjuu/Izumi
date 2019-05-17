@@ -136,17 +136,17 @@ if __name__ == "__main__":
     # Set the variables
     c = _get_config_handler()
     p = PrintHandler(c)
-    logger = p.get_logger()
+    logger = p.logger
     ep = EncodePrints(p.Colors())
     a = _get_auth_handler(p)
 
-    logger.warning(ep.WORKER_SPAWN.format(c.get_encode_encode_jobs()))
+    logger.warning(ep.WORKER_SPAWN.format(c.encode_encode_jobs))
 
     # Spawn the number of worker threads in the background
-    for _ in range(c.get_encode_encode_jobs()):
+    for _ in range(c.encode_encode_jobs):
         encode = Thread(target=encode_worker)
         encode.daemon = True
         encode.start()
 
     # Start the Flask server
-    app.run(host='0.0.0.0', port=c.get_listen_port(), debug=True)
+    app.run(host='0.0.0.0', port=c.listen_port, debug=True)
