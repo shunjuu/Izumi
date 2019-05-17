@@ -43,7 +43,7 @@ class NetworkHandler:
         self._logger = printh.logger
         self._prints = NetworkHandlerPrints(printh.Colors())
 
-        self.request = self._generate_request()
+        self._request = self._generate_request()
 
     def _generate_request(self):
         """
@@ -87,7 +87,7 @@ class NetworkHandler:
 
         try:
             self._logger.info(self._prints.SENDING_REQUEST.format(url))
-            res = requests.post(url, json=self.request, headers=headers, timeout=5)
+            res = requests.post(url, json=self._request, headers=headers, timeout=5)
         except requests.exceptions.ConnectionError:
             # When the internet has some kind of issue, just exit
             self._logger.warning(self._prints.SENDING_REQUEST_CONNECTION_ERROR) 
