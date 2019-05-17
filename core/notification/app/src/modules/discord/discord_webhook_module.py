@@ -30,7 +30,7 @@ class DiscordWebhookModule:
 
     def __init__(self, conf, reqh, printh, info):
 
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = DiscordWebhookModulePrints(printh.Colors())
 
         self._conf = conf

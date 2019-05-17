@@ -23,7 +23,7 @@ class RequestHandler:
             printh - A PrintHandler object
         """
 
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = RequestHandlerPrints(printh.Colors())
 
         # Store the various attributes of the current request

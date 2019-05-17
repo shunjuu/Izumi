@@ -45,8 +45,24 @@ class PrintHandler():
         self._conf = conf
         self._verbose = self._get_verbosity(self._conf)
 
-        self.logger = self._create_logger(self._conf)
+        self._logger = self._create_logger(self._conf)
 
+    @property
+    def verbose(self):
+        """
+        Returns whether or not we're working verbosely.
+        Designed to be called with super().verbose()
+        """
+        return self._verbose
+    
+    @property
+    def logger(self):
+        """
+        Gets the logger object that the system will be printing with.
+        Alternatively, it should be possible to simply call it with 
+        logging.getLogger(conf.get_name())
+        """
+        return self._logger
 
     def _get_verbosity(self, conf):
         """
@@ -76,21 +92,4 @@ class PrintHandler():
             logger.setLevel(logging.WARNING)
 
         return logger
-
-    # Getters
-
-    def verbose(self):
-        """
-        Returns whether or not we're worknig verbosely.
-        Designed to be called with super().verbose()
-        """
-        return self._verbose
-
-    def get_logger(self):
-        """
-        Gets the logger object that the system will be printing with.
-        Alternatively, it should be possible to simply call it with 
-        logging.getLogger(conf.get_name())
-        """
-        return self.logger
 

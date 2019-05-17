@@ -32,7 +32,7 @@ class ModuleHandler:
         self._printh = printh
 
         # Logging things
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = ModuleHandlerPrints(printh.Colors())
 
         self._info = self._get_show_info(self._reqh.show)
