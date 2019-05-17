@@ -44,11 +44,11 @@ class NetworkHandler:
         self._reqh = reqh
 
         # Logging Tools
-        self._logger = printh.get_logger()
+        self._logger = printh.logger
         self._prints = NetworkHandlerPrints(printh.Colors())
 
         # Variables
-        self.request = self._generate_request(self._reqh) # A dict representing the JSOn request
+        self._request = self._generate_request(self._reqh) # A dict representing the JSOn request
 
 
     def _generate_request(self, reqh):
@@ -62,10 +62,10 @@ class NetworkHandler:
         Returns: The request JSON as a dict object
         """
         req = dict()
-        req['show'] = reqh.get_show()
-        req['episode'] = reqh.get_episode()
-        req['filesize'] = reqh.get_filesize()
-        req['sub'] = reqh.get_sub_type()
+        req['show'] = reqh.show
+        req['episode'] = reqh.episode
+        req['filesize'] = reqh.filesize
+        req['sub'] = reqh.sub_type
 
         """
         We'll be ignoring the signature body for now, and duration 
@@ -80,7 +80,7 @@ class NetworkHandler:
         Ensures that the repsonse code is a 2XX code or else raises an exception.
 
         Params:
-            url: The url to send the request ot
+            url: The url to send the request to
             auth_key: An optional authorization header key
 
         Returns:
@@ -96,7 +96,7 @@ class NetworkHandler:
 
         try:
             self._logger.info(self._prints.SENDING_REQUEST.format(url))
-            res = requests.post(url, json=self.request, headers=headers, timeout=5)
+            res = requests.post(url, json=self._request, headers=headers, timeout=5)
         except requests.exceptions.ConnectionError:
             # When the internet has some kind of issue, just exit
             self._logger.warning(self._prints.SENDING_REQUEST_CONNECTION_ERROR) 

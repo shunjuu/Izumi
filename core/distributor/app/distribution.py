@@ -125,7 +125,7 @@ if __name__ == "__main__":
 
     c = _get_config_handler()
     p = PrintHandler(c)
-    logger = p.get_logger()
+    logger = p.logger
     dp = DistributionPrints(p.Colors())
     a = _get_auth_handler(p)
 
