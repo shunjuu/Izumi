@@ -163,8 +163,7 @@ class NetworkHandler:
         self._logger.info(self._prints.GROUP_NOTIFIERS)
 
         # Call the general notifer, passing in the notifier functions
-        self._notify(self._conf.get_notifiers_always(),
-                        self._conf.get_notifiers_sequential())
+        self._notify(self._conf.notifiers_always, self._conf.notifiers_sequential)
 
     def notify_distributors(self):
         """
@@ -174,5 +173,4 @@ class NetworkHandler:
         self._logger.info(self._prints.GROUP_DISTRIBUTORS)
 
         # Call the general notifier, passing in the distributor functions
-        self._notify(self._conf.get_distributors_always(),
-                        self._conf.get_distributors_sequential())
+        self._notify(self._conf.distributors_always, self._conf.distributors_sequential)

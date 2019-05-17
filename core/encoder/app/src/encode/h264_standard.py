@@ -42,7 +42,7 @@ class H264Standard:
         os.system(ENCODE.format(
             self._ffmpeg_8bit,
             self._src_file, self._src_file,
-            self._conf.get_encode_encode_flags(),
+            self._conf.encode_encode_flags,
             full_end_file))
 
         self._logger.warning(self._prints.ENCODE_FINISH.format(self._end_file))
