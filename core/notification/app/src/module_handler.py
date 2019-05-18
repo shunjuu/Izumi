@@ -6,8 +6,8 @@ import json
 import pprint as pp
 
 # Temp hisha3 for fetching info
-from lib import hisha
-from lib import hisha2a as hitsu # We need to phase this out in a future module
+from bin import hisha
+from bin import hisha2a as hitsu # We need to phase this out in a future module
 
 from src.prints.module_handler_prints import ModuleHandlerPrints
 
