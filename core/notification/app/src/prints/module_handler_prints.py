@@ -25,3 +25,11 @@ class ModuleHandlerPrints:
         self.MODULE_START = prefix + "Starting " + module_color + \
             "{}" + endc + " notification sequence"
         self.MODULE_END = prefix + "Completed " + module_color + "{}" + endc + " notification sequence"
+
+        filter_color = colors.LYELLOW
+        self.FILTER_NOT_USED = prefix + "Filters are not being used, proceeding"
+        self.FILTER_SHOW_NOT_FOUND = prefix + "Show " + filter_color + "{}" + endc + \
+            " not found in any filter configurations"
+        self.FILTER_FOUND = prefix + "Found " + filter_color + "{}" + endc + \
+            " in " + filter_color + "{}" + endc + " profile " + filter_color + "{}" + endc + \
+            " by " + filter_color + "{}" + endc + ", proceeding"
