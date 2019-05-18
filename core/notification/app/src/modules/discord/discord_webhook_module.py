@@ -121,12 +121,10 @@ class DiscordWebhookModule:
         Returns it as an integer
         """
 
-        if 'duration' in self._info and self._info['duration']:
-            mins = self._info['duration']
+        if self._info.duration != -1:
+            return str(self._info.duration)
         else:
-            mins = "〇〇"
-
-        return mins
+            return "〇〇"
 
     def _load_size(self):
         """
@@ -165,60 +163,56 @@ class DiscordWebhookModule:
         """
         Gets the original-language name of the show
         """
-        return self._info['title']['native']
+        return self._info.title_userPreferred
 
     def _load_thumbnail(self):
         """
         Gets the large cover image
         """
-        return self._info['coverImage']['large']
+        return self._info.coverImage
 
     def _load_score(self):
         """
         Returns the score rating of the show, as an integer
         """
-        if 'averageScore' in self._info and self._info['averageScore']:
-            score = int(self._info['averageScore']) + 10
+        if self._info.averageScore != -1:
+            return str(self._info.averageScore)
         else:
-            score = "〇〇"
-
-        return score
+            return "〇〇"
 
     def _load_popularity(self):
         """
         Returns the popularity of the show
         """
-        if 'popularity' in self._info and self._info['popularity']:
-            popularity = self._info['popularity']
-        else:
-            popularity = "〇〇"
 
-        return popularity
+        if self._info.popularity != -1:
+            return str(self._info.popularity)
+        else:
+            return "〇〇"
 
     def _load_eps(self):
         """
         Returns the number of eps in the show
         """
-        if 'episodes' in self._info and self._info['episodes']:
-            episodes = self._info['duration']
-        else:
-            episodes = "〇〇"
 
-        return episodes
+        if self._info.episodes != -1:
+            return str(self._info.episodes)
+        else:
+            return "〇〇"
 
     def _load_mal_url(self):
         """
         Gets the MAL url and returns it as a string
         """
 
-        return MAL_ANI_BASE + str(self._info['idMal'])
+        return MAL_ANI_BASE + str(self._info.idMal)
     
     def _load_anilist_url(self):
         """
         Gets the Anilist url and returns it as a string
         """
 
-        return ANI_ANI_BASE + str(self._info['id'])
+        return ANI_ANI_BASE + str(self._info.id)
 
     def _load_kitsu_url(self):
         """
@@ -226,10 +220,8 @@ class DiscordWebhookModule:
         """
 
         # Kitsu may be down - only return if so
-        if self._info['idKitsu']:
-            return KIT_ANI_BASE + str(self._info['idKitsu'])
 
-        return KIT_DOWN
+        return KIT_ANI_BASE + str(self._info.idKitsu)
 
 # -------------------------------------------------------------------- #
 
