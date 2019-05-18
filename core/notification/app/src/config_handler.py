@@ -77,7 +77,7 @@ class ConfigHandler:
 
         self._notification_jobs = self._load_notification_jobs(self._conf, self._web_conf_use)
         self._notification_filter_anilist = self._load_notification_filter_anilist(self._conf, self._web_conf_use)
-        self._load_notification_filter_mal = self._load_notification_filter_mal(self._conf, self._web_conf_use)
+        self._notification_filter_mal = self._load_notification_filter_mal(self._conf, self._web_conf_use)
 
         self._discord_webhook = self._load_discord_webhook(self._conf, self._web_conf_use)
 

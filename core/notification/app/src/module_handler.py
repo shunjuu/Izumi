@@ -77,8 +77,8 @@ class ModuleHandler:
         Returns: a boolean indicating whether or not the show is being watched
         """
 
-        ani_user = self._conf.notifications_filter_anilist
-        mal_user = self._conf.notifiations_filter_mal
+        ani_user = self._conf.notification_filter_anilist
+        mal_user = self._conf.notification_filter_mal
 
         # If neither are being used, then return true by default
         if not ani_user and not mal_user:
@@ -122,7 +122,7 @@ class ModuleHandler:
         """
         Calls all the module notification triggers
         """
-
+        # Only run it if filters are green
         if self._check_filters(self._reqh.show):
 
             self._logger.warning(self._prints.NOTIFY_ALL_START)
