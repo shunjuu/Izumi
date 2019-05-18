@@ -6,7 +6,8 @@ import json
 import pprint as pp
 
 # Temp hisha3 for fetching info
-from lib import hisha2a
+from lib import hisha
+from lib import hisha2a as hitsu # We need to phase this out in a future module
 
 from src.prints.module_handler_prints import ModuleHandlerPrints
 
@@ -30,6 +31,7 @@ class ModuleHandler:
         self._conf = conf
         self._reqh = reqh
         self._printh = printh
+        self._hisha = hisha.Hisha()
 
         # Logging things
         self._logger = printh.logger
@@ -39,7 +41,7 @@ class ModuleHandler:
 
     def _get_show_info(self, show):
         """ 
-        Uses hisha3 to fetch the information 
+        Uses hisha and hitsu to fetch the information 
 
         Params:
             show - the name of the show in the request
@@ -47,11 +49,11 @@ class ModuleHandler:
 
         self._logger.info(self._prints.FETCHING_INFO_START)
 
-        info = hisha2a.hisha2a(show)
+        info = self._hisha.search(show)
         try:
-            info['idKitsu'] = hisha2a.hitsu2a(show)['data'][0]['id']
+            info.idKitsu = hitsu.hitsu2a(show)['data'][0]['id']
         except:
-            info['idKitsu'] = None
+            pass
 
         self._logger.info(self._prints.FETCHING_INFO_END)
 
