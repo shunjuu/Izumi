@@ -245,8 +245,9 @@ class Hisha:
         self._logger.debug("Comparing {} and {} without punctuation".format(str1, str2))
 
         try:
-            re_str1 = re.sub(r'[^\w\s]','', str1)
-            re_str2 = re.sub(r'[^\w\s]','', str2)
+            # Anilist sometimes has weird leading/trailing spaces
+            re_str1 = re.sub(r'[^\w\s]','', str1).strip()
+            re_str2 = re.sub(r'[^\w\s]','', str2).strip()
             return bool(re_str1 == re_str2)
         except:
             return False
