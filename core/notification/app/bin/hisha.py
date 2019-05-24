@@ -255,8 +255,8 @@ class Hisha:
 
         try:
             # Anilist sometimes has weird leading/trailing spaces in the show names
-            re_str1 = re.sub(r'[^\w\s]','', str1).strip()
-            re_str2 = re.sub(r'[^\w\s]','', str2).strip()
+            re_str1 = re.sub(r'[^\w]','', str1)
+            re_str2 = re.sub(r'[^\w]','', str2)
             return bool(re_str1 == re_str2)
         except:
             return False
