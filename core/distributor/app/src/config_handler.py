@@ -41,6 +41,8 @@ class ConfigHandler:
         self._listen_port = None # The port Flask will listen to
 
         self._distributor_jobs = None # How many distribution jobs to run at once
+        self._distributor_filter_anilist = None # Anilist profile to filter from
+        self._distributor_filter_mal = None # MAL user profile to filter from
 
         self._download_rclone_flags = None # Flags for rclone to use when downloading
         self._download_rclone_hardsub = None # rclone hardsub download sources
@@ -79,6 +81,8 @@ class ConfigHandler:
         self._listen_port = self._load_listen_port(self._conf, self._web_conf_use)
 
         self._distributor_jobs = self._load_distributor_jobs(self._conf, self._web_conf_use)
+        self._distributor_filter_anilist = self._load_distributor_filter_anilist(self._conf, self._web_conf_use)
+        self._distributor_filter_mal = self._load_distributor_filter_mal(self._conf, self._web_conf_use)
 
         self._download_rclone_flags = self._load_download_rclone_flags(self._conf, self._web_conf_use)
         self._download_rclone_hardsub = self._load_download_rclone_hardsub(self._conf, self._web_conf_use)
@@ -107,6 +111,17 @@ class ConfigHandler:
     def distributor_jobs(self):
         """Returns the number of simultaneous jobs to run as a string"""
         return self._distributor_jobs
+
+    @property
+    def distributor_filter_anilist(self):
+        """Returns the username of a provided anilist user (if provided) as a string"""
+        return self._distributor_filter_anilist
+    
+    @property
+    def distributor_filter_mal(self):
+        """Returns the username of a provided mal user (if provided) as a string"""
+        return self._distributor_filter_mal
+    
 
     @property
     def download_rclone_flags(self):
@@ -310,7 +325,7 @@ class ConfigHandler:
             web: A boolean value which indicates if the web conf
                 is being used (default: local)
 
-        Returns; The amount, as an integer
+        Returns: The amount, as an integer
         """
 
         if web:
@@ -318,6 +333,37 @@ class ConfigHandler:
 
         return int(conf['distribution']['jobs'])
 
+    def _load_distributor_filter_anilist(self, conf, web):
+        """
+        Retrieve the anilist profile (if provided) to filter from
+
+        Params:
+            conf: self._conf, which represents config.yml
+            web: A boolean value which indicates if the web conf is being used
+
+        Returns: The username, or an empty string if not provided
+        """
+
+        if web:
+            pass
+
+        return conf['distribution']['filters']['anilist']
+
+    def _load_distributor_filter_mal(self, conf, web):
+        """
+        Retrieve the mal profile (if provided) to filter from
+
+        Params:
+            conf: self._conf, which represents config.yml
+            web: A boolean value which indicates if the web conf is being used
+
+        Returns: The username, or an empty string if not provided
+        """
+
+        if web:
+            pass
+
+        return conf['distribution']['filters']['myanimelist']
 
     def _load_download_rclone_flags(self, conf, web):
         """
