@@ -7,6 +7,11 @@ import json
 
 import pprint as pp 
 
+from bin import hisha # for information fetching
+from bin import hisha2a as hitsu # We need to phase this out in a future module
+from bin import akari # for MAL filtering
+from bin import kishi # for Anilist filtering
+
 from src.prints.os_handler_prints import OSHandlerPrints
 
 RCLONE_SOURCE = ('/bin2/rclone --config=\"/bin2/rclone.conf\" '
@@ -36,6 +41,11 @@ class OSHandler:
         self._conf = conf 
         self._reqh = reqh
 
+        # Filtering tools
+        self._hisha = hisha.Hisha()
+        self._akari = akari.Akari()
+        self._kishi = kishi.Kishi()
+
         # Logging Tools
         self._logger = printh.logger
         self._printh = printh
@@ -47,6 +57,67 @@ class OSHandler:
         self._temp_out_dir = None # Full dir path of new file. Overlaps with self._temp_src_dir
         self._temp_out_file = None # Where the encoded file is located
 
+    def _get_show_info(self, show):
+        """ 
+        Uses hisha and hitsu to fetch the information 
+
+        Params:
+            show - the name of the show in the request
+        """
+
+        self._logger.info(self._prints.FETCHING_INFO_START)
+
+        info = self._hisha.search(show)
+        try:
+            info.idKitsu = hitsu.hitsu2a(show)['data'][0]['id']
+        except:
+            pass
+
+        self._logger.info(self._prints.FETCHING_INFO_END)
+
+        return info
+
+    def _check_filters(self, show):
+        """
+        Use Akari and Kishi to check if a given user's profile is watching this show.
+        Used to filter whether or not notifications should be sent.
+        If either profile returns True, return True
+        Params:
+            show - the name of the show in the request
+        Returns: a boolean indicating whether or not the show is being watched
+        """
+
+        ani_user = self._conf.distributor_filter_anilist
+        mal_user = self._conf.distributor_filter_mal
+
+        # If neither are being used, then return true by default
+        if not ani_user and not mal_user:
+            self._logger.info(self._prints.FILTER_NOT_USED)
+            return True
+
+        # Create the show info later to avoid making pointless requests
+        info = self._get_show_info(self._reqh.show)
+
+        # Check both by ID and Names
+        if ani_user:
+            if self._kishi.is_user_watching_id(ani_user, info.id): 
+                self._logger.info(self._prints.FILTER_FOUND.format(show, "Anilist", ani_user, "id"))
+                return True
+            if self._kishi.is_user_watching_names(ani_user, show): 
+                self._logger.info(self._prints.FILTER_FOUND.format(show, "Anilist", ani_user, "name"))
+                return True
+
+        if mal_user:
+            if self._akari.is_user_watching_id(mal_user, info.idMal): 
+                self._logger.info(self._prints.FILTER_FOUND.format(show, "MyAnimeList", mal_user, "id"))
+                return True
+            if self._akari.is_user_watching_names(mal_user, show): 
+                self._logger.info(self._prints.FILTER_FOUND.format(show, "MyAnimeList", mal_user, "name"))
+                return True
+
+        # All checks failed, so return False
+        self._logger.info(self._prints.FILTER_SHOW_NOT_FOUND.format(show))
+        return False
 
     def _create_temp_dir(self):
         """
@@ -180,6 +251,17 @@ class OSHandler:
             self._logger.warning(self._prints.UPLOAD_START.format(dest))
             os.system(UPLOAD.format(self._temp_src_dir, dest, self._conf.upload_rclone_flags))
             self._logger.warning(self._prints.UPLOAD_COMPLETE.format(dest))
+
+
+    def distribute(self):
+        """
+        This is a wrapper method that calls both upload and distribute, but also checks filters
+        first.
+        """
+        if self._check_filters(self._reqh.show):
+            self.download()
+            self.upload()
+
 
     # Cleanup methods
 
