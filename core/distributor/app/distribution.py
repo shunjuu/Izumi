@@ -82,8 +82,7 @@ def distribute_worker():
 
         try:
             o = OSHandler(c, new_request, p)
-            o.download()
-            o.upload()
+            o.distribute()
 
             n = NetworkHandler(c, new_request, p)
             n.notify_notifiers()

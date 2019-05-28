@@ -61,3 +61,13 @@ class OSHandlerPrints:
         self.DELETE_TEMP_FOLDER_FAIL = prefix + colors.FAIL + "Failure" + endc + \
             ": Could not delete the temporary folder at " + \
             temp_color + "{}" + endc
+
+        # Filters
+        filter_color = colors.LYELLOW
+        self.FILTER_NOT_USED = prefix + "Filters are not being used, proceeding"
+        self.FILTER_SHOW_NOT_FOUND = prefix + "Show " + filter_color + "{}" + endc + \
+            " not found in any filter configurations"
+        self.FILTER_FOUND = prefix + "Found " + filter_color + "{}" + endc + \
+            " in " + filter_color + "{}" + endc + " profile " + filter_color + "{}" + endc + \
+            " by " + filter_color + "{}" + endc + ", proceeding" 
+            
