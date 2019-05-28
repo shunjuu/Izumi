@@ -205,7 +205,7 @@ class ConfigHandler:
         if file_ext in YAML_EXT:
             with open(cpath_abs, 'r') as cfyml:
                 try:
-                    return yaml.load(cfyml)
+                    return yaml.full_load(cfyml)
                 except Exception as e:
                     print(e)
                     pass

@@ -136,4 +136,5 @@ if __name__ == "__main__":
         distribute.daemon = True
         distribute.start()
 
-    app.run(host='0.0.0.0', port=c.listen_port, debug=True)
+    app.run(host='0.0.0.0', port=c.listen_port)
+
