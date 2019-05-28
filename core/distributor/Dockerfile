@@ -10,7 +10,7 @@ RUN apt-get update -y && \
 COPY app/ /src/
 COPY bin/ /bin2/
 
-RUN pip3 /src/requirements.txt
+RUN pip3 install -r /src/requirements.txt
 
 RUN chmod 700 /bin2/*
 
