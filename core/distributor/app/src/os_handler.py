@@ -7,6 +7,8 @@ import json
 
 import pprint as pp 
 
+from bin import hisha # for information fetching
+from bin import hisha2a as hitsu # We need to phase this out in a future module
 from bin import akari # for MAL filtering
 from bin import kishi # for Anilist filtering
 
@@ -40,6 +42,7 @@ class OSHandler:
         self._reqh = reqh
 
         # Filtering tools
+        self._hisha = hisha.Hisha()
         self._akari = akari.Akari()
         self._kishi = kishi.Kishi()
 
@@ -54,6 +57,25 @@ class OSHandler:
         self._temp_out_dir = None # Full dir path of new file. Overlaps with self._temp_src_dir
         self._temp_out_file = None # Where the encoded file is located
 
+    def _get_show_info(self, show):
+        """ 
+        Uses hisha and hitsu to fetch the information 
+
+        Params:
+            show - the name of the show in the request
+        """
+
+        self._logger.info(self._prints.FETCHING_INFO_START)
+
+        info = self._hisha.search(show)
+        try:
+            info.idKitsu = hitsu.hitsu2a(show)['data'][0]['id']
+        except:
+            pass
+
+        self._logger.info(self._prints.FETCHING_INFO_END)
+
+        return info
 
     def _check_filters(self, show):
         """
@@ -65,6 +87,7 @@ class OSHandler:
         Returns: a boolean indicating whether or not the show is being watched
         """
 
+        info = self._get_show_info(self._reqh.show)
         ani_user = self._conf.distributor_filter_anilist
         mal_user = self._conf.distributor_filter_mal
 
@@ -75,7 +98,7 @@ class OSHandler:
 
         # Check both by ID and Names
         if ani_user:
-            if self._kishi.is_user_watching_id(ani_user, self._info.id): 
+            if self._kishi.is_user_watching_id(ani_user, info.id): 
                 self._logger.info(self._prints.FILTER_FOUND.format(show, "Anilist", ani_user, "id"))
                 return True
             if self._kishi.is_user_watching_names(ani_user, show): 
@@ -83,7 +106,7 @@ class OSHandler:
                 return True
 
         if mal_user:
-            if self._akari.is_user_watching_id(mal_user, self._info.idMal): 
+            if self._akari.is_user_watching_id(mal_user, info.idMal): 
                 self._logger.info(self._prints.FILTER_FOUND.format(show, "MyAnimeList", mal_user, "id"))
                 return True
             if self._akari.is_user_watching_names(mal_user, show): 
