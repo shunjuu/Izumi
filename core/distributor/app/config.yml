@@ -16,6 +16,18 @@ distribution:
   # [type: Integer]
   jobs: 1
 
+  # Distribution can be optionally filtered based on given anilist or mal profiles
+  # If a given show is found on any provided profile (inclusive or), it is considered
+  # currently watching.
+  filters:
+
+    # For all filters, leave as empty string if not used
+    # The string should be the username as it appears on the site
+    # e.g., "anilist: 'anilist_user'"
+
+    anilist: ""
+    myanimelist: ""
+
 # Grouping body to specify where to download files from
 downloading:
 
