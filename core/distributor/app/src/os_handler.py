@@ -87,7 +87,6 @@ class OSHandler:
         Returns: a boolean indicating whether or not the show is being watched
         """
 
-        info = self._get_show_info(self._reqh.show)
         ani_user = self._conf.distributor_filter_anilist
         mal_user = self._conf.distributor_filter_mal
 
@@ -95,6 +94,9 @@ class OSHandler:
         if not ani_user and not mal_user:
             self._logger.info(self._prints.FILTER_NOT_USED)
             return True
+
+        # Create the show info later to avoid making pointless requests
+        info = self._get_show_info(self._reqh.show)
 
         # Check both by ID and Names
         if ani_user:
