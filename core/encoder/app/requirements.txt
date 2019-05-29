@@ -1,0 +1,4 @@
+requests==2.20.0
+Flask==1.0.3
+PyYAML==5.1
+hurry.filesize==0.9
