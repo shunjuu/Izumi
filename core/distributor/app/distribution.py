@@ -82,8 +82,7 @@ def distribute_worker():
 
         try:
             o = OSHandler(c, new_request, p)
-            o.download()
-            o.upload()
+            o.distribute()
 
             n = NetworkHandler(c, new_request, p)
             n.notify_notifiers()
@@ -137,4 +136,5 @@ if __name__ == "__main__":
         distribute.daemon = True
         distribute.start()
 
-    app.run(host='0.0.0.0', port=c.listen_port, debug=True)
+    app.run(host='0.0.0.0', port=c.listen_port)
+

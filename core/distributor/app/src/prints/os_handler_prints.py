@@ -61,3 +61,18 @@ class OSHandlerPrints:
         self.DELETE_TEMP_FOLDER_FAIL = prefix + colors.FAIL + "Failure" + endc + \
             ": Could not delete the temporary folder at " + \
             temp_color + "{}" + endc
+
+        # Hisha
+        hisha2a_color = colors.LYELLOW
+        self.FETCHING_INFO_START = prefix + "Starting" + hisha2a_color + " information" + endc + " fetch" 
+        self.FETCHING_INFO_END =prefix + hisha2a_color + "Information" + endc + " fetch successful"
+
+        # Filters
+        filter_color = colors.LYELLOW
+        self.FILTER_NOT_USED = prefix + "Filters are not being used, proceeding"
+        self.FILTER_SHOW_NOT_FOUND = prefix + "Show " + filter_color + "{}" + endc + \
+            " not found in any filter configurations"
+        self.FILTER_FOUND = prefix + "Found " + filter_color + "{}" + endc + \
+            " in " + filter_color + "{}" + endc + " profile " + filter_color + "{}" + endc + \
+            " by " + filter_color + "{}" + endc + ", proceeding" 
+            

@@ -72,7 +72,7 @@ class AuthHandler:
         if file_ext in YAML_EXT:
             with open(apath_abs, 'r') as atyml:
                 try:
-                    auth = yaml.load(atyml)
+                    auth = yaml.full_load(atyml)
                     self._logger.info(self._prints.LOCAL_AUTH_YAML_SUCCESS.format(apath_abs))
                     return auth
                 except:

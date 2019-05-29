@@ -41,6 +41,8 @@ class ConfigHandler:
         self._listen_port = None # The port Flask will listen to
 
         self._notification_jobs = None # How many distribution jobs to run at once
+        self._notification_filter_anilist = None # Anilist user profile to filter from
+        self._notification_filter_mal = None # MAL user profile to filter from
 
         self._discord_webhook = None # The Discord webhook list
 
@@ -74,6 +76,8 @@ class ConfigHandler:
         self._listen_port = self._load_listen_port(self._conf, self._web_conf_use)
 
         self._notification_jobs = self._load_notification_jobs(self._conf, self._web_conf_use)
+        self._notification_filter_anilist = self._load_notification_filter_anilist(self._conf, self._web_conf_use)
+        self._notification_filter_mal = self._load_notification_filter_mal(self._conf, self._web_conf_use)
 
         self._discord_webhook = self._load_discord_webhook(self._conf, self._web_conf_use)
 
@@ -98,6 +102,16 @@ class ConfigHandler:
     def notification_jobs(self):
         """Returns the number of simultaneous jobs to run as a string"""
         return self._notification_jobs
+
+    @property
+    def notification_filter_anilist(self):
+        """Returns the username of a provided anilist user (if provided) as a string"""
+        return self._notification_filter_anilist
+    
+    @property
+    def notification_filter_mal(self):
+        """Returns the username of a provided MAL user (if provided) as a string"""
+        return self._notification_filter_mal
     
     @property
     def discord_webhook(self):
@@ -271,13 +285,45 @@ class ConfigHandler:
             web: A boolean value which indicates if the web conf
                 is being used (default: local)
 
-        Returns; The amount, as an integer
+        Returns: The amount, as an integer
         """
 
         if web:
             pass
 
         return int(conf['notification']['jobs'])
+
+    def _load_notification_filter_anilist(self, conf, web):
+        """
+        Retrieve the Anilist user profile (if provided) to filter from
+
+        Params:
+            conf: self._conf, which represents a dict object
+            web: A boolean value which indicates if the web conf is being used
+
+        Returns: The username, or empty string if not provided
+        """
+
+        if web:
+            pass
+
+        return conf['notification']['filters']['anilist']
+
+    def _load_notification_filter_mal(self, conf, web):
+        """
+        Retrieve the MAL user profile (if provided) to filter from
+
+        Params:
+            conf: self._conf, which represents a dict object
+            web: A boolean value which indicates if the web conf is being used
+
+        Returns: The username, or empty string if not provided
+        """      
+
+        if web:
+            pass
+
+        return conf['notification']['filters']['myanimelist']
 
     def _load_discord_webhook(self, conf, web, default=1):
         """
