@@ -7,8 +7,8 @@ LABEL maintainer="Aleytia"
 RUN apt-get update -y && \
     apt-get install apt-utils -y
 
-RUN pip3 install flask requests pyyaml hurry.filesize anitopy colorthief
-
 COPY app/ /src/
+
+RUN pip3 install -r /src/requirements.txt
 
 ENTRYPOINT ["sh", "-c", "python3 /src/notification.py"]
