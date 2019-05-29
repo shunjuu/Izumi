@@ -7,10 +7,10 @@ LABEL maintainer="Aleytia"
 RUN apt-get update -y && \
 	apt-get install apt-utils -y
 
-RUN pip3 install flask requests pyyaml hurry.filesize anitopy 
-
 COPY app/ /src/
 COPY bin/ /bin2/
+
+RUN pip3 install -r /src/requirements.txt
 
 RUN chmod 700 /bin2/*
 
