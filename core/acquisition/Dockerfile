@@ -8,10 +8,10 @@ RUN apt-get update -y && \
 	apt-get install apt-utils -y && \
 	apt-get install inotify-tools -y
 
-RUN pip3 install requests hurry.filesize anitopy pyyaml
-
 COPY app/ /src/
 COPY bin/ /rclone/
+
+RUN pip3 install -r /src/requirements.txt
 
 RUN chmod 700 /rclone/*
 RUN chmod 700 /src/bin/yq
