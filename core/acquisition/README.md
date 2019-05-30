@@ -12,9 +12,15 @@ The entire process occurs in a temporary folder with a hardlinked copy of the fi
 
 ## Setup and Usage
 
-### Configuring ruTorrent
+  1. [Configuring ruTorrent](#configuring-rutorrent)
+  2. [Configuring Upload Destinations](#configuring-upload-destinations)
+  3. [Configuring Endpoints](#configuring-endpoints)
+  4. [Configuring System Properties](#configuring-system-properties)
+
 
 Acquisition can be run either as an interactive program (e.g., in tmux), or as a Docker container. There are no differences in either use case, but Docker containers will require a build and a change to a mounted volume.
+
+### Configuring ruTorrent
 
 Acquisition is intended to be a complement to ruTorrent and the Autotools plugin. There are plans in the future to make Acquisition executable with command-line arguments, too. 
 
@@ -65,19 +71,52 @@ Alternatively, you can use [Sonarr](https://sonarr.tv/) to handle new downloads,
 
 ### Configuring Upload Destinations
 
-Izumi makes use of rclone to upload new files. Upload destinations can be specified as a list in uploading/upload-destinations.
+Izumi uses rclone to upload new files. Upload destinations can be specified as a list in uploading/upload-destinations.
 Include the full path of the rclone destination you would like to upload new files to. (It does not matter if your destination ends with a `/` or not).
 You can also specify an "airing folder name" that gets append to the end of all the upload-destinations.
 
-**If you want to have new episodes mass-distributed to various destinations, there is also a Distributor module to handle this**. This can also be handy if you want to domain-separate uploader access, or have multiple distributors. See [docs/decentralization](/docs/decentralization.md) for more information.
+**If you want to have new episodes mass-distributed to various destinations, there is also a Distributor module to handle this**. This can also be handy if you want to domain-separate uploader access, or have multiple distributors.
 
 For example, if a rclone destination is set to `dest:Anime` with `airing-folder-name="Airing"`, then new episodes will be uploaded to:
 ```
 dest:Anime/Airing/$SHOW_NAME/$EPISODE
 
-# Example:
+# Example Result:
 mega:Anime/Airing/5-Toubun no Hanayome/5-Toubun no Hanayome - 01 [1080p].mkv
 ```
 The folder that represents the show is added automatically (or specified above). There is no way to turn this off.
 
 ### Configuring Endpoints
+
+*Familiarity with YAML syntax is required for this section.*
+
+Distributor, Encoder, and Notification all are activated using JSON post requests made from Acquisition (or each other). The JSON payload is identical in every request, and has the following form:
+
+```
+{
+	"show": "SHOW_NAME",
+	"episode": "EPISODE_NAME",
+	"filesize": 99999999,
+	"sub": "hardsub"
+}
+```
+
+`filesize` is the size of the episode in bytes, and `sub` is either "hardsub" or "softsub". In Acquisition's case, "softsub" is set (as uploads are presumed to be MKV files with soft subs).
+
+In [config.yml](./app/config.yml), under the `endpoints` key, there are separate sections for encoders, notifiers, and distributors. Note that these groupings are more a formality - the payload sent is the same. 
+
+There are two types of request "attempts", "always" and "sequential" (as seen in config.):
+  - Every provided endpoint in `always` will *always* be sent. 
+  - In `sequential`, for each group (dict) provided, the endpoints will be tested in order provided until one is successful (or none are).
+
+Each "endpoint" is a dict-style object with two keys. The `url` key is required, and is the URL that the JSON payload will be sent to. The `auth` key is optional (shown in the config), which is an optional "authorization" key that can be sent as a header. (Encoder, Distributor, and Notifications optionally support an `auth.yml` file to authorize incoming requests; this `auth` key is for exactly that).
+
+### Configuring System Properties
+
+System properties are various application properties that Izumi uses.
+
+  - `name`: For logging purposes, this will be the "name" that appears for the running Acquisition module.
+  - `delimiter`: Acquisition makes use of inotify-tools's folder watching ability to detect new episodes. This delimiter is used to separate provided arguments. Avoid using characters that might appear in show names (e.g., apostrophes).
+  - `verbose`: Whether or not to print more verbose logging output.
+  - `logging/logfmt`: Logging message format to output. See Python's logging documentation for more info.
+  - `logging/datefmt`: Date output format for logging messages. See Python's logging documentation for more info.
