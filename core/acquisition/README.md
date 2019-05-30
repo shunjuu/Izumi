@@ -10,15 +10,20 @@ Unit 1, Acquistion (*Ichika*, 一花) handles processing new file uploads. It:
 
 The entire process occurs in a temporary folder with a hardlinked copy of the file. Once completed, the **original file is deleted, so users should trigger the Acquisition pipeline with a copy of the file**. 
 
+*This is by far the most complicated setup of all the units. Feel free to shoot me an email for clarifications.*
+
 ## Setup and Usage
 
   1. [Configuring ruTorrent](#configuring-rutorrent)
   2. [Configuring Upload Destinations](#configuring-upload-destinations)
   3. [Configuring Endpoints](#configuring-endpoints)
   4. [Configuring System Properties](#configuring-system-properties)
+  5. [Starting Acquisition](#starting-acquisition)
 
 
-Acquisition can be run either as an interactive program (e.g., in tmux), or as a Docker container. There are no differences in either use case, but Docker containers will require a build and a change to a mounted volume.
+Acquisition can be run either as an interactive program (e.g., in tmux), or as a Docker container. There are no differences in either use case, but Docker containers will require a build and a change to a mounted volume. 
+
+*ruTorrent configuration is included in this README, but it is not necessary for Acquisition. This is a rundown of how to configure ruTorrent to automate new downloads into Acquistion.*
 
 ### Configuring ruTorrent
 
@@ -26,12 +31,14 @@ Acquisition is intended to be a complement to ruTorrent and the Autotools plugin
 
 Note: **Acquisition configurations are in [config.yml](./app/config.yml)**
 
-Please first read [Autotools Documentation](https://github.com/Novik/ruTorrent/wiki/PluginAutotools). The rest of this writeup will make much more sense.
+Please first read [Autotools Documentation](https://github.com/Novik/ruTorrent/wiki/PluginAutotools). The rest of this writeup will make much more sense. Autotools's Autoremove is REQUIRED if using ruTorrent.
 
 There are several paths that are of importance. They are:
 - `rutorrent.rc directory path`: This is the folder Autotools will copy new downloads from (the entire new download file structure is copied). This is not an Acquisition config.
 - `Autotools folder`: This folder is where new **completed** downloads are moved to. This is the "path to finished downloads" in Autotools.
-- `watch-folder`: A folder in the configuration where Acquisition where watch for new files. This should be the same as `Autotools folder`.
+- `watch-folder`: A folder settable in config.yml (under the same name) where Acquisition where watch for new files. This should be the same *folder reference* as `Autotools folder`. **If Acquisition is run in Docker, set this folder in the `start.sh` script's host volume instead of in the config.**. It will be automatically set in a future update.
+
+*Folder reference means the same folder on the hard drive should be pointed at in both `Autotools folder` and `watch-folder`. These are not necessarily the exact same path - set accordingly if Docker volumes are being used.*
 
 When saving new files (manually or in RSS), you should save them to the `rutorrent.rc directory path`. For example purposes, let us assume this path is `/home/rutorrent/incompleted/`, and that the `Autotools folder` is `/home/rutorrent/completed`.
 Then, in a standard download sequence, the episode would first be written to:
@@ -120,3 +127,15 @@ System properties are various application properties that Izumi uses.
   - `verbose`: Whether or not to print more verbose logging output.
   - `logging/logfmt`: Logging message format to output. See Python's logging documentation for more info.
   - `logging/datefmt`: Date output format for logging messages. See Python's logging documentation for more info.
+
+### Starting Acquisition
+
+Make sure all other configurations in this README have been followed, or else Acquisition won't work right.
+
+#### Interactive/Tmux/Screen
+
+To start Acquisition, run the `watch.sh` script inside the app/ folder. This will initialize inotify-tools to watch your configured folder for new downloads. Any new files moved into the watched folder will be processed.
+
+#### Docker
+
+Run `build.sh` to create a Docker image that has your current config baked in. (Changes to config.yml will need new builds). Then, run `start.sh` to start the Docker container. By default, the container will be called `izumi-acquisition`.
