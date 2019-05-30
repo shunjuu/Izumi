@@ -149,4 +149,4 @@ if __name__ == "__main__":
         encode.start()
 
     # Start the Flask server
-    app.run(host='0.0.0.0', port=c.listen_port, debug=True)
+    app.run(host='0.0.0.0', port=c.listen_port)
