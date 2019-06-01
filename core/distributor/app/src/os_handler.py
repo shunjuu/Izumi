@@ -8,7 +8,6 @@ import json
 import pprint as pp 
 
 from bin import hisha # for information fetching
-from bin import hisha2a as hitsu # We need to phase this out in a future module
 from bin import akari # for MAL filtering
 from bin import kishi # for Anilist filtering
 
@@ -66,13 +65,7 @@ class OSHandler:
         """
 
         self._logger.info(self._prints.FETCHING_INFO_START)
-
         info = self._hisha.search(show)
-        try:
-            info.idKitsu = hitsu.hitsu2a(show)['data'][0]['id']
-        except:
-            pass
-
         self._logger.info(self._prints.FETCHING_INFO_END)
 
         return info
