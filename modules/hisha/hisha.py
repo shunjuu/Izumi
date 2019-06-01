@@ -9,6 +9,7 @@ import pprint
 logging.basicConfig(format="[%(name)s] (%(levelname).4s) %(message)s")
 
 ANILIST_API_URL = "https://graphql.anilist.co"
+KITSU_API_URL = "https://kitsu.io/api/edge/anime?filter[text]="
 
 ANILIST_SINGLE_QUERY = '''
 query ($search: String, $status: MediaStatus) {
@@ -87,6 +88,7 @@ class HishaInfo:
         # Set the default values here
         self._id = -1
         self._idMal = -1
+        self._idKitsu = -1
         self._episodes = -1
         self._duration = -1
         self._popularity = -1
@@ -364,6 +366,49 @@ class Hisha:
         self._logger.debug("Didn't find a match for {} in {}".format(search, status))
         return None
 
+    def _kitsu_basic_search(self, title):
+        """
+        This is a quick Kitsu search implementation from the Hitsu 2A module.
+
+        Params:
+            title - the title of the show (in provided request) to search for
+
+        Returns: Kitsu's JSON response
+        """
+        title_lower = title.lower()
+        request_url = requests.utils.requote_uri(KITSU_API_URL + title_lower)
+        self._logger.debug("Created Kitsu url - {}".format(request_url))
+
+        try:
+            kitsu_res = requests.get(request_url)
+
+            try:
+                kitsu_res_json = kitsu_res.json()
+            except:
+                self._logger.error("Kitsu response did not properly parse into JSON")
+                raise Exception()
+
+            return kitsu_res_json
+
+        except:
+            self._logger.error("There was an error when attempting to contact Kitsu")
+            raise Exception()
+
+    def _get_kitsu_id(self, title):
+        """
+        Gets Kitsu's unique ID for a provided show.
+
+        Params:
+            title - a title to search for
+
+        Returns: The ID, if it's found, as an int, or -1 otherwise
+        """
+        try:
+            kitsu_id = self._kitsu_basic_search(title)['data'][0]['id']
+            return int(kitsu_id)
+        except:
+            return -1
+
     def _create_hisha_info(self, show, title):
         """
         Creates a HishaInfo object from a provided show json
@@ -386,6 +431,7 @@ class Hisha:
             # Don't need to check for None values - setters will handle it
             hishaInfo.id = show['id']
             hishaInfo.idMal = show['idMal']
+            hishaInfo.idKitsu = self._get_kitsu_id(title)
             hishaInfo.episodes = show['episodes']
             hishaInfo.duration = show['duration']
             hishaInfo.popularity = show['popularity']
