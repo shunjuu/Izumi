@@ -29,6 +29,7 @@ query ($search: String, $status: MediaStatus) {
             english
             romaji
         }
+        synonyms
         startDate {
             year
         }
@@ -64,6 +65,7 @@ query ($search: String, $status: MediaStatus) {
                 english
                 romaji
             }
+            synonyms
             startDate {
                 year
             }
@@ -307,11 +309,21 @@ class Hisha:
         # If any of the titles match, return the show data
         for title in info['Media']['title'].values():
             if self._check_equality_regex(search, title):
-                self._logger.debug("Matched {} to {}".format(search, title))
+                self._logger.info("Matched {} to {}".format(search, title))
                 return info['Media']
+            else:
+                self._logger.debug("Didn't match {} to {}".format(search, title))
+
+        # If any of the synonyms match, return the show data
+        for title in info['Media']['synonyms']:
+            if self._check_equality_regex(search, title):
+                self._logger.info("Matched {} to {}".format(search, title))
+                return info['Media']
+            else:
+                self._logger.debug("Didn't match {} to {}".format(search, title))
 
         # But if none of the titles match, return None
-        self._logger.debug("Didn't match {} in {}".format(search, status))
+        self._logger.debug("Didn't find a match for {} in {}".format(search, status))
         return None
 
     def _page_search(self, search, status):
@@ -329,13 +341,27 @@ class Hisha:
             # Default to an empty list if the results are bad - Hisha can cleanly exit here
             info = list()
 
+        # Match against the titles provided in the response
         for show in info:
+
+            # Match against the titles
             for title in show['title'].values():
                 if self._check_equality_regex(search, title):
-                    self._logger.debug("Matched {} to {}".format(search, title))
+                    self._logger.info("Matched {} to {}".format(search, title))
                     return show
+                else:
+                    self._logger.debug("Didn't match {} to {}".format(search, title))
+
+            # Match against the synonyms
+            for title in show['synonyms']:
+                if self._check_equality_regex(search, title):
+                    self._logger.info("Matched {} to {}".format(search, title))
+                    return show
+                else:
+                    self._logger.debug("Didn't match {} to {}".format(search, title))
 
         # If there are no matches, return None
+        self._logger.debug("Didn't find a match for {} in {}".format(search, status))
         return None
 
     def _create_hisha_info(self, show, title):
