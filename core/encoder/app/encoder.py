@@ -32,45 +32,13 @@ app = Flask(__name__)
 # A queue will act as the source for all encoder threads to pull jobs from
 episode_job_queue = Queue() 
 
-# Initialize in __main__ if
-c = None # Represents a ConfigHandler
-p = None # Represents PrintHandler
-logger = None # Represents the logger object
-ep = None # Represents the EncodePrints object
-a = None # Represents the authandler object
-
-def _get_config_handler():
-    """
-    Gets the config path based on if Docker is used or not
-    Checks environment for DOCKER='true'
-    Returns the appropriate ConfigHandler
-    """
-    if 'DOCKER' not in os.environ:
-        return ConfigHandler()
-    else:
-        USAGE = bool(os.environ.get("DOCKER"))
-        if USAGE:
-            return ConfigHandler("/src/config.yml")
-        else:
-            return ConfigHandler()
-
-def _get_auth_handler(printh):
-    """
-    Gets the auth path based on if Docker is used or not
-    Checks environment for DOCKER='true'
-    Returns the appropriate AuthHandler (refresh() not supported)
-
-    Args:
-        printh - represents a printh object
-    """
-    if 'DOCKER' not in os.environ:
-        return AuthHandler(printh)
-    else:
-        USAGE = bool(os.environ.get("DOCKER"))
-        if USAGE:
-            return AuthHandler(printh, "/src/auth.yml")
-        else:
-            return AuthHandler(printh)
+c = (ConfigHandler() if 'DOCKER' not in os.environ or not bool(os.environ.get("DOCKER"))
+    else ConfigHandler("/src/config.yml")) # Represents ConfigHandler
+p = PrintHandler(c) # Represents PrintHandler
+logger = p.logger # Represents the logger object
+ep = EncodePrints(p.Colors()) # Represents the EncodePrints object
+a = (AuthHandler(p) if 'DOCKER' not in os.environ or not bool(os.environ.get("DOCKER"))
+    else AuthHandler(p, "/src/auth.yml")) # Represents AuthHandler
 
 def encode_worker():
     """
@@ -108,7 +76,7 @@ def encode_worker():
         logger.warning(ep.JOB_COMPLETE)
 
 
-@app.route("/encode", methods=['POST'])
+@app.route(c.route, methods=['POST'])
 def encode():
 
     # Headers must be passed in separately, so the request isn't processed
@@ -131,13 +99,6 @@ def encode():
         return "Error with request", 400
 
 if __name__ == "__main__":
-
-    # Set the variables
-    c = _get_config_handler()
-    p = PrintHandler(c)
-    logger = p.logger
-    ep = EncodePrints(p.Colors())
-    a = _get_auth_handler(p)
 
     logger.warning(ep.WORKER_SPAWN.format(c.encode_encode_jobs))
 
