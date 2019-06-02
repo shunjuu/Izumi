@@ -25,6 +25,7 @@ import pprint as pp
 from src.config_handler import ConfigHandler
 from src.auth_handler import AuthHandler
 from src.request_handler import RequestHandler
+from src.network_handler import NetworkHandler
 from src.module_handler import ModuleHandler
 from src.print_handler import PrintHandler
 from src.prints.notification_prints import NotificationPrints
@@ -84,11 +85,16 @@ def encode_worker():
             # We need to ignore any errors to keep the queue empty
             m = ModuleHandler(c, new_request, p)
             m.notify_all()
-        except:
+
+            n = NetworkHandler(c, new_request, p)
+            n.notify()
+        except Exception as e:
+            print(e)
             pass
 
         notify_job_queue.task_done()
         logger.warning(np.JOB_COMPLETE)
+        print()
 
 @app.route("/notify", methods=['POST'])
 def distribute():
