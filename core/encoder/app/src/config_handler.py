@@ -34,38 +34,12 @@ class ConfigHandler:
         """
         Variables
         """
-        self._web_config_url = None # The URL if a config will be loaded from the web
-        self._conf = None # The real config to parse all other vars from
-        self._web_conf_use = False # Whether or not using web-style conf
-
-        self._listen_port = None # The port Flask will listen to
-
-        self._encode_encode_flags = None # The flags to be used for encoding videos
-        self._encode_encode_jobs = None # Number of encoding jobs that can run at once
-
-
-        self._download_download_sources = None # The list of rclone sources to dl from
-        self._download_softsub_folder = None # The name of the softsub folder name
-        self._download_rclone_flags = None # Flags for rclone to use when downloading
-
-        self._upload_destinations = None # List of rclone dests to upload to
-        self._upload_hardsub_folder = None # The name of the hardsub folder to upload to
-        self._upload_rclone_flags = None # Flags for rclone to use when downloading
-
-        self._notifiers_always = None # The notification endpoints, always
-        self._notifiers_sequential = None # The notification endpoints, sequential
-        self._distributors_always = None # The distribution endpoints, always
-        self._distributors_sequential = None # The distribution endpoints, sequential
-
-        self._name = None # The name of this application insance
-        self._verbose = False # Whether or not we are printing verbosely
-
-        self._logging_logfmt = None # The format string for the logger to use
-        self._logging_datefmt = None # If logging strings include asctime (strftime format)
-
-        # ---------------- #
 
         # First, we want to load the web config URL if it exists.
+
+        # self._web_config_url: The URL if a config will be loaded from the web
+        # self._conf: The real config to parse all other vars from
+        # self._web_conf_use: Whether or not web conf is being used
         self._web_config_url = self._load_web_config_url(initial_conf)
         # If it does exist, we want to open the URL 
         if self._web_config_url:
@@ -80,31 +54,146 @@ class ConfigHandler:
         # ---------------- #
         # Populate the rest of the variables now
         # ---------------- #
+
+        # The port Flask will listen to
         self._listen_port = self._load_listen_port(self._conf, self._web_conf_use)
 
+        # The flags to be used for encoding videos
         self._encode_encode_flags = self._load_encode_encode_flags(self._conf, self._web_conf_use) 
+        # Number of encoding jobs that can run at once 
         self._encode_encode_jobs = self._load_encode_encode_jobs(self._conf, self._web_conf_use)
 
+        # The list of rclone sources to dl from
         self._download_download_sources = self._load_download_download_sources(self._conf, self._web_conf_use)
+        # The name of the softsub folder name
         self._download_softsub_folder = self._load_download_softsub_folder(self._conf, self._web_conf_use)
+        # Flags for rclone to use when downloading
         self._download_rclone_flags = self._load_download_rclone_flags(self._conf, self._web_conf_use)
-
+        # List of rclone dests to upload to
         self._upload_destinations = self._load_upload_destinations(self._conf, self._web_conf_use)
+        # The name of the hardsub folder to upload to
         self._upload_hardsub_folder = self._load_upload_hardsub_folder(self._conf, self._web_conf_use)
+        # Flags for rclone to use when downloading
         self._upload_rclone_flags = self._load_upload_rclone_flags(self._conf, self._web_conf_use)
-
-        self._notifiers_always = self._load_endpoints_notifiers_always(self._conf, self._web_conf_use)
-        self._notifiers_sequential = self._load_endpoints_notifiers_sequential(self._conf, self._web_conf_use)
-        self._distributors_always = self._load_endpoints_distributors_always(self._conf, self._web_conf_use)
-        self._distributors_sequential = self._load_endpoints_distributors_sequential(self._conf, self._web_conf_use)
- 
-
+        # The Always endpoints used by the system
+        self._endpoints_always = self._load_endpoints_always(self._conf, self._web_conf_use)
+        # The Sequential endpoints used by the system
+        self._endpoints_sequential = self._load_endpoints_sequential(self._conf, self._web_conf_use)
+        # The name of this application insance
         self._name = self._load_system_name(self._conf, self._web_conf_use)
+        # Whether or not we are printing verbosely
         self._verbose = self._load_system_verbose(self._conf, self._web_conf_use)
-        
+        # The format string for the logger to use
         self._logging_logfmt = self._load_logging_logfmt(self._conf, self._web_conf_use)
+        # If logging strings include asctime (strftime format)
         self._logging_datefmt = self._load_logging_datefmt(self._conf, self._web_conf_use)
 
+
+    @property
+    def listen_port(self):
+        """Returns the port for flask to listen to, as an integer"""
+        return self._listen_port
+    
+    @property
+    def encode_encode_flags(self):
+        """Returns the flags to be used by rclone as a string"""
+        return self._encode_encode_flags
+    
+    @property
+    def encode_encode_jobs(self):
+        """Returns the number of encoding jobs run simultaneously as an int."""
+        return self._encode_encode_jobs
+
+    @property
+    def download_download_sources(self):
+        """Returns the rclone download sources list, each ending with "/" """
+        return self._download_download_sources
+    
+    @property
+    def download_softsub_folder(self):
+        """Returns the softsub folder as a string, with "/" ending"""
+        return self._download_softsub_folder
+
+    @property
+    def download_rclone_flags(self):
+        """Returns the download rclone flags as a string"""
+        return self._download_rclone_flags
+    
+    @property
+    def upload_destinations(self):
+        """Returns the upload destinations as a list of strings, all ending with "/" """
+        return self._upload_destinations
+
+    @property
+    def upload_hardsub_folder(self):
+        """Returns the upload hardsub folder, ending with a "/" """
+        return self._upload_hardsub_folder
+    
+    @property
+    def upload_rclone_flags(self):
+        """Returns the string representing the upload rclone flags"""
+        return self._upload_rclone_flags
+
+    @property
+    def endpoints_always(self):
+        """Returns the always endpoints"""
+        return self._endpoints_always
+    
+    @property
+    def endpoints_sequential(self):
+        """Returns the sequential endpoints"""
+        return self._endpoints_sequential
+    
+    @property
+    def notifiers(self):
+        """Returns the notifiers as a tuple (always, sequential)"""
+        return (self._notifiers_always, self._notifiers_sequential)
+
+    @property
+    def notifiers_always(self):
+        """Returns the always notifier endpoints as a list of dicts"""
+        return self._notifiers_always
+    
+    @property
+    def notifiers_sequential(self):
+        """Returns the sequential notifier endpoints as a dict of list of dicts"""
+        return self._notifiers_sequential
+    
+    @property
+    def distributors(self):
+        """Returns the distributors as a tuple (always, sequential)"""
+        return (self._distributors_always, self._distributors_sequential)
+
+    @property
+    def distributors_always(self):
+        """Returns the always distributors endpoints as a list of dicts"""
+        return self._distributors_always
+    
+    @property
+    def distributors_sequential(self):
+        """Returns the sequential distributors endpoints as a dict of list of dicts"""
+        return self._distributors_sequential
+    
+    @property
+    def name(self):
+        """Returns the name for this application specified by the user"""
+        return self._name
+
+    @property
+    def verbose(self):
+        """Returns a boolean representing whether or not to verbose print"""
+        return self._verbose
+    
+    @property
+    def logging_logfmt(self):
+        """Returns a string representation for the logfmt"""
+        return self._logging_logfmt
+    
+    @property
+    def logging_datefmt(self):
+        """Returns a string representation for the datefmt"""
+        return self._logging_datefmt
+ 
     def _load_local_config(self, cpath_abs):
         """
         Loads the config path into a parsable dict.
@@ -422,85 +511,37 @@ class ConfigHandler:
 
         return conf['uploading']['rclone-flags']
 
-    def _load_endpoints_notifiers_always(self, conf, web):
+    def _load_endpoints_always(self, conf, web):
         """
-        Finds the ALWAYS notification endpoints.
+        Loads the Always endpoints from the config
 
         Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
+            conf: self._conf, a dict object of the loaded conf
+            web: a boolean value indicating if web conf is being used
 
-        Returns: A list of lists, where each inside list represents one endpoint
-            entry. Index 0 is URL, Index 1 (optional) is an Authorization key.
+        Returns: A list of dicts, each entry being an endpoint
+        """ 
+        if web:
+            pass
+
+        # Return from the local config
+        return conf['endpoints']['always']
+
+    def _load_endpoints_sequential(self, conf, web):
+        """
+        Loads the Sequential endpoints from the config
+
+        Params:
+            conf: self._conf, a dict object of the loaded conf
+            web: a boolean value indicating if web conf is being used
+
+        Returns: A dict of lists of dicts
         """
         if web:
             pass
 
         # Return from the local config
-        return conf['endpoints']['notifiers']['always']
-
-    def _load_endpoints_notifiers_sequential(self, conf, web):
-        """
-        Finds the SEQUENTIAL notification endpoints.
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns: A list of list of lists. 
-        For x in root list, y in x in order represents URLs in order to 
-        try until a single request succeeds.
-        Follows standard index 0/1 url/auth key(opt)
-        """
-        if web:
-            pass
-
-        # Return from the local config
-        return conf['endpoints']['notifiers']['sequential']
-
-    def _load_endpoints_distributors_always(self, conf, web):
-        """
-        Finds the ALWAYS notification endpoints.
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns: A list of lists, where each inside list represents one endpoint
-            entry. Index 0 is URL, Index 1 (optional) is an Authorization key.
-        """
-        if web:
-            pass
-
-        # Return from the local config
-        return conf['endpoints']['distributors']['always']
-
-    def _load_endpoints_distributors_sequential(self, conf, web):
-        """
-        Finds the SEQUENTIAL notification endpoints.
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns: A list of list of lists. 
-        For x in root list, y in x in order represents URLs in order to 
-        try until a single request succeeds.
-        Follows standard index 0/1 url/auth key(opt)
-        """
-        if web:
-            pass
-
-        # Return from the local config
-        return conf['endpoints']['distributors']['sequential']
+        return conf['endpoints']['sequential']
 
     def _load_system_name(self, conf, web):
         """
@@ -575,98 +616,3 @@ class ConfigHandler:
         # Return from the local config
         return conf['system']['logging']['datefmt']
 
-    @property
-    def listen_port(self):
-        """Returns the port for flask to listen to, as an integer"""
-        return self._listen_port
-    
-    @property
-    def encode_encode_flags(self):
-        """Returns the flags to be used by rclone as a string"""
-        return self._encode_encode_flags
-    
-    @property
-    def encode_encode_jobs(self):
-        """Returns the number of encoding jobs run simultaneously as an int."""
-        return self._encode_encode_jobs
-
-    @property
-    def download_download_sources(self):
-        """Returns the rclone download sources list, each ending with "/" """
-        return self._download_download_sources
-    
-    @property
-    def download_softsub_folder(self):
-        """Returns the softsub folder as a string, with "/" ending"""
-        return self._download_softsub_folder
-
-    @property
-    def download_rclone_flags(self):
-        """Returns the download rclone flags as a string"""
-        return self._download_rclone_flags
-    
-    @property
-    def upload_destinations(self):
-        """Returns the upload destinations as a list of strings, all ending with "/" """
-        return self._upload_destinations
-
-    @property
-    def upload_hardsub_folder(self):
-        """Returns the upload hardsub folder, ending with a "/" """
-        return self._upload_hardsub_folder
-    
-    @property
-    def upload_rclone_flags(self):
-        """Returns the string representing the upload rclone flags"""
-        return self._upload_rclone_flags
-    
-    @property
-    def notifiers(self):
-        """Returns the notifiers as a tuple (always, sequential)"""
-        return (self._notifiers_always, self._notifiers_sequential)
-
-    @property
-    def notifiers_always(self):
-        """Returns the always notifier endpoints as a list of dicts"""
-        return self._notifiers_always
-    
-    @property
-    def notifiers_sequential(self):
-        """Returns the sequential notifier endpoints as a dict of list of dicts"""
-        return self._notifiers_sequential
-    
-    @property
-    def distributors(self):
-        """Returns the distributors as a tuple (always, sequential)"""
-        return (self._distributors_always, self._distributors_sequential)
-
-    @property
-    def distributors_always(self):
-        """Returns the always distributors endpoints as a list of dicts"""
-        return self._distributors_always
-    
-    @property
-    def distributors_sequential(self):
-        """Returns the sequential distributors endpoints as a dict of list of dicts"""
-        return self._distributors_sequential
-    
-    @property
-    def name(self):
-        """Returns the name for this application specified by the user"""
-        return self._name
-
-    @property
-    def verbose(self):
-        """Returns a boolean representing whether or not to verbose print"""
-        return self._verbose
-    
-    @property
-    def logging_logfmt(self):
-        """Returns a string representation for the logfmt"""
-        return self._logging_logfmt
-    
-    @property
-    def logging_datefmt(self):
-        """Returns a string representation for the datefmt"""
-        return self._logging_datefmt
-    

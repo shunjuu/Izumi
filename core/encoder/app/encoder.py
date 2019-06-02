@@ -91,8 +91,7 @@ def encode_worker():
 
             # Create the NetworkHandler to send out notifications
             n = NetworkHandler(c, new_request, p, ofile_name, ofile_size)
-            n.notify_notifiers()
-            n.notify_distributors()
+            n.notify()
             
         except:
             pass
