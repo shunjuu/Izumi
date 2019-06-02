@@ -9,6 +9,7 @@ import pprint
 logging.basicConfig(format="[%(name)s] (%(levelname).4s) %(message)s")
 
 ANILIST_API_URL = "https://graphql.anilist.co"
+KITSU_API_URL = "https://kitsu.io/api/edge/anime?filter[text]="
 
 ANILIST_SINGLE_QUERY = '''
 query ($search: String, $status: MediaStatus) {
@@ -29,6 +30,7 @@ query ($search: String, $status: MediaStatus) {
             english
             romaji
         }
+        synonyms
         startDate {
             year
         }
@@ -64,6 +66,7 @@ query ($search: String, $status: MediaStatus) {
                 english
                 romaji
             }
+            synonyms
             startDate {
                 year
             }
@@ -75,7 +78,7 @@ query ($search: String, $status: MediaStatus) {
 }
 '''
 
-class ShowInfo:
+class HishaInfo:
     """
     This is a class that holds the information for a returned show from Hisha.
     Return this instead of a raw dict to streamline data access.
@@ -114,14 +117,6 @@ class ShowInfo:
     @idMal.setter
     def idMal(self, val):
         if val: self._idMal = val
-
-    @property
-    def idKitsu(self):
-        return self._idKitsu
-    
-    @idKitsu.setter
-    def idKitsu(self, val):
-        if val: self._idKitsu = val
     
     @property
     def episodes(self):
@@ -254,7 +249,7 @@ class Hisha:
         self._logger.debug("Comparing {} and {} without punctuation".format(str1, str2))
 
         try:
-            # Anilist sometimes has weird leading/trailing spaces in the show names
+            # Anilist sometimes has weird leading/trailing spaces
             re_str1 = re.sub(r'[^\w]','', str1)
             re_str2 = re.sub(r'[^\w]','', str2)
             return bool(re_str1 == re_str2)
@@ -316,11 +311,21 @@ class Hisha:
         # If any of the titles match, return the show data
         for title in info['Media']['title'].values():
             if self._check_equality_regex(search, title):
-                self._logger.debug("Matched {} to {}".format(search, title))
+                self._logger.info("Matched {} to {}".format(search, title))
                 return info['Media']
+            else:
+                self._logger.debug("Didn't match {} to {}".format(search, title))
+
+        # If any of the synonyms match, return the show data
+        for title in info['Media']['synonyms']:
+            if self._check_equality_regex(search, title):
+                self._logger.info("Matched {} to {}".format(search, title))
+                return info['Media']
+            else:
+                self._logger.debug("Didn't match {} to {}".format(search, title))
 
         # But if none of the titles match, return None
-        self._logger.debug("Didn't match {} in {}".format(search, status))
+        self._logger.debug("Didn't find a match for {} in {}".format(search, status))
         return None
 
     def _page_search(self, search, status):
@@ -338,51 +343,109 @@ class Hisha:
             # Default to an empty list if the results are bad - Hisha can cleanly exit here
             info = list()
 
+        # Match against the titles provided in the response
         for show in info:
+
+            # Match against the titles
             for title in show['title'].values():
                 if self._check_equality_regex(search, title):
-                    self._logger.debug("Matched {} to {}".format(search, title))
+                    self._logger.info("Matched {} to {}".format(search, title))
                     return show
+                else:
+                    self._logger.debug("Didn't match {} to {}".format(search, title))
+
+            # Match against the synonyms
+            for title in show['synonyms']:
+                if self._check_equality_regex(search, title):
+                    self._logger.info("Matched {} to {}".format(search, title))
+                    return show
+                else:
+                    self._logger.debug("Didn't match {} to {}".format(search, title))
 
         # If there are no matches, return None
+        self._logger.debug("Didn't find a match for {} in {}".format(search, status))
         return None
 
-    def _create_show_info(self, show, title):
+    def _kitsu_basic_search(self, title):
         """
-        Creates a ShowInfo object from a provided show json
+        This is a quick Kitsu search implementation from the Hitsu 2A module.
+
+        Params:
+            title - the title of the show (in provided request) to search for
+
+        Returns: Kitsu's JSON response
+        """
+        title_lower = title.lower()
+        request_url = requests.utils.requote_uri(KITSU_API_URL + title_lower)
+        self._logger.debug("Created Kitsu url - {}".format(request_url))
+
+        try:
+            kitsu_res = requests.get(request_url)
+
+            try:
+                kitsu_res_json = kitsu_res.json()
+            except:
+                self._logger.error("Kitsu response did not properly parse into JSON")
+                raise Exception()
+
+            return kitsu_res_json
+
+        except:
+            self._logger.error("There was an error when attempting to contact Kitsu")
+            raise Exception()
+
+    def _get_kitsu_id(self, title):
+        """
+        Gets Kitsu's unique ID for a provided show.
+
+        Params:
+            title - a title to search for
+
+        Returns: The ID, if it's found, as an int, or -1 otherwise
+        """
+        try:
+            kitsu_id = self._kitsu_basic_search(title)['data'][0]['id']
+            return int(kitsu_id)
+        except:
+            return -1
+
+    def _create_hisha_info(self, show, title):
+        """
+        Creates a HishaInfo object from a provided show json
         Params:
             show - a dict that represents Anilist show response, or None
             title - the name of the show (for when it's not provided)
 
-        Returns a ShowInfo object
+        Returns a HishaInfo object
         """
 
-        showInfo = ShowInfo()
+        hishaInfo = HishaInfo()
 
         if show is None:
             # If the show doesn't exist, set title and use defaults
-            showInfo.title = title 
-            showInfo.title_native = title
-            showInfo.title_english = title
-            showInfo.title_romaji = title
+            hishaInfo.title = title 
+            hishaInfo.title_native = title
+            hishaInfo.title_english = title
+            hishaInfo.title_romaji = title
         else:
             # Don't need to check for None values - setters will handle it
-            showInfo.id = show['id']
-            showInfo.idMal = show['idMal']
-            showInfo.episodes = show['episodes']
-            showInfo.duration = show['duration']
-            showInfo.popularity = show['popularity']
-            showInfo.averageScore = show['averageScore']
-            showInfo.bannerImage = show['bannerImage']
-            showInfo.coverImage = show['coverImage']['large']
-            showInfo.title = show['title']['userPreferred']
-            showInfo.title_native = show['title']['native']
-            showInfo.title_english = show['title']['english']
-            showInfo.title_romaji = show['title']['romaji']
-            showInfo.startYear = show['startDate']['year']
-            showInfo.endYear = show['endDate']['year']
+            hishaInfo.id = show['id']
+            hishaInfo.idMal = show['idMal']
+            hishaInfo.idKitsu = self._get_kitsu_id(title)
+            hishaInfo.episodes = show['episodes']
+            hishaInfo.duration = show['duration']
+            hishaInfo.popularity = show['popularity']
+            hishaInfo.averageScore = show['averageScore']
+            hishaInfo.bannerImage = show['bannerImage']
+            hishaInfo.coverImage = show['coverImage']['large']
+            hishaInfo.title = show['title']['userPreferred']
+            hishaInfo.title_native = show['title']['native']
+            hishaInfo.title_english = show['title']['english']
+            hishaInfo.title_romaji = show['title']['romaji']
+            hishaInfo.startYear = show['startDate']['year']
+            hishaInfo.endYear = show['endDate']['year']
 
-        return showInfo
+        return hishaInfo
 
     def search(self, show):
         """
@@ -390,22 +453,22 @@ class Hisha:
         """
         airing = self._single_search(show, "RELEASING")
         if airing:
-            self._logger.info("Creating ShowInfo for {} in RELEASING".format(show))
-            return self._create_show_info(airing, show)
+            self._logger.info("Creating HishaInfo for {} in RELEASING".format(show))
+            return self._create_hisha_info(airing, show)
 
         finished = self._page_search(show, "FINISHED")
         if finished:
-            self._logger.info("Creating ShowInfo for {} in FINISHED".format(show))
-            return self._create_show_info(finished, show)
+            self._logger.info("Creating HishaInfo for {} in FINISHED".format(show))
+            return self._create_hisha_info(finished, show)
 
         not_yet_released = self._single_search(show, "NOT_YET_RELEASED")
         if not_yet_released:
-            self._logger.info("Creating ShowInfo for {} in NOT_YET_RELEASED".format(show))
-            return self._create_show_info(not_yet_released, show)
+            self._logger.info("Creating HishaInfo for {} in NOT_YET_RELEASED".format(show))
+            return self._create_hisha_info(not_yet_released, show)
 
         # None of the three found a result, so create a dummy Hisha object and return it
-        self._logger.info("Creating ShowInfo for {} with default values".format(show))
-        return self._create_show_info(None, show)
+        self._logger.info("Creating HishaInfo for {} with default values".format(show))
+        return self._create_hisha_info(None, show)
 
 
 if __name__ == "__main__":
