@@ -85,7 +85,7 @@ def distribute_worker():
             o.distribute()
 
             n = NetworkHandler(c, new_request, p)
-            n.notify_notifiers()
+            n.notify()
         except:
             pass
         finally:

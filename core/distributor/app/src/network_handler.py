@@ -162,15 +162,10 @@ class NetworkHandler:
         return
 
     # Public functions for telling NH to send out notifications.
-
-    def notify_notifiers(self):
+    
+    def notify(self):
         """
-        Sends out notifications to all the U3 Notifier modules
+        Sends out notifcations to all the Endpoints
         """
-
-        self._logger.info(self._prints.GROUP_NOTIFIERS)
-
-        # Call the general notifer, passing in the notifier functions
-        self._notify(self._conf.notifiers_always,
-                        self._conf.notifiers_sequential)
-
+        self._logger.info(self._prints.ENDPOINT_START)
+        self._notify(self._conf.endpoints_always, self._conf.endpoints_sequential)
