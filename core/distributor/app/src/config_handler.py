@@ -87,6 +87,8 @@ class ConfigHandler:
         self._logging_logfmt = self._load_logging_logfmt(self._conf, self._web_conf_use)
         # If logging strings include asctime (strftime format)
         self._logging_datefmt = self._load_logging_datefmt(self._conf, self._web_conf_use)
+        # The route that the Flask server will listen on
+        self._route = self._load_route(self._conf, self._web_conf_use)
 
 
     @property
@@ -168,7 +170,11 @@ class ConfigHandler:
     def logging_datefmt(self):
         """Returns a string reprsentation for the datefmt"""
         return self._logging_datefmt
-        
+
+    @property
+    def route(self):
+        """The route flask will listen on"""
+        return self._route
 
     def _load_local_config(self, cpath_abs):
         """
@@ -658,3 +664,26 @@ class ConfigHandler:
 
         # Return from the local config
         return conf['system']['logging']['datefmt']
+
+    def _load_route(self, conf, web):
+        """
+        Loads the route that Flask will listen on
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+                is being used (default: local)
+
+        Returns: The route, as a string with a / appended before it
+        """
+        if web:
+            pass
+
+        route = conf['system']['route']
+        if not route.startswith("/"):
+            route = "/" + route
+
+        # Return from the local config
+        return route
+        

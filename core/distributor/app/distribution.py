@@ -32,44 +32,14 @@ episode_job_queue = Queue()
 
 # Don't try any of this here - startup configs should fail immediately
 # Initialize in __main__ if
-c = None # Represents a ConfigHandler
-p = None # Represents PrintHandler
-logger = None # Represents the logger object
-dp = None # Represents the EncodePrints object
-a = None # Represents the authandler object
 
-def _get_config_handler():
-    """
-    Gets the config path based on if Docker is used or not
-    Checks environment for DOCKER='true'
-    Returns the appropriate ConfigHandler
-    """
-    if 'DOCKER' not in os.environ:
-        return ConfigHandler()
-    else:
-        USAGE = bool(os.environ.get("DOCKER"))
-        if USAGE:
-            return ConfigHandler("/src/config.yml")
-        else:
-            return ConfigHandler()
-
-def _get_auth_handler(printh):
-    """
-    Gets the auth path based on if Docker is used or not
-    Checks environment for DOCKER='true'
-    Returns the appropriate AuthHandler (refresh() not supported)
-    Args:
-        printh - represents a printh object
-    """
-    if 'DOCKER' not in os.environ:
-        return AuthHandler(printh)
-    else:
-        USAGE = bool(os.environ.get("DOCKER"))
-        if USAGE:
-            return AuthHandler(printh, "/src/auth.yml")
-        else:
-            return AuthHandler(printh)
-
+c = (ConfigHandler() if 'DOCKER' not in os.environ or not bool(os.environ.get("DOCKER"))
+    else ConfigHandler("/src/config.yml")) # Represents ConfigHandler
+p = PrintHandler(c) # Represents PrintHandler
+logger = p.logger # Represents the logger object
+dp = DistributionPrints(p.Colors()) # Represents the EncodePrints object
+a = (AuthHandler(p) if 'DOCKER' not in os.environ or not bool(os.environ.get("DOCKER"))
+    else AuthHandler(p, "/src/auth.yml")) # Represents AuthHandler
 
 def distribute_worker():
     """
@@ -99,7 +69,7 @@ def distribute_worker():
         episode_job_queue.task_done()
         logger.warning(dp.JOB_COMPLETE)
 
-@app.route("/distribute", methods=['POST'])
+@app.route(c.route, methods=['POST'])
 def distribute():
 
     # Headers must be passed in separately, so the request isn't processeed
@@ -121,12 +91,6 @@ def distribute():
         return "Error with request", 400
 
 if __name__ == "__main__":
-
-    c = _get_config_handler()
-    p = PrintHandler(c)
-    logger = p.logger
-    dp = DistributionPrints(p.Colors())
-    a = _get_auth_handler(p)
 
     logger.warning(dp.WORKER_SPAWN.format(c.distributor_jobs))
 
