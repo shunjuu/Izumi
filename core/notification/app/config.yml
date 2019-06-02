@@ -50,6 +50,35 @@ dev:
     url: "https://dev.discord.webhook.url/identifier"
     template: 1
 
+# Grouping body to list endpoints for other Izumi modules for this app to talk to.
+endpoints:
+
+  # All modules use and accept the same formatted request
+  # Thus, there is no need to "group" each type of request
+
+  # [always] URLs will always be POST'd, regardless of the response
+  # To have no URLs in this list, use an empty list, i.e.:
+  # always: []
+  always:
+    - url: "https://endpoint1.url/notify"
+      auth: "authorization_key1"
+    - url: "https://endpoint2.url/encode"
+    - url: "https://endpoint3.url/distribute"
+
+  # [sequential] URLs are sorted into groups.
+  # For each group, the URLs will be tested in order until one of them succeeds.
+  # All the groups will be tested.
+  # To specify no groups, use an empty dict, i.e.:
+  # sequential: {}
+  sequential:
+    group1:
+      - url: "https://endpoint1.url/notify"
+        auth: "authorization_key1"
+      - url: "https://endpoint2.url/notify"
+    group2:
+      - url: "https://endpoint3.url/distribute"
+      
+
 # Application-specifc settings
 system:
 
