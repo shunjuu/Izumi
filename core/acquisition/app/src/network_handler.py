@@ -158,33 +158,9 @@ class NetworkHandler:
         return
 
     # Public functions for telling NH to send out notifications.
-
-    def notify_encoders(self):
+    def notify(self):
         """
-        Sends out notifications to all the U2 Encoders per their standards.
+        Sends out notifcations to all the Endpoints
         """
-
-        self._logger.info(self._prints.GROUP_ENCODERS)
-
-        # Call the general notifier, passing in the encoder functions
-        self._notify(self._conf.encoders_always, self._conf.encoders_sequential)
-
-    def notify_notifiers(self):
-        """
-        Sends out notifications to all the U3 Notifier modules
-        """
-
-        self._logger.info(self._prints.GROUP_NOTIFIERS)
-
-        # Call the general notifer, passing in the notifier functions
-        self._notify(self._conf.notifiers_always, self._conf.notifiers_sequential)
-
-    def notify_distributors(self):
-        """
-        Sends out notifications to all the U4 Distributor modules
-        """
-
-        self._logger.info(self._prints.GROUP_DISTRIBUTORS)
-
-        # Call the general notifier, passing in the distributor functions
-        self._notify(self._conf.distributors_always, self._conf.distributors_sequential)
+        self._logger.info(self._prints.ENDPOINT_START)
+        self._notify(self._conf.endpoints_always, self._conf.endpoints_sequential)

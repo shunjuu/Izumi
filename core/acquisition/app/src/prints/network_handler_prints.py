@@ -35,13 +35,8 @@ class NetworkHandlerPrints:
             error_color + "{}" + endc + " returned bad response code " + \
             error_color + "{}" + endc
 
-        # Sending Group Bodies
-        group_color = colors.BLUE
-        group_base = prefix + "Now sending requests to " + colors.MAGENTA + "{}" + endc
-        self.GROUP_ENCODERS = group_base.format("encoders")
-        self.GROUP_NOTIFIERS = group_base.format("notifiers")
-        self.GROUP_DISTRIBUTORS = group_base.format("distributors")
-
+        self.ENDPOINT_START = prefix + "Starting to send out endpoint requests..."
+        
         # Always Bodies
         body_color = colors.BLUE
         body_base = prefix + "Working on " + body_color + "{}" + endc + "..."
