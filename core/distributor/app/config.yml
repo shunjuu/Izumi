@@ -103,3 +103,6 @@ system:
     logfmt: "[%(name)s] (%(levelname)s) %(asctime)s: %(message)s"
     # The strftime-style format for %(asctime)s
     datefmt: "%a|%b%y %X %Z"
+
+  # The route Flask will listen to
+  route: "distribute"
