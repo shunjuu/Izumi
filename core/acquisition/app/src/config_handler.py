@@ -35,33 +35,12 @@ class ConfigHandler:
         """
         Variables
         """
-        self._web_config_url = None # The URL if a config will be loaded from the web
-        self._conf = None # The real config to parse all other vars from
-        self._web_conf_use = False # Whether or not using web-style conf
-
-        self._watch_folder = None # The watch folder of the string
-
-        self._destinations = None # A list of rclone destinations
-        self._airing_folder = None # The name of an airing folder to store to
-        self._rclone_flags = None # Flags used by rclone to determine its output
-
-        self._encoders_always = None # The encoding endpoints, always
-        self._encoders_sequential = None # The encoding endpoints, sequential
-        self._notifiers_always = None # The notification endpoints, always
-        self._notifiers_sequential = None # The notification endpoints, sequential
-        self._distributors_always = None # The distribution endpoints, always
-        self._distributors_sequential = None # The distribution endpoints, sequential
-
-        self._name = None # The name of this application insance
-        self._delimiter = None # The delimiter used by inotify !!IMPORTANT
-        self._verbose = False # Whether or not we are printing verbosely
-
-        self._logging_logfmt = None # The format string for the logger to use
-        self._logging_datefmt = None # If logging strings include asctime (strftime format)
-
-        # ---------------- #
 
         # First, we want to load the web config URL if it exists.
+
+        # self._web_config_url: The URL if a config will be loaded from the web
+        # self._conf: The real config to parse all other vars from
+        # self._web_conf_use: Whether or not web conf is being used
         self._web_config_url = self._load_web_config_url(initial_conf)
         # If it does exist, we want to open the URL 
         if self._web_config_url:
@@ -76,24 +55,28 @@ class ConfigHandler:
         # ---------------- #
         # Populate the rest of the variables now
         # ---------------- #
+
+        # The watch folder of the string
         self._watch_folder = self._load_watch_folder(self._conf, self._web_conf_use)
-
+        # A list of rclone destinations
         self._destinations = self._load_destinations(self._conf, self._web_conf_use)
+        # The name of an airing folder to store to
         self._airing_folder = self._load_airing_folder(self._conf, self._web_conf_use)
+        # Flags used by rclone to determine its output
         self._rclone_flags = self._load_rclone_flags(self._conf, self._web_conf_use)
-
-        self._encoders_always = self._load_endpoints_encoders_always(self._conf, self._web_conf_use)
-        self._encoders_sequential = self._load_endpoints_encoders_sequential(self._conf, self._web_conf_use)
-        self._notifiers_always = self._load_endpoints_notifiers_always(self._conf, self._web_conf_use)
-        self._notifiers_sequential = self._load_endpoints_notifiers_sequential(self._conf, self._web_conf_use)
-        self._distributors_always = self._load_endpoints_distributors_always(self._conf, self._web_conf_use)
-        self._distributors_sequential = self._load_endpoints_distributors_sequential(self._conf, self._web_conf_use)
-
+        # The Always endpoints used by the system
+        self._endpoints_always = self._load_endpoints_always(self._conf, self._web_conf_use)
+        # The Sequential endpoints used by the system
+        self._endpoints_sequential = self._load_endpoints_sequential(self._conf, self._web_conf_use)
+        # The name of this application insance
         self._name = self._load_system_name(self._conf, self._web_conf_use)
+        # The delimiter used by inotify !!IMPORTANT
         self._delimiter = self._load_system_delimiter(self._conf, self._web_conf_use)
+        # Whether or not we are printing verbosely
         self._verbose = self._load_system_verbose(self._conf, self._web_conf_use)
-        
+        # The format string for the logger to use
         self._logging_logfmt = self._load_logging_logfmt(self._conf, self._web_conf_use)
+        # If logging strings include asctime (strftime format)
         self._logging_datefmt = self._load_logging_datefmt(self._conf, self._web_conf_use)
 
     # Getter methods
@@ -119,49 +102,14 @@ class ConfigHandler:
         return self._rclone_flags
 
     @property
-    def encoders(self):
-        """Returns the encoders as a tuple (always, sequential)"""
-        return (self._encoders_always, self._encoders_sequential)
+    def endpoints_always(self):
+        """Returns the always endpoints"""
+        return self._endpoints_always
     
     @property
-    def encoders_always(self):
-        """Returns the always encoder endpoints as a list of dicts"""
-        return self._encoders_always
-    
-    @property
-    def encoders_sequential(self):
-        """Returns the sequential encoder endpoints as a dict of list of dicts"""
-        return self._encoders_sequential
-
-    @property
-    def notifiers(self):
-        """Returns the notifiers as a tuple (always, sequential)"""
-        return (self._notifiers_always, self._notifiers_sequential)
-    
-    @property
-    def notifiers_always(self):
-        """Returns the always notifier endpoints as a list of dicts"""
-        return self._notifiers_always
-    
-    @property
-    def notifiers_sequential(self):
-        """Returns the sequential notifier endpoints as a dict of list of dicts"""
-        return self._notifiers_sequential
-
-    @property
-    def distributors(self):
-        """Returns the distributors as a tuple (always, sequential)"""
-        return (self._distributors_always, self._distributors_sequential)
-    
-    @property
-    def distributors_always(self):
-        """Returns the always distributors endpoints as a list of dicts"""
-        return self._distributors_always
-    
-    @property
-    def distributors_sequential(self):
-        """Returns the sequential distributors endpoints as a dict of list of dicts"""
-        return self._distributors_sequential
+    def endpoints_sequential(self):
+        """Returns the sequential endpoints"""
+        return self._endpoints_sequential
 
     @property
     def name(self):
@@ -408,128 +356,37 @@ class ConfigHandler:
 
         return folder
 
-
-    def _load_endpoints_encoders_always(self, conf, web):
+    def _load_endpoints_always(self, conf, web):
         """
-        Finds the ALWAYS encoder endpoints.
+        Loads the Always endpoints from the config
 
         Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
+            conf: self._conf, a dict object of the loaded conf
+            web: a boolean value indicating if web conf is being used
 
-        Returns: A list of lists, where each inside list represents one endpoint
-            entry. Index 0 is URL, Index 1 (optional) is an Authorization key.
+        Returns: A list of dicts, each entry being an endpoint
+        """ 
+        if web:
+            pass
+
+        # Return from the local config
+        return conf['endpoints']['always']
+
+    def _load_endpoints_sequential(self, conf, web):
+        """
+        Loads the Sequential endpoints from the config
+
+        Params:
+            conf: self._conf, a dict object of the loaded conf
+            web: a boolean value indicating if web conf is being used
+
+        Returns: A dict of lists of dicts
         """
         if web:
             pass
 
         # Return from the local config
-        return conf['endpoints']['encoders']['always']
-
-
-    def _load_endpoints_encoders_sequential(self, conf, web):
-        """
-        Finds the SEQUENTIAL encoder endpoints.
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns: A list of list of lists. 
-        For x in root list, y in x in order represents URLs in order to 
-        try until a single request succeeds.
-        Follows standard index 0/1 url/auth key(opt)
-        """
-        if web:
-            pass
-
-        # Return from the local config
-        return conf['endpoints']['encoders']['sequential']
-
-
-    def _load_endpoints_notifiers_always(self, conf, web):
-        """
-        Finds the ALWAYS notification endpoints.
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns: A list of lists, where each inside list represents one endpoint
-            entry. Index 0 is URL, Index 1 (optional) is an Authorization key.
-        """
-        if web:
-            pass
-
-        # Return from the local config
-        return conf['endpoints']['notifiers']['always']
-
-    def _load_endpoints_notifiers_sequential(self, conf, web):
-        """
-        Finds the SEQUENTIAL notification endpoints.
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns: A list of list of lists. 
-        For x in root list, y in x in order represents URLs in order to 
-        try until a single request succeeds.
-        Follows standard index 0/1 url/auth key(opt)
-        """
-        if web:
-            pass
-
-        # Return from the local config
-        return conf['endpoints']['notifiers']['sequential']
-
-    def _load_endpoints_distributors_always(self, conf, web):
-        """
-        Finds the ALWAYS notification endpoints.
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns: A list of lists, where each inside list represents one endpoint
-            entry. Index 0 is URL, Index 1 (optional) is an Authorization key.
-        """
-        if web:
-            pass
-
-        # Return from the local config
-        return conf['endpoints']['distributors']['always']
-
-    def _load_endpoints_distributors_sequential(self, conf, web):
-        """
-        Finds the SEQUENTIAL notification endpoints.
-
-        Params:
-            conf: self._conf, which represents a dict object
-                of the loaded conf
-            web: A boolean value which indicates if the web conf
-                is being used (default: local)
-
-        Returns: A list of list of lists. 
-        For x in root list, y in x in order represents URLs in order to 
-        try until a single request succeeds.
-        Follows standard index 0/1 url/auth key(opt)
-        """
-        if web:
-            pass
-
-        # Return from the local config
-        return conf['endpoints']['distributors']['sequential']
+        return conf['endpoints']['sequential']
 
     def _load_system_name(self, conf, web):
         """

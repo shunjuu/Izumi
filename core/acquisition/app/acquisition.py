@@ -45,9 +45,7 @@ def main():
         o.create_temp_replica_fs()
         o.upload()
 
-        n.notify_encoders()
-        n.notify_notifiers()
-        n.notify_distributors()
+        n.notify()
 
     except:
         pass
@@ -60,7 +58,7 @@ def main():
         except:
             pass
 
-    print()
+    print() # For interactive sessions
 
 if __name__ == "__main__":
     main()
