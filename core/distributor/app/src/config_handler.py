@@ -34,36 +34,12 @@ class ConfigHandler:
         """
         Variables
         """
-        self._web_config_url = None # The URL if a config will be loaded from the web
-        self._conf = None # The real config to parse all other vars from
-        self._web_conf_use = False # Whether or not using web-style conf
-
-        self._listen_port = None # The port Flask will listen to
-
-        self._distributor_jobs = None # How many distribution jobs to run at once
-        self._distributor_filter_anilist = None # Anilist profile to filter from
-        self._distributor_filter_mal = None # MAL user profile to filter from
-
-        self._download_rclone_flags = None # Flags for rclone to use when downloading
-        self._download_rclone_hardsub = None # rclone hardsub download sources
-        self._download_rclone_softsub = None # rclone softsub download sources
-
-        self._upload_rclone_flags = None # Flags for rclone to use when downloading
-        self._upload_rclone_hardsub = None # rclone hardsub download sources
-        self._upload_rclone_softsub = None # rclone softsub download sources
-
-        self._notifiers_always = None # The notification endpoints, always
-        self._notifiers_sequential = None # The notification endpoints, sequential
-
-        self._name = None # The name of this application insance
-        self._verbose = False # Whether or not we are printing verbosely
-
-        self._logging_logfmt = None # The format string for the logger to use
-        self._logging_datefmt = None # If logging strings include asctime (strftime format)
-
-        # ---------------- #
 
         # First, we want to load the web config URL if it exists.
+
+        # self._web_config_url: The URL if a config will be loaded from the web
+        # self._conf: The real config to parse all other vars from
+        # self._web_conf_use: Whether or not web conf is being used
         self._web_config_url = self._load_web_config_url(initial_conf)
         # If it does exist, we want to open the URL 
         if self._web_config_url:
@@ -78,27 +54,38 @@ class ConfigHandler:
         # ---------------- #
         # Populate the rest of the variables now
         # ---------------- #
+
+        # The port Flask will listen to
         self._listen_port = self._load_listen_port(self._conf, self._web_conf_use)
-
+        # How many distribution jobs to run at once
         self._distributor_jobs = self._load_distributor_jobs(self._conf, self._web_conf_use)
+        # Anilist profile to filter from
         self._distributor_filter_anilist = self._load_distributor_filter_anilist(self._conf, self._web_conf_use)
+        # MAL user profile to filter from
         self._distributor_filter_mal = self._load_distributor_filter_mal(self._conf, self._web_conf_use)
-
+        # Flags for rclone to use when downloading
         self._download_rclone_flags = self._load_download_rclone_flags(self._conf, self._web_conf_use)
+        # rclone hardsub download sources
         self._download_rclone_hardsub = self._load_download_rclone_hardsub(self._conf, self._web_conf_use)
+        # rclone softsub download sources
         self._download_rclone_softsub = self._load_download_rclone_softsub(self._conf, self._web_conf_use)
-
+        # Flags for rclone to use when downloading
         self._upload_rclone_flags = self._load_upload_rclone_flags(self._conf, self._web_conf_use)
+        # rclone hardsub download sources
         self._upload_rclone_hardsub = self._load_upload_rclone_hardsub(self._conf, self._web_conf_use)
+        # rclone softsub download sources
         self._upload_rclone_softsub = self._load_upload_rclone_softsub(self._conf, self._web_conf_use)
-
-        self._notifiers_always = self._load_endpoints_notifiers_always(self._conf, self._web_conf_use)
-        self._notifiers_sequential = self._load_endpoints_notifiers_sequential(self._conf, self._web_conf_use)
-
+        # The Always endpoints used by the system
+        self._endpoints_always = self._load_endpoints_always(self._conf, self._web_conf_use)
+        # The Sequential endpoints used by the system
+        self._endpoints_sequential = self._load_endpoints_sequential(self._conf, self._web_conf_use)
+        # The name of this application insance
         self._name = self._load_system_name(self._conf, self._web_conf_use)
+        # Whether or not we are printing verbosely
         self._verbose = self._load_system_verbose(self._conf, self._web_conf_use)
-        
+        # The format string for the logger to use
         self._logging_logfmt = self._load_logging_logfmt(self._conf, self._web_conf_use)
+        # If logging strings include asctime (strftime format)
         self._logging_datefmt = self._load_logging_datefmt(self._conf, self._web_conf_use)
 
 
@@ -122,7 +109,6 @@ class ConfigHandler:
         """Returns the username of a provided mal user (if provided) as a string"""
         return self._distributor_filter_mal
     
-
     @property
     def download_rclone_flags(self):
         """Returns the download rclone flags as a string"""
@@ -154,19 +140,14 @@ class ConfigHandler:
         return self._upload_rclone_softsub
 
     @property
-    def notifiers(self):
-        """Returns the notifiers as a tuple (always, sequential)"""
-        return (self._notifiers_always, self._notifiers_sequential)
-
+    def endpoints_always(self):
+        """Returns the always endpoints"""
+        return self._endpoints_always
+    
     @property
-    def notifiers_always(self):
-        """Returns the always notifier endpoints as a list of dicts"""
-        return self._notifiers_always
-
-    @property
-    def notifiers_sequential(self):
-        """Returns the sequential notifier endpoints as a dict of list of dicts"""
-        return self._notifiers_sequential
+    def endpoints_sequential(self):
+        """Returns the sequential endpoints"""
+        return self._endpoints_sequential
 
     @property
     def name(self):
@@ -210,7 +191,6 @@ class ConfigHandler:
                     print(e)
                     pass
                     # TODO: print statement here for loading config error
-
         elif file_ext in JSON_EXT:
             with open(cpath_abs, 'r') as cfjson:
                 try:
@@ -532,6 +512,38 @@ class ConfigHandler:
                 folder[src] += "/"
 
         return folder
+
+    def _load_endpoints_always(self, conf, web):
+        """
+        Loads the Always endpoints from the config
+
+        Params:
+            conf: self._conf, a dict object of the loaded conf
+            web: a boolean value indicating if web conf is being used
+
+        Returns: A list of dicts, each entry being an endpoint
+        """ 
+        if web:
+            pass
+
+        # Return from the local config
+        return conf['endpoints']['always']
+
+    def _load_endpoints_sequential(self, conf, web):
+        """
+        Loads the Sequential endpoints from the config
+
+        Params:
+            conf: self._conf, a dict object of the loaded conf
+            web: a boolean value indicating if web conf is being used
+
+        Returns: A dict of lists of dicts
+        """
+        if web:
+            pass
+
+        # Return from the local config
+        return conf['endpoints']['sequential']
 
 
     def _load_endpoints_notifiers_always(self, conf, web):
