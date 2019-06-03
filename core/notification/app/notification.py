@@ -30,48 +30,17 @@ from src.module_handler import ModuleHandler
 from src.print_handler import PrintHandler
 from src.prints.notification_prints import NotificationPrints
 
-c = None
-p = None
-logger = None
-np = None
-a = None
-
 app = Flask(__name__)
 
 notify_job_queue = Queue()
 
-def _get_config_handler():
-    """
-    Gets the config path based on if Docker is used or not
-    Checks environment for DOCKER='true'
-    Returns the appropriate ConfigHandler
-    """
-    if 'DOCKER' not in os.environ:
-        return ConfigHandler()
-    else:
-        USAGE = bool(os.environ.get("DOCKER"))
-        if USAGE:
-            return ConfigHandler("/src/config.yml")
-        else:
-            return ConfigHandler()
-
-def _get_auth_handler(printh):
-    """
-    Gets the auth path based on if Docker is used or not
-    Checks environment for DOCKER='true'
-    Returns the appropriate AuthHandler (refresh() not supported)
-    Args:
-        printh - represents a printh object
-    """
-    if 'DOCKER' not in os.environ:
-        return AuthHandler(printh)
-    else:
-        USAGE = bool(os.environ.get("DOCKER"))
-        if USAGE:
-            return AuthHandler(printh, "/src/auth.yml")
-        else:
-            return AuthHandler(printh)
-
+c = (ConfigHandler() if 'DOCKER' not in os.environ or not bool(os.environ.get("DOCKER"))
+    else ConfigHandler("/src/config.yml")) # Represents ConfigHandler
+p = PrintHandler(c) # Represents PrintHandler
+logger = p.logger # Represents the logger object
+np = NotificationPrints(p.Colors()) # Represents the EncodePrints object
+a = (AuthHandler(p) if 'DOCKER' not in os.environ or not bool(os.environ.get("DOCKER"))
+    else AuthHandler(p, "/src/auth.yml")) # Represents AuthHandler
 
 def encode_worker():
     """
@@ -96,7 +65,7 @@ def encode_worker():
         logger.warning(np.JOB_COMPLETE)
         print()
 
-@app.route("/notify", methods=['POST'])
+@app.route(c.route, methods=['POST'])
 def distribute():
 
     # Headers must be passed in separately, so the request isn't processed
@@ -120,12 +89,6 @@ def distribute():
 
 if __name__ == "__main__":
 
-    c = _get_config_handler()
-    p = PrintHandler(c)
-    logger = p.logger
-    np = NotificationPrints(p.Colors())
-    a = _get_auth_handler(p)
-
     logger.warning(np.WORKER_SPAWN.format(c.notification_jobs))
 
     # Spawn the number of worker threads in the background
@@ -133,7 +96,6 @@ if __name__ == "__main__":
         encode = Thread(target=encode_worker)
         encode.daemon = True
         encode.start()
-
 
     # Start the Flask server
     app.run(host='0.0.0.0', port=c.listen_port)
