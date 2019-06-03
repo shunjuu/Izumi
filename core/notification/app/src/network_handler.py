@@ -17,11 +17,11 @@ class NetworkHandler:
     Units if designated necessary.
     """
 
-    def __init__(self, conf, fileh, printh):
+    def __init__(self, conf, reqh, printh):
         """
         Args:
             conf - a ConfigHandler that should already be populated
-            fileh - a FileHandler that should already be populated
+            reqh - a RequestHandler that represents the new incoming request
 
             NetworkHandler should generate the request upon instantialization.
 
@@ -37,31 +37,32 @@ class NetworkHandler:
 
         # Store handlers as "private" variables
         self._conf = conf
-        self._fileh = fileh
+        self._reqh = reqh
 
         # Logging Tools
         self._logger = printh.logger
         self._prints = NetworkHandlerPrints(printh.Colors())
 
         # Variables
-        self._request = self._generate_request(fileh) # A dict representing the JSON request
+        self._request = self._generate_request(reqh) # A dict representing the JSON request
 
 
-    def _generate_request(self, fileh):
+    def _generate_request(self, reqh):
         """
         Generates the request for Requests to send using properties found
         by fileh.
 
         Params:
-            fileh: A filehandler object that is already populated
+            reqh: A requestHandler object that represents the new incoming request
 
         Returns: The request JSON as a dict object
         """
+        # This is basically just duplicating the reqh object
         req = dict()
-        req['show'] = fileh.show # provided "show" is already show_clean
-        req['episode'] = fileh.episode # provided "episode" is already ep_new
-        req['filesize'] = fileh.filesize
-        req['sub'] = fileh.sub_type
+        req['show'] = reqh.show # provided "show" is already show_clean
+        req['episode'] = reqh.episode # provided "episode" is already ep_new
+        req['filesize'] = reqh.filesize
+        req['sub'] = reqh.sub_type 
 
         """
         We'll be ignoring the signature body for now, and duration 
