@@ -1,12 +1,11 @@
 #Get Python stuffs
 
-FROM python:3
+FROM python:3.7-alpine
 
 LABEL maintainer="Aleytia"
 
-RUN apt-get update -y && \
-	apt-get install apt-utils -y && \
-	apt-get install inotify-tools -y
+RUN apk update && \
+	apk add inotify-tools
 
 COPY app/ /src/
 COPY bin/ /rclone/
