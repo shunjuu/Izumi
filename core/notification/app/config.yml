@@ -41,6 +41,21 @@ modules:
       url: "https://discord.webhook.url/identifier"
       template: 1
 
+  # Grouping body for Facebook Messenger
+  # Key 'template' is an optional parameter, defaults to 1
+  # If none are used, leave as an empty list []
+  fbchat:
+
+    # Fb credentials
+    username: "username"
+    password: "password"
+
+    chats:
+      - name: "test"
+        type: "group" # Either "GROUP" or "USER", not case-sensitive
+        thread_id: "12345" # ID of the chat thread
+        template: 1
+
 # Modules, but for developer use
 dev:
 
@@ -48,6 +63,15 @@ dev:
   discord-webhook:
     name: "dev"
     url: "https://dev.discord.webhook.url/identifier"
+    template: 1
+
+  # See: fbchat above, but this is not a list
+  fbchat:
+    username: "username dev"
+    password: "password dev"
+    name: "fbchat dev"
+    type: "user"
+    thread_id: "12345"
     template: 1
 
 # Grouping body to list endpoints for other Izumi modules for this app to talk to.

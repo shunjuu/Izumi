@@ -4,3 +4,4 @@ hurry.filesize==0.9
 requests==2.20.0
 colorthief==0.2.1
 PyYAML==5.1
+fbchat==1.6.5
