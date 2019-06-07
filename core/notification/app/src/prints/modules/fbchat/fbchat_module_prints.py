@@ -20,3 +20,4 @@ class FBChatModulePrints:
             " with template " + fb_color + "{}" + endc + "..."
 
         self.NOT_SENDING = prefix + "No chat configurations detected, skipping FBChat"
+        self.ERR_SENDING = prefix + "Error occured while trying to send to Messenger"
