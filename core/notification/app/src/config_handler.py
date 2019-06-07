@@ -36,8 +36,6 @@ class ConfigHandler:
                 self._thread_id = int(chat['thread_id'])
                 self._template = self._load_template(chat)
 
-                print(self._thread_id)
-
             @property
             def name(self):
                 return self._name
@@ -111,6 +109,12 @@ class ConfigHandler:
                 for chat in fbchat_conf['chats']:
                     chats.append(ConfigHandler.FBChatModule.FBChatNode(chat))
             else:
+
+                # If username/password/name is not provided, chats is set to 0-len list,
+                # which will cause FBChat to be completely skipped :)
+                if not self._username or not self._password or not fbchat_conf['name']:
+                    return list()
+
                 chat = dict()
                 chat['name'] = fbchat_conf['name']
                 chat['type'] = fbchat_conf['type']

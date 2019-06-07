@@ -66,6 +66,7 @@ dev:
     template: 1
 
   # See: fbchat above, but this is not a list
+  # To disable this configuration, set username, password, or name to empty or None
   fbchat:
     username: "username dev"
     password: "password dev"
