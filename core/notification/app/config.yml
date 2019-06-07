@@ -46,13 +46,14 @@ modules:
   # If none are used, leave as an empty list []
   fbchat:
 
-    username: "username" # FB username account
-    password: "password" # FB password account
+    # Fb credentials
+    username: "username"
+    password: "password"
 
     chats:
-      - name: "chat name"
-        type: "user" # Either "GROUP" or "USER", not case-sensitive
-        thread_id: "THREAD_ID" # ID of the chat thread
+      - name: "test"
+        type: "group" # Either "GROUP" or "USER", not case-sensitive
+        thread_id: "12345" # ID of the chat thread
         template: 1
 
 # Modules, but for developer use
@@ -69,8 +70,8 @@ dev:
     username: "username dev"
     password: "password dev"
     name: "fbchat dev"
-    type: "user dev"
-    thread_id: "dev id"
+    type: "user"
+    thread_id: "12345"
     template: 1
 
 # Grouping body to list endpoints for other Izumi modules for this app to talk to.

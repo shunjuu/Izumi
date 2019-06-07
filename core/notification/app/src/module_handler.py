@@ -14,6 +14,7 @@ from src.prints.module_handler_prints import ModuleHandlerPrints
 
 # Individual modules
 from src.modules.discord.discord_webhook_module import DiscordWebhookModule
+from src.modules.fbchat.fbchat_module import FBChatModule
 
 class ModuleHandler:
     """
@@ -110,6 +111,13 @@ class ModuleHandler:
         dw.send_notifications(fmt)
         self._logger.info(self._prints.MODULE_END.format("Discord"))
 
+    def fbchat_notify(self):
+        """
+        Initiates sending out notifs to FBChat
+        """
+        fbcm = FBChatModule(self._conf, self._reqh, self._printh, self._info)
+        fbcm.send_notifications()
+
 
     def notify_all(self):
         """
@@ -120,4 +128,5 @@ class ModuleHandler:
 
             self._logger.warning(self._prints.NOTIFY_ALL_START)
             self.discord_webhook_notify()
+            self.fbchat_notify()
             self._logger.warning(self._prints.NOTIFY_ALL_END)

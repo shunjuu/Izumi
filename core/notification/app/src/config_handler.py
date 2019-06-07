@@ -8,6 +8,8 @@ import pprint as pp
 
 import requests # For fetching web configs
 
+from fbchat.models import ThreadType
+
 # File Extension Definitions
 YAML_EXT = ['.yaml', '.yml']
 JSON_EXT = ['.json']
@@ -30,9 +32,11 @@ class ConfigHandler:
             def __init__(self, chat):
                 """Set variables into properties"""
                 self._name = chat['name']
-                self._type = chat['type']
-                self._thread_id = chat['thread_id']
-                self._template = chat['template']
+                self._type = self._load_thread_type(chat['type'])
+                self._thread_id = int(chat['thread_id'])
+                self._template = self._load_template(chat)
+
+                print(self._thread_id)
 
             @property
             def name(self):
@@ -49,6 +53,25 @@ class ConfigHandler:
             @property
             def template(self):
                 return self._template
+
+
+            def _load_thread_type(self, thread_type):
+                """
+                Load the ThreadType ENUM group
+                """
+                if thread_type.lower() == "user":
+                    return ThreadType.USER
+                else:
+                    return ThreadType.GROUP
+
+            def _load_template(self, chat):
+                """
+                load template type
+                """
+                if 'template' in chat:
+                    return chat['template']
+                else:
+                    return 1
 
 
         def __init__(self, fbchat_conf, dev=False):
@@ -198,6 +221,16 @@ class ConfigHandler:
     def dev_discord_webhook(self):
         """Returns the Discord dev webhook job"""
         return self._dev_discord_webhook
+
+    @property
+    def fbchat(self):
+        """Returns the FBChat module"""
+        return self._fbchat
+
+    @property
+    def dev_fbchat(self):
+        """Returns the Dev FBChat module"""
+        return self._dev_fbchat
     
     @property
     def use_dev(self):
