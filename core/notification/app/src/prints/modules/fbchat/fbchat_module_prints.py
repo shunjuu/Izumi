@@ -18,3 +18,5 @@ class FBChatModulePrints:
         fb_color = colors.BLUE
         self.SENDING_TO = prefix + "Sending notification to " + fb_color + "{}" + endc + \
             " with template " + fb_color + "{}" + endc + "..."
+
+        self.NOT_SENDING = prefix + "No chat configurations detected, skipping FBChat"

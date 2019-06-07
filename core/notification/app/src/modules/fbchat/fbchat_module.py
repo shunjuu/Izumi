@@ -62,38 +62,50 @@ class FBChatModule:
 
         if self._conf.use_dev:
 
-            self._logger.info(self._prints.DEV_ENABLED)
+            # Only run this if there's any chats at all
+            if len(self._conf.dev_fbchat.chats) > 0:
 
-            fbchat_client = Client(
-                self._conf.dev_fbchat.username,
-                self._conf.dev_fbchat.password)
+                self._logger.info(self._prints.DEV_ENABLED)
 
+                fbchat_client = Client(
+                    self._conf.dev_fbchat.username,
+                    self._conf.dev_fbchat.password)
+ 
 
-            if self._conf.dev_fbchat.chats[0].template == 1:
-                message = message_1
+                if self._conf.dev_fbchat.chats[0].template == 1:
+                    message = message_1
 
-            self._logger.info(self._prints.SENDING_TO.format(self._conf.dev_fbchat.chats[0].name,
-                self._conf.dev_fbchat.chats[0].template))
+                self._logger.info(self._prints.SENDING_TO.format(self._conf.dev_fbchat.chats[0].name,
+                    self._conf.dev_fbchat.chats[0].template))
 
-            fbchat_client.send(message,
-                thread_id=self._conf.dev_fbchat.chats[0].thread_id,
-                thread_type=self._conf.dev_fbchat.chats[0].type)
+                fbchat_client.send(message,
+                    thread_id=self._conf.dev_fbchat.chats[0].thread_id,
+                    thread_type=self._conf.dev_fbchat.chats[0].type)
+
+            else:
+                self._logger.info(self._prints.NOT_SENDING)
 
         else:
 
-            self._logger.info(self._prints.DEV_DISABLED)
+            # only run if there are entries
+            if len(self._conf.fbchat.chats) > 0:
 
-            fbchat_client = Client(
-                self._conf.fbchat.username,
-                self._conf.fbchat.password)
+                self._logger.info(self._prints.DEV_DISABLED)
 
-            for chat in self._conf.fbchat.chats:
+                fbchat_client = Client(
+                    self._conf.fbchat.username,
+                    self._conf.fbchat.password)
 
-                if chat.template == 1:
-                    message = message_1
+                for chat in self._conf.fbchat.chats:
 
-                self._logger.info(self._prints.SENDING_TO.format(chat.name, chat.template))
+                    if chat.template == 1:
+                        message = message_1
 
-                fbchat_client.send(message,
-                    thread_id=chat.thread_id,
-                    thread_type=chat.type)
+                    self._logger.info(self._prints.SENDING_TO.format(chat.name, chat.template))
+
+                    fbchat_client.send(message,
+                        thread_id=chat.thread_id,
+                        thread_type=chat.type)
+
+            else:
+                self._logger.info(self._prints.NOT_SENDING)
