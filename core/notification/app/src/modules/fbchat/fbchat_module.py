@@ -8,6 +8,8 @@ from fbchat.models import Message, ThreadType
 
 from src.modules.fbchat.fbchat_templates import FBChatTemplates
 
+from src.prints.modules.fbchat.fbchat_module_prints import FBChatModulePrints
+
 class FBChatModule:
     """
     Handles sending notifications on Facebook Messenger
@@ -23,7 +25,7 @@ class FBChatModule:
         """
 
         self._logger = printh._logger
-        self._prints = None
+        self._prints = FBChatModulePrints(printh.Colors())
 
         self._conf = conf
         self._reqh = reqh
@@ -60,6 +62,7 @@ class FBChatModule:
 
         if self._conf.use_dev:
 
+            self._logger.info(self._prints.DEV_ENABLED)
 
             fbchat_client = Client(
                 self._conf.dev_fbchat.username,
@@ -69,11 +72,16 @@ class FBChatModule:
             if self._conf.dev_fbchat.chats[0].template == 1:
                 message = message_1
 
+            self._logger.info(self._prints.SENDING_TO.format(self._conf.dev_fbchat.chats[0].name,
+                self._conf.dev_fbchat.chats[0].template))
+
             fbchat_client.send(message,
                 thread_id=self._conf.dev_fbchat.chats[0].thread_id,
                 thread_type=self._conf.dev_fbchat.chats[0].type)
 
         else:
+
+            self._logger.info(self._prints.DEV_DISABLED)
 
             fbchat_client = Client(
                 self._conf.fbchat.username,
@@ -83,6 +91,8 @@ class FBChatModule:
 
                 if chat.template == 1:
                     message = message_1
+
+                self._logger.info(self._prints.SENDING_TO.format(chat.name, chat.template))
 
                 fbchat_client.send(message,
                     thread_id=chat.thread_id,

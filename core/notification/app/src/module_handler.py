@@ -115,8 +115,10 @@ class ModuleHandler:
         """
         Initiates sending out notifs to FBChat
         """
+        self._logger.info(self._prints.MODULE_START.format("FBChat"))
         fbcm = FBChatModule(self._conf, self._reqh, self._printh, self._info)
         fbcm.send_notifications()
+        self._logger.info(self._prints.MODULE_END.format("FBChat"))
 
 
     def notify_all(self):
