@@ -19,6 +19,85 @@ class ConfigHandler:
     This class does not print anything through the logger.
     """
 
+    class FBChatModule:
+        """
+        Internal class to handle FBChat properties.
+        """
+
+        class FBChatNode:
+            """Internal class to represent each chat node"""
+
+            def __init__(self, chat):
+                """Set variables into properties"""
+                self._name = chat['name']
+                self._type = chat['type']
+                self._thread_id = chat['thread_id']
+                self._template = chat['template']
+
+            @property
+            def name(self):
+                return self._name
+
+            @property
+            def type(self):
+                return self._type
+
+            @property
+            def thread_id(self):
+                return self._thread_id
+
+            @property
+            def template(self):
+                return self._template
+
+
+        def __init__(self, fbchat_conf, dev=False):
+            """Initialize variables""" 
+            self._username = self._load_username(fbchat_conf, dev)
+            self._password = self._load_password(fbchat_conf, dev)
+            self._chats = self._load_chats(fbchat_conf, dev)
+
+        @property
+        def username(self):
+            """Username for FBChat"""
+            return self._username
+
+        @property
+        def password(self):
+            """Password for FBChat"""
+            return self._password
+
+        @property
+        def chats(self):
+            """Chat listings for FBChat"""
+            return self._chats
+        
+        def _load_username(self, fbchat_conf, dev=False):
+            """Load the username"""
+            return fbchat_conf['username']
+
+        def _load_password(self, fbchat_conf, dev=False):
+            """Load the password"""
+            return fbchat_conf['password']
+
+        def _load_chats(self, fbchat_conf, dev=False):
+            """Load the chats"""
+            chats = list()
+
+            if not dev:
+                for chat in fbchat_conf['chats']:
+                    chats.append(ConfigHandler.FBChatModule.FBChatNode(chat))
+            else:
+                chat = dict()
+                chat['name'] = fbchat_conf['name']
+                chat['type'] = fbchat_conf['type']
+                chat['thread_id'] = fbchat_conf['thread_id']
+                chat['template'] = fbchat_conf['template']
+                chats.append(ConfigHandler.FBChatModule.FBChatNode(chat))
+
+            return chats
+
+
     def __init__(self,  cpath="config.yml"):
         """
         Args:
@@ -65,10 +144,14 @@ class ConfigHandler:
         self._notification_filter_mal = self._load_notification_filter_mal(self._conf, self._web_conf_use)
         # The Discord webhook list
         self._discord_webhook = self._load_discord_webhook(self._conf, self._web_conf_use)
+        # Load the FBchat modules
+        self._fbchat = self._load_fbchat(self._conf, self._web_conf_use)
         # Boolean to use dev or not
         self._use_dev = self._load_use_dev(self._conf, self._web_conf_use)
         # Discord webhooks, for dev use
         self._dev_discord_webhook = self._load_dev_discord_webhook(self._conf, self._web_conf_use)
+        # FBChat for Dev use
+        self._dev_fbchat = self._load_dev_fbchat(self._conf, self._web_conf_use)
         # The Always endpoints used by the system
         self._endpoints_always = self._load_endpoints_always(self._conf, self._web_conf_use)
         # The Sequential endpoints used by the system
@@ -380,6 +463,36 @@ class ConfigHandler:
             webhook['template'] = default
 
         return webhook
+
+    def _load_fbchat(self, conf, web, default=1):
+        """
+        Loads the FBChat configurations
+
+        Params:
+            conf: self._conf, which represents a dict object
+                of the loaded conf
+            web: A boolean value which indicates if the web conf
+            default: default template to use
+
+        Returns: A FBChatModule representing this class
+        """
+        if web:
+            pass
+
+        return ConfigHandler.FBChatModule(conf['modules']['fbchat'])
+
+    def _load_dev_fbchat(self, conf, web, default=1):
+        """
+        Loads the FBChat configurations from dev
+
+        Params: See above
+
+        Returns: A FBChatModule representing this class
+        """
+        if web:
+            pass
+
+        return ConfigHandler.FBChatModule(conf['dev']['fbchat'], dev=True)
 
     def _load_use_dev(self, conf, web):
         """
