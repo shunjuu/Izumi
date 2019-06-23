@@ -306,7 +306,9 @@ class Hisha:
         try:
             info = self._anilist(self._SINGLE_QUERY, search, status)
         except:
-            info = str()
+            # There wasn't a match, so return None immediately
+            self._logger.debug("No data provided for {} in {}, returning None".format(search, status))
+            return None
 
         # If any of the titles match, return the show data
         for title in info['Media']['title'].values():
@@ -341,7 +343,8 @@ class Hisha:
             info = self._anilist(self._PAGE_QUERY, search, status)['Page']['media']
         except:
             # Default to an empty list if the results are bad - Hisha can cleanly exit here
-            info = list()
+            self._logger.debug("No data provided for {} in {}, returning None".format(search, status))
+            return None
 
         # Match against the titles provided in the response
         for show in info:
