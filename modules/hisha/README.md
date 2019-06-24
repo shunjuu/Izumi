@@ -22,6 +22,7 @@ Calling `search()` will request Hisha to make up to (3) calls to Anilist's Graph
 | -- | -- |
 | id | -1 |
 | idMal | -1 |
+| idKitsu | -1 |
 | episodes | -1 |
 | duration | -1 |
 | popularity | -1 |
