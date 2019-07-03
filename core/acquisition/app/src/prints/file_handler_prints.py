@@ -32,6 +32,8 @@ class FileHandlerPrints:
             "{}" + endc
         self.SHOW_LOADED_HISHA = prefix + "Found Show (Hisha): " + show_color + \
             "{}" + endc
+        self.SHOW_NEW_NAME = prefix + "New Show Name: " + show_color + \
+            "{}" + endc
 
         # Filesize Printouts
         fsize_color = colors.LCYAN
