@@ -58,7 +58,7 @@ class FileHandler:
             self._episode = self._load_episode(conf, args)
             self._episode_new = self._generate_new_episode(self._episode)
             self._show = self._load_show(args)
-            self._show_clean = self._show.replace(": ", " - ")
+            self._show_clean = self._generate_clean_show(self._show)
             self._filesize = self._load_filesize(conf, args)
             self._sub_type = self._load_sub_type(self._episode)
         except Exception as e:
@@ -241,6 +241,25 @@ class FileHandler:
         self._logger.warning(self._prints.EPISODE_NEW_NAME.format(new_episode))
         return new_episode
 
+    def _generate_clean_show(self, show):
+        """
+        Cleans the show names into file friendly names
+
+        Params:
+            show - the name of the old show
+
+        Return: A "cleaned" show name
+
+        Note: This works because Anilist requests do not consider punctuation
+        """
+
+        # 1. Get rid of colons and replace with hypen
+        clean_show = show.replace(": ", " - ")
+
+        # 2. Get rid of "?"
+        clean_show = clean_show.replace("?", "")
+
+        return clean_show
 
     # --------------------
     # Getters!
