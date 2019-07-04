@@ -259,6 +259,9 @@ class FileHandler:
         # 2. Get rid of "?"
         clean_show = clean_show.replace("?", "")
 
+        # 3. Finally, a whitespace cleanup
+        clean_show = clean_show.strip()
+
         self._logger.warning(self._prints.SHOW_NEW_NAME.format(clean_show))
         return clean_show
 
