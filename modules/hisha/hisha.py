@@ -117,6 +117,14 @@ class HishaInfo:
     @idMal.setter
     def idMal(self, val):
         if val: self._idMal = val
+
+    @property
+    def idKitsu(self):
+        return self._idKitsu
+
+    @idKitsu.setter
+    def idKitsu(self, val):
+        if val: self._idKitsu = val
     
     @property
     def episodes(self):
