@@ -264,6 +264,14 @@ class Hisha:
         except:
             return False
 
+    def _clean_string(self, str1):
+        """
+        Cleans a string of potentially problematic characters
+        """
+        clean_str = str1.replace('"', '')
+        self._logger.debug("Cleaned {} to {}".format(str1, clean_str))
+        return clean_str
+
     def _anilist(self, query, search, status):
         """
         This helper method handles making requests to Anilist
@@ -434,10 +442,10 @@ class Hisha:
 
         if show is None:
             # If the show doesn't exist, set title and use defaults
-            hishaInfo.title = title 
-            hishaInfo.title_native = title
-            hishaInfo.title_english = title
-            hishaInfo.title_romaji = title
+            hishaInfo.title = self._clean_string(title)
+            hishaInfo.title_native = self._clean_string(title)
+            hishaInfo.title_english = self._clean_string(title)
+            hishaInfo.title_romaji = self._clean_string(title)
         else:
             # Don't need to check for None values - setters will handle it
             hishaInfo.id = show['id']
@@ -449,10 +457,10 @@ class Hisha:
             hishaInfo.averageScore = show['averageScore']
             hishaInfo.bannerImage = show['bannerImage']
             hishaInfo.coverImage = show['coverImage']['large']
-            hishaInfo.title = show['title']['userPreferred']
-            hishaInfo.title_native = show['title']['native']
-            hishaInfo.title_english = show['title']['english']
-            hishaInfo.title_romaji = show['title']['romaji']
+            hishaInfo.title = self._clean_string(show['title']['userPreferred'])
+            hishaInfo.title_native = self._clean_string(show['title']['native'])
+            hishaInfo.title_english = self._clean_string(show['title']['english'])
+            hishaInfo.title_romaji = self._clean_string(show['title']['romaji'])
             hishaInfo.startYear = show['startDate']['year']
             hishaInfo.endYear = show['endDate']['year']
 
