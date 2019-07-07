@@ -12,7 +12,6 @@ import datetime
 import time
 
 from hurry.filesize import size
-from colorthief import ColorThief
 
 from src.modules.discord.discord_webhook_templates import DiscordWebhookTemplates
 
@@ -222,79 +221,6 @@ class DiscordWebhookModule:
         # Kitsu may be down - only return if so
 
         return KIT_ANI_BASE + str(self._info.idKitsu)
-
-# -------------------------------------------------------------------- #
-
-    def _generate_colors(self):
-        """
-        Generates the decimal colors used for the webhook embeds
-
-        Returns the decimal color value
-        """
-        # First, download the cover pic into the temp dir
-        path = self.__download_thumbnail()
-        dom_color = self.__get_dom_color(path)
-        hexc = self.__convert_rgb_to_hex(dom_color)
-        decc = self.__convert_hex_to_dec(hexc)
-        self._cleanup()
-
-        return decc
-
-    # Helper for colors
-    def __download_thumbnail(self):
-        """
-        Downloads the thumbnail into a temp directory
-        """
-
-        self.__create_temp_dir() 
-        # Get the extension just in case jpg/png
-        _, image_ext = os.path.splitext(self._load_thumbnail())
-        # Download and save the image
-        image_req = requests.get(self._load_thumbnail(), stream=True)
-
-        path = self._temp_dir + "temp" + image_ext
-        with open(path, 'wb') as i:
-            image_req.raw.decode_content = True
-            shutil.copyfileobj(image_req.raw, i)      
-
-        return path
-
-    def __get_dom_color(self, path):
-        """
-        Use colorthief to get the dominatn color
-        Params:
-            path - the path to the temporary downloaded thumbnail
-        """
-        ct = ColorThief(path)
-        return ct.get_color(quality=1)
-
-    def __get_palette(self, path):
-        """
-        Use colorthief to get the two palette colors (as tuples)
-        Params:
-            path - the path to the temporary downloaded thumbnail
-        """
-        ct = ColorThief(path)
-        return ct.get_palette(color_count=2, quality=1)
-
-    def __convert_rgb_to_hex(self, rgbt):
-        """
-        Converts the RGB tuple into a hex code
-        Params:
-            rgbt - RGB tuple
-        """
-        hexc = '%02x%02x%02x' % rgbt
-        return hexc
-
-    def __convert_hex_to_dec(self, hexc):
-        """
-        Converts the hex value into a decimal value for discord
-        Params:
-            hexc - a hex string
-        """
-        dec = int(hexc, 16)
-        return dec
-
 
     def __create_temp_dir(self):
         """
