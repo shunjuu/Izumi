@@ -9,6 +9,7 @@ from flask import Flask, request
 from src.auth_handler import AuthHandler
 from src.config_handler import ConfigHandler
 from src.mochi_handler import MochiHandler
+from src.network_handler import NetworkHandler
 from src.print_handler import PrintHandler
 from src.request_handler import RequestHandler
 
@@ -35,8 +36,12 @@ def mochi():
         if r.sub_type in c.mochi_sub_types:
             m.send(r)
 
+            n = NetworkHandler(c, r, p)
+            n.notify()
+
         return "Request accepted", 200
-    except:
+    except Exception as e:
+        print(e)
         return "Error with request", 400
 
 if __name__ == "__main__":
