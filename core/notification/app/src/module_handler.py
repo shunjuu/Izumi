@@ -58,7 +58,7 @@ class ModuleHandler:
 
         return info
 
-    def _check_filters(self, show):
+    def check_filters(self, show):
         """
         Use Akari and Kishi to check if a given user's profile is watching this show.
         Used to filter whether or not notifications should be sent.
@@ -125,10 +125,7 @@ class ModuleHandler:
         """
         Calls all the module notification triggers
         """
-        # Only run it if filters are green
-        if self._check_filters(self._reqh.show):
-
-            self._logger.warning(self._prints.NOTIFY_ALL_START)
-            self.discord_webhook_notify()
-            self.fbchat_notify()
-            self._logger.warning(self._prints.NOTIFY_ALL_END)
+        self._logger.warning(self._prints.NOTIFY_ALL_START)
+        self.discord_webhook_notify()
+        self.fbchat_notify()
+        self._logger.warning(self._prints.NOTIFY_ALL_END)

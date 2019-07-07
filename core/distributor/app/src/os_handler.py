@@ -70,7 +70,7 @@ class OSHandler:
 
         return info
 
-    def _check_filters(self, show):
+    def check_filters(self, show):
         """
         Use Akari and Kishi to check if a given user's profile is watching this show.
         Used to filter whether or not notifications should be sent.
@@ -251,9 +251,8 @@ class OSHandler:
         This is a wrapper method that calls both upload and distribute, but also checks filters
         first.
         """
-        if self._check_filters(self._reqh.show):
-            self.download()
-            self.upload()
+        self.download()
+        self.upload()
 
 
     # Cleanup methods
