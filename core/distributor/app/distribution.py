@@ -52,10 +52,11 @@ def distribute_worker():
 
         try:
             o = OSHandler(c, new_request, p)
-            o.distribute()
+            if o.check_filters(new_request.show):
+                o.distribute()
 
-            n = NetworkHandler(c, new_request, p)
-            n.notify()
+                n = NetworkHandler(c, new_request, p)
+                n.notify()
         except:
             pass
         finally:
