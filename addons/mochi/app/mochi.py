@@ -22,7 +22,7 @@ a = (AuthHandler(p) if 'DOCKER' not in os.environ or not bool(os.environ.get("DO
     else AuthHandler(p, "/src/auth.yml")) # Represents AuthHandler
 m = MochiHandler(c, p)
 
-@app.route("/mochi", methods=['POST'])
+@app.route(c.route, methods=['POST'])
 def mochi():
 
     try:
@@ -46,4 +46,4 @@ def mochi():
 
 if __name__ == "__main__":
 
-    app.run(host='0.0.0.0', port=8081)
+    app.run(host='0.0.0.0', port=c.listen_port)

@@ -71,4 +71,4 @@ system:
     datefmt: "%a|%b%y %X %Z"
 
   # The route Flask will listen to
-  route: "distribute"
+  route: "mochi"
