@@ -53,12 +53,13 @@ def encode_worker():
         try:
             # We need to ignore any errors to keep the queue empty
             m = ModuleHandler(c, new_request, p)
-            m.notify_all()
 
-            n = NetworkHandler(c, new_request, p)
-            n.notify()
-        except Exception as e:
-            print(e)
+            if m.check_filters(new_request.show):
+                m.notify_all()
+
+                n = NetworkHandler(c, new_request, p)
+                n.notify()
+        except:
             pass
 
         notify_job_queue.task_done()
