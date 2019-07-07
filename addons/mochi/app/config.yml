@@ -1,0 +1,74 @@
+# This is the port the application will listen on.
+# [type: Integer]
+listen-port: 8080
+
+# Authorization files must be stored locally
+
+# You can optionally load a global config from a web source
+# If you do not, leave this as an empty string
+# [type: string]
+web-config: ""
+
+# Mochi's configurations
+mochi:
+
+  # Which kinds of show extensions are safe? 
+  # Only types are "hardsub" and "softsub"
+  sub-types:
+    - "hardsub"
+
+  # Webhooks to send to
+  discord-webhooks:
+    - name: "Mochi"
+      url: "https://discord.webhook.url/identifier"
+      base: "https://your.base.url"
+
+# Grouping body to list endpoints for other Izumi modules for this app to talk to.
+endpoints:
+
+  # All modules use and accept the same formatted request
+  # Thus, there is no need to "group" each type of request
+
+  # [always] URLs will always be POST'd, regardless of the response
+  # To have no URLs in this list, use an empty list, i.e.:
+  # always: []
+  always:
+    - url: "https://endpoint1.url/notify"
+      auth: "authorization_key1"
+    - url: "https://endpoint2.url/encode"
+    - url: "https://endpoint3.url/distribute"
+
+  # [sequential] URLs are sorted into groups.
+  # For each group, the URLs will be tested in order until one of them succeeds.
+  # All the groups will be tested.
+  # To specify no groups, use an empty dict, i.e.:
+  # sequential: {}
+  sequential:
+    group1:
+      - url: "https://endpoint1.url/notify"
+        auth: "authorization_key1"
+      - url: "https://endpoint2.url/notify"
+    group2:
+      - url: "https://endpoint3.url/distribute"
+      
+# Application-specifc settings
+system:
+
+  # The identifier for this system
+  # [type: String]
+  name: "izumi"
+
+  # Whether or not hte application should print more information
+  # [type: Boolean]
+  verbose: yes
+
+  # Logging settings
+  logging:
+
+    # The style of the log output messages, using %(var)s style
+    logfmt: "[%(name)s] (%(levelname)s) %(asctime)s: %(message)s"
+    # The strftime-style format for %(asctime)s
+    datefmt: "%a|%b%y %X %Z"
+
+  # The route Flask will listen to
+  route: "mochi"
