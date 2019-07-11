@@ -268,9 +268,13 @@ class Hisha:
         """
         Cleans a string of potentially problematic characters
         """
-        clean_str = str1.replace('"', '')
-        self._logger.debug("Cleaned {} to {}".format(str1, clean_str))
-        return clean_str
+        try:
+            clean_str = str1.replace('"', '')
+            self._logger.debug("Cleaned {} to {}".format(str1, clean_str))
+            return clean_str
+        except:
+            self._logger.debug("Cleaner was not provided a valid title, returning None")
+            return None
 
     def _anilist(self, query, search, status):
         """
