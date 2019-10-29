@@ -76,7 +76,7 @@ class Toudai:
         return -1
 
     @staticmethod
-    def watch(path: str, queue: Queue, logger: Logger, interval: int = 5, ) -> None:
+    def watch(path: str, queue: Queue, logger: Logger, interval: int = 5) -> None:
         """
         Watches a given path and tracks all the files in that path directory.
         Checks every interval, and once a file has unchanged, append the event 
