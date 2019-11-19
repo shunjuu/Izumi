@@ -5,21 +5,23 @@ TEMPLATE_1 = '''
 {{
     "embeds": [
         {{
+            "title": "{title}",
+            "description": "{mins} mins, {size} [{sub_type}]",
             "color": {color:d},
             "timestamp": "{timestamp}",
             "footer": {{
-                "text": "© Aeri | {show_original}"
+                "text": "{show_original}"
             }},
             "thumbnail": {{
                 "url": "{thumbnail_url}"
             }},
+            "author": {{
+                "name": "{studio}",
+                "url": "{studio_url}"
+            }},
             "fields": [
                 {{
-                    "name": "{title}",
-                    "value": "{mins} mins, {size} [{sub_type}]"
-                }},
-                {{
-                    "name": "Information",
+                    "name": "Stats",
                     "value": "Score: {score}/100, Pop: {popularity}, Total: {eps} Eps."
                 }},
                 {{
