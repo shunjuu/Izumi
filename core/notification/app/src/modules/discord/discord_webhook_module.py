@@ -65,6 +65,8 @@ class DiscordWebhookModule:
         fmt['mal_url'] = self._load_mal_url()
         fmt['anilist_url'] = self._load_anilist_url()
         fmt['kitsu_url'] = self._load_kitsu_url()
+        fmt['studio'] = self._load_studio()
+        fmt['studio_url'] = self._load_studio_url()
 
         return fmt
 
@@ -221,6 +223,18 @@ class DiscordWebhookModule:
         # Kitsu may be down - only return if so
 
         return KIT_ANI_BASE + str(self._info.idKitsu)
+
+    def _load_studio(self):
+        """
+        Gets the Studio name and returns it as a string
+        """
+        return str(self._info.studio)
+
+    def _load_studio_url(self):
+        """
+        Gets the Studio url and returns it as a string
+        """
+        return str(self._info._studio_url)
 
     def __create_temp_dir(self):
         """
