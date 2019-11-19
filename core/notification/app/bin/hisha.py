@@ -37,6 +37,15 @@ query ($search: String, $status: MediaStatus) {
         endDate {
             year
         }
+        studios {
+            edges {
+                isMain
+                node {
+                    name
+                    siteUrl
+                }
+            }
+        }
     }
 }
 '''
@@ -73,6 +82,15 @@ query ($search: String, $status: MediaStatus) {
             endDate {
                 year
             }
+            studios {
+                edges {
+                    isMain
+                    node {
+                        name
+                        siteUrl
+                    }
+                }
+            }
         }
     }
 }
@@ -101,6 +119,8 @@ class HishaInfo:
         self._title_romaji = "Unknown"
         self._startDate_year = -1
         self._endDate_year = -1
+        self._studio = "Unknown"
+        self._studio_url = ""
 
     @property
     def id(self):
@@ -230,6 +250,22 @@ class HishaInfo:
     @endYear.setter
     def endYear(self, val):
         if val: self._endDate_year = val
+
+    @property
+    def studio(self):
+        return self._studio
+
+    @studio.setter
+    def studio(self, val):
+        if val: self._studio = str(val)
+
+    @property
+    def studio_url(self):
+        return self._studio_url
+
+    @studio_url.setter
+    def studio_url(self, val):
+        if val: self._studio_url = str(val)
 
 class Hisha:
     """
@@ -432,6 +468,30 @@ class Hisha:
         except:
             return -1
 
+    def _get_main_studio_info(self, studios):
+        """
+        Goes through the studio edges and returns the main (studio name, siteurl)
+
+        Params:
+            studios - The studios body from the Anilist GraphQL json response
+
+        Returns: A tuple (studio name: str, site url: str), or None if not found
+        """
+        try:
+            edges = studios['edges']
+            for edge in edges:
+                self._logger.debug("Checking edge {}".format(edge['node']['name']))
+                if edge['isMain']:
+                    self._logger.debug("Found main studio edge, returning tuple")
+                    node = edge['node']
+                    return (node['name'], node['siteUrl'])
+            # If a main studio isn't found, return None
+            self._logger.debug("Didn't find any main studio edge, returning None")
+            return None
+        except:
+            self._logger.warn("Didn't find any main studio edge, returning None")
+            return None
+
     def _create_hisha_info(self, show, title):
         """
         Creates a HishaInfo object from a provided show json
@@ -467,6 +527,7 @@ class Hisha:
             hishaInfo.title_romaji = self._clean_string(show['title']['romaji'])
             hishaInfo.startYear = show['startDate']['year']
             hishaInfo.endYear = show['endDate']['year']
+            hishaInfo.studio, hishaInfo.studio_url = self._get_main_studio_info(show['studios'])
 
         return hishaInfo
 
