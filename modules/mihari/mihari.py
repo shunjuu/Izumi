@@ -102,4 +102,4 @@ if __name__ == "__main__":
     from dep.LoggingUtils import LoggingUtils
     from dep.SleepUtils import SleepUtils
 
-    Mihari.watch("/mnt/c/Users/jarek/Desktop/Watch", Queue(), LoggingUtils, SleepUtils, 5)
+    Mihari.watch("", Queue(), LoggingUtils, SleepUtils, 5)
