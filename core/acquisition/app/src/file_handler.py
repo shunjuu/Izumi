@@ -224,7 +224,8 @@ class FileHandler:
         if 'anime_season' in a:
             new_episode = new_episode + " S" + str(a['anime_season'])
 
-        new_episode = new_episode + " - " + a['episode_number']
+        if 'episode_number' in a:
+            new_episode = new_episode + " - " + a['episode_number']
 
         # Mark video resolution
         if 'video_resolution' in a:
