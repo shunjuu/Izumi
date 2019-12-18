@@ -49,11 +49,18 @@ function docker {
 
     elif [ $1 == "encode" ] || [ $1 == "e" ] || [ $1 == "encoder" ]; then
         echo "Starting Izumi encoding worker in Docker"
+
+        IMAGE_NAME="$(grep '^image_name = ' conf/encoder.toml | awk -F '"' '{print $2}')"
+        CONTAINER_NAME="$(grep '^container_name = ' conf/encoder.toml | awk -F '"' '{print $2}')"
+
+        echo "Docker image is '$IMAGE_NAME', container name is '$CONTAINER_NAME'"
+        echo
+
         command docker run -d \
-            --name "izumi-v5-encoder" \
+            --name "$CONTAINER_NAME" \
             -e DOCKER='true' \
-            "izumi/v5/encoder"
-        command docker logs -f "izumi-v5-encoder"
+            "$IMAGE_NAME"
+        command docker logs -f "$CONTAINER_NAME"
 
     fi
 }
