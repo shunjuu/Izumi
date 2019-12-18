@@ -136,7 +136,7 @@ class FFmpeg:
             command.extend(["-vf", "subtitles={sub}:force_style='FontName=Open Sans Semibold:fontsdir={ftd}'".format(
                 sub=sub1_file, 
                 ftd=PathUtils.clean_directory_path(PathUtils.abspath_root()) + "src/encoder/assets/")]) 
-        command.extend(["-ss", "00:03:00", "-t", "00:00:15"]) # Dev mode stuff
+        #command.extend(["-ss", "00:03:00", "-t", "00:00:15"]) # Dev mode stuff
 
         # Sometimes, the audio provided is not HTML5 friendly. If the audio track is not FLAC/MP3/AAC, re-encode it:
         audio_codec = info.audio_codec_name.lower()

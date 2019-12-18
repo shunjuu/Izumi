@@ -19,9 +19,9 @@ from src.shared.factory.utils.LoggingUtils import LoggingUtils
 from src.encoder import worker as encode_worker
 
 # Reject Mac OS systems
-#if platform.system().lower() == "darwin":
-#    print("Warning: MacOS has an ObjC error with RQ, please run 'rq worker <queue> instead'")
-#    sys.exit()
+if platform.system().lower() == "darwin":
+    print("Warning: MacOS has an ObjC error with RQ, please run 'rq worker <queue> instead'")
+    sys.exit()
 
 # Boot setup
 redis_conn = Redis(host=IzumiConf.redis_host, port=IzumiConf.redis_port, password=IzumiConf.redis_password)
