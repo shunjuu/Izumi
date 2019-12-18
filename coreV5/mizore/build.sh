@@ -25,7 +25,7 @@ case "$1" in
         izumi
         ;;
     
-    "encode"|"e")
+    "encode"|"e"|"encoder")
         encode
         ;;
     
