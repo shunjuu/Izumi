@@ -10,6 +10,7 @@ import socket
 import sys
 
 from redis import Redis
+from redis.exceptions import ConnectionError as RedisConnectionError
 from rq import Connection, Queue, Worker
 
 from src.izumi.factory.conf.IzumiConf import IzumiConf
@@ -23,9 +24,6 @@ if platform.system().lower() == "darwin":
     print("Warning: MacOS has an ObjC error with RQ, please run 'rq worker <queue> instead'")
     sys.exit()
 
-# Boot setup
-redis_conn = Redis(host=IzumiConf.redis_host, port=IzumiConf.redis_port, password=IzumiConf.redis_password)
-
 # Set worker name based on user host, or if Docker, the passed in build variable
 WORKER_NAME = str()
 if 'WORKER_NAME' in os.environ:
@@ -34,8 +32,17 @@ else:
     WORKER_NAME = "{name}@{fqdn}".format(name=getpass.getuser(), fqdn=socket.getfqdn())
 print("Set Worker name as {}".format(WORKER_NAME))
 
-with Connection():
-    qs = sys.argv[1:]
-    w = Worker(qs, connection=redis_conn, name=WORKER_NAME)
+try:
 
-    w.work()
+    with Connection():
+    # Boot setup
+        redis_conn = Redis(host=IzumiConf.redis_host, port=IzumiConf.redis_port, password=IzumiConf.redis_password)
+
+        qs = sys.argv[1:]
+        w = Worker(qs, connection=redis_conn, name=WORKER_NAME)
+
+        w.work()
+
+except RedisConnectionError as rce:
+    LoggingUtils.critical("Lost connection to Redis instance, shutting down.", color=LoggingUtils.LRED)
+    sys.exit()

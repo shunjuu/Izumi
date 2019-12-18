@@ -24,12 +24,14 @@ from src.izumi.factory.conf.IzumiConf import IzumiConf
 from src.encoder import worker as encode_worker
 
 # Flask imports
-from flask import Flask, request
+from flask import Flask, jsonify, request
 
 # Distributed System imports
 import rq_dashboard
 from redis import Redis
 from rq import Queue
+
+from redis.exceptions import ConnectionError as RedisConnectionError
 
 # Signal handler
 def sig_handler(sig, frame):
@@ -145,6 +147,18 @@ def encode_lp():
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
+
+@app.errorhandler(RedisConnectionError)
+def handle_redis_connection_error(error):
+    LoggingUtils.critical("It appears that Redis is down.")
+    response = {
+        "success": False,
+        "error": {
+            "type": "Redis Connection",
+            "message": "Redis connection error has occured."
+        }
+    }
+    return jsonify(response), 500
 
 if __name__ == "__main__":
 
