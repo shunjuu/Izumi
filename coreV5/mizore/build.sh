@@ -8,10 +8,11 @@ function izumi {
 }
 
 function encode {
-    echo "Building Izumi encoding worker"
+    IMAGE_NAME="$(grep '^image_name = ' conf/encoder.toml | awk -F '"' '{print $2}')"
+    echo "Building Izumi encoding worker with image name: $IMAGE_NAME"
     docker build \
         -f "docker/Encode.Dockerfile" \
-        -t "izumi/v5/encoder" \
+        -t "$IMAGE_NAME" \
         --build-arg WORKER_NAME="$(whoami)@$(hostname):$(date +%Y%m%d.%H%M)" \
         .
 }
