@@ -1,0 +1,26 @@
+# Do NOT change the order of these keys!
+[flask]
+port = 8080
+
+[flask.routes]
+dashboard = "/rq"
+
+# These are the routes for the default queues of each job
+distribute = "/distribute"
+encode = "/encode"
+modify = "/modify"
+notify = "/notify"
+
+# For encodes, because they take so long, we also support priority queues
+encode_hp = "/encode-hp"
+encode_mp = "/encode-mp"
+encode_lp = "/encode-lp"
+
+[redis]
+# For the host, do not include http/https/redis://
+host = "localhost"
+port = 6379
+password = ""
+
+[system]
+name = "izumi"
