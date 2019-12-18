@@ -148,8 +148,5 @@ def encode_lp():
 
 if __name__ == "__main__":
 
-    from src.shared.factory.utils.PathUtils import PathUtils
-    print(PathUtils.abspath_root())
-
     LoggingUtils.info("Initializing Izumi application server")
     app.run(host='0.0.0.0', port=8080, debug=False)
