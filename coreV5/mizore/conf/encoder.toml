@@ -1,0 +1,24 @@
+# This is the Encoder's config file
+
+# Rclone downloading configs
+[downloading]
+# A list of rclone configs to try and download given file from
+# Must provide at least a single config, must be a path to a directory
+sources = ["/Users/adieuri/Movies/Izumi"]
+rclone_flags = "--stats 1s --stats-one-line --progress"
+
+# Rclone uploading configs
+[uploading]
+# A list of rclone configs to upload to.
+# Must provide at least a single config, must be a path to a directory
+destinations = ["/Users/adieuri/Desktop/"]
+rclone_flags = "--stats 1s --stats-one-line --progress"
+
+# Send POST requests upon completion of the job
+[endpoints]
+# Include a list of URLs like the example below.
+# Auth key can be removed completely or left empty.
+urls = [
+    { url = "https://endpoint1.url", auth = "authorization_key1" },
+    { url = "https://endpoint2.url" }
+]
