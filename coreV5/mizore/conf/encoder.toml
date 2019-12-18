@@ -22,3 +22,8 @@ urls = [
     { url = "https://endpoint1.url", auth = "authorization_key1" },
     { url = "https://endpoint2.url" }
 ]
+
+[system]
+
+image_name = "izumi/v5/encoder"
+container_name = "izumi-v5-encoder"

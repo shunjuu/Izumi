@@ -1,6 +1,7 @@
 # Do NOT change the order of these keys!
 [flask]
 port = 8080
+docker_port = 17000
 
 [flask.routes]
 dashboard = "/rq"
@@ -24,3 +25,7 @@ password = ""
 
 [system]
 name = "izumi"
+
+# This name represents the names of the images and containers that will be built
+image_name = "izumi/v5/applet"
+container_name = "izumi-v5-applet"
