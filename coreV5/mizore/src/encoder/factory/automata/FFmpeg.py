@@ -47,7 +47,7 @@ class FFmpeg:
         LoggingUtils.debug("Extracting main subtitle file to {}".format(sub1_file))
         command = [binary, "-i", src_file] # ffmpeg -i temp.mkv
         command.extend(["-map", "0:{}".format(info.subtitle_main_index), sub1_file]) # -map 0:2 sub1.ass
-        result = subprocess.run(command, stderr=subprocess.PIPE)
+        result = subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
         if result.returncode !=0:
             raise FFmpegError("Error occured while extracting the main subtitle file", result.stderr.decode('utf-8'))
         LoggingUtils.debug("Successfully extracted main subtitle file", color=LoggingUtils.GREEN)
@@ -59,7 +59,7 @@ class FFmpeg:
             LoggingUtils.debug("Extracting secondary subtitle file to {}".format(sub2_file))
             command = [binary, "-i", src_file] # ffmpeg -i temp.mkv
             command.extend(["-map", "0:{}".format(info.subtitle_extra_index), sub2_file])
-            result = subprocess.run(command, stderr=subprocess.PIPE)
+            result = subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
             if result.returncode != 0:
                 LoggingUtils.warning("Error occured while extracting secondary subtitle file, ignoring", color=LoggingUtils.YELLOW)
                 sub2_file = None
@@ -75,7 +75,7 @@ class FFmpeg:
 
         # Create the new file
         LoggingUtils.debug("Running command {}".format(' '.join(command)))
-        result = subprocess.run(command, stderr=subprocess.PIPE)
+        result = subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
         if result.returncode != 0:
             raise FFmpegError("Error occured while ffmpeg was preparing the episode", result.stderr.decode('utf-8'))
 
@@ -85,9 +85,11 @@ class FFmpeg:
         LoggingUtils.debug("Successfully replaced original file with prepared episode", color=LoggingUtils.GREEN)
 
         # We have to run another clear copy - this removes any corrupted tracks, usually subtitles
+        LoggingUtils.debug("Running final clean pass on file...", color=LoggingUtils.YELLOW)
         command = [binary, "-i", src_file, "-c", "copy", dest_temp_file]
-        subprocess.run(command, stderr=subprocess.PIPE)
+        subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
         shutil.move(dest_temp_file, src_file)
+        LoggingUtils.debug("Successfully ran clean pass on file...", color=LoggingUtils.GREEN)
 
         return sub1_file, sub2_file
 
@@ -105,7 +107,7 @@ class FFmpeg:
         command.extend(["-c:a", "copy", "-c:v", "copy", "-c:s", "copy", dest_temp_file])
 
         LoggingUtils.debug("Running command {}".format(' '.join(command)))
-        result = subprocess.run(command, stderr=subprocess.PIPE)
+        result = subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
         if result.returncode != 0:
             raise FFmpegError("Error occured while ffmpeg was attaching font to the episode", result.stderr.decode('utf-8'))
 
@@ -152,7 +154,7 @@ class FFmpeg:
 
         LoggingUtils.debug("Starting hardsub encode of file with main subtitle track...", color=LoggingUtils.YELLOW)
         LoggingUtils.debug("Running command {}".format(' '.join(command)))
-        result = subprocess.run(command, stderr=subprocess.PIPE)
+        result = subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
         if result.returncode != 0:
             raise FFmpegError("Error occured while encoding the file with the main subtitle track", result.stderr.decode('utf-8'))
 
@@ -169,7 +171,7 @@ class FFmpeg:
 
             LoggingUtils.debug("Starting hardsub encode of file with extra subtitle track...", color=LoggingUtils.YELLOW)
             LoggingUtils.debug("Running command {}".format(' '.join(command)))
-            result = subprocess.run(command, stderr=subprocess.PIPE)
+            result = subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
             if result.returncode != 0:
                 raise FFmpegError("Error occured while encoding the file with extra subtitle track", result.stderr.decode('utf-8'))
 
