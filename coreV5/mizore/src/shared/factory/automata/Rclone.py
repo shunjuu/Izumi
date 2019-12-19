@@ -43,8 +43,11 @@ class Rclone:
         so we need to actually catch it on our own to kill rclone processes.
         Because of this, we need to temporarily change the sigint handler and then revert it for RQ.
         """
-        rq_sig_handler = signal.getsignal(signal.SIGINT)
+        rq_sigint_handler = signal.getsignal(signal.SIGINT)
+        rq_sigterm_handler = signal.getsignal(signal.SIGTERM)
+
         signal.signal(signal.SIGINT, Rclone._sig_handler)
+        signal.signal(signal.SIGTERM, Rclone._sig_handler)
 
         LoggingUtils.debug("Running command {}".format(' '.join(command)))
         response = subprocess.run(command, capture_output=True)
@@ -52,7 +55,9 @@ class Rclone:
         if response.returncode != 0:
             raise run_error
 
-        signal.signal(signal.SIGINT, rq_sig_handler)
+        signal.signal(signal.SIGINT, rq_sigint_handler)
+        signal.signal(signal.SIGTERM, rq_sigterm_handler)
+
         return response
 
     @staticmethod
