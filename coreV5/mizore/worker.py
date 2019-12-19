@@ -9,6 +9,8 @@ import signal
 import socket
 import sys
 
+from datetime import datetime
+
 from redis import Redis
 from redis.exceptions import ConnectionError as RedisConnectionError
 from rq import Connection, Queue, Worker
@@ -29,7 +31,9 @@ WORKER_NAME = str()
 if 'WORKER_NAME' in os.environ:
     WORKER_NAME = "{}|docker".format(os.environ.get('WORKER_NAME'))
 else:
-    WORKER_NAME = "{name}@{fqdn}".format(name=getpass.getuser(), fqdn=socket.getfqdn())
+    WORKER_NAME = "{name}@{fqdn}:{ident}".format(name=getpass.getuser(),
+                                                    fqdn=socket.getfqdn(),
+                                                    ident=datetime.now().strftime("%Y%m%d.%H%M"))
 print("Set Worker name as {}".format(WORKER_NAME))
 
 try:
