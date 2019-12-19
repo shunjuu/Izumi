@@ -5,6 +5,7 @@ This is the application-level FLask server that handles all incoming requests.
 # Basic imports
 import logging
 import json
+import pickle
 import os
 import signal
 import sys
@@ -27,6 +28,7 @@ from src.encoder import worker as encode_worker
 from flask import Flask, jsonify, request
 
 # Distributed System imports
+pickle.HIGHEST_PROTOCOL = 4 # Force to use Protocol 4 to support modern Python systems
 import rq_dashboard
 from redis import Redis
 from rq import Queue
