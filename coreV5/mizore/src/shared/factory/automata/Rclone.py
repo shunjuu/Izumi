@@ -3,18 +3,57 @@ Automata for executing rclone commands
 """
 
 import json
+import psutil
+import signal
 import subprocess
 
-from typing import List
+from os import kill
+from typing import Iterable, List
+
+#from src.shared.exceptions.errors import RcloneError
 
 from src.shared.constants.Job import Job #pylint: disable=import-error
-from src.shared.exceptions.errors.RcloneError import RcloneUploadError, RcloneDownloadError, RcloneDownloadNotFoundError #pylint: disable=import-error
+from src.shared.exceptions.errors.RcloneError import RcloneError, RcloneUploadError, RcloneDownloadError, RcloneDownloadNotFoundError, RcloneLSJsonError #pylint: disable=import-error
+from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError #pylint: disable=import-error
 from src.shared.factory.utils.BinUtils import BinUtils #pylint: disable=import-error
 from src.shared.factory.utils.DockerUtils import DockerUtils #pylint: disable=import-error
 from src.shared.factory.utils.LoggingUtils import LoggingUtils #pylint: disable=import-error
 from src.shared.factory.utils.PathUtils import PathUtils #pylint: disable=import-error
 
 class Rclone:
+
+    # Signal handler
+    @staticmethod
+    def _sig_handler(sig, frame):
+        LoggingUtils.critical("SIG command {} detected, killing all running rclone processes...".format(sig), color=LoggingUtils.LRED)
+
+        current_proc = psutil.Process()
+        children = current_proc.children(recursive=True)
+
+        for child in children:
+            LoggingUtils.debug("Killing child rclone process with PID {}".format(child.pid))
+            kill(child.pid, signal.SIGTERM)
+
+        raise WorkerCancelledError(helper=True)
+
+    @staticmethod
+    def _run(command: Iterable[str], run_error: RcloneError) -> str:
+        """
+        Helper method to run commands. Rclone doesn't properly catch SIGINT signals,
+        so we need to actually catch it on our own to kill rclone processes.
+        Because of this, we need to temporarily change the sigint handler and then revert it for RQ.
+        """
+        rq_sig_handler = signal.getsignal(signal.SIGINT)
+        signal.signal(signal.SIGINT, Rclone._sig_handler)
+
+        LoggingUtils.debug("Running command {}".format(' '.join(command)))
+        response = subprocess.run(command, capture_output=True)
+
+        if response.returncode != 0:
+            raise run_error
+
+        signal.signal(signal.SIGINT, rq_sig_handler)
+        return response
 
     @staticmethod
     def upload(job: Job, destinations: List[str], upload_file: str, flags: str) -> bool:
@@ -30,7 +69,6 @@ class Rclone:
         This method will upload the file and include its show name:
         e.g., 'temp.mp4' --> destination/show/episode.mp4
         """
-        error_occured = False
         for dest in destinations:
             LoggingUtils.debug("Uploading to {}".format(dest))
             rclone_dest = PathUtils.clean_directory_path(dest) + PathUtils.clean_directory_path(job.show) + job.episode
@@ -44,17 +82,7 @@ class Rclone:
             command.extend(["copyto", upload_file, rclone_dest])
             command.extend(flags.split())
             LoggingUtils.debug("Running command {}".format(' '.join(command)))
-            response = subprocess.run(command, stdout=subprocess.PIPE)
-
-            if response.returncode != 0:
-                error_occured = True
-                LoggingUtils.warning("There was an error when uploading to {}".format(dest))
-
-        if error_occured:
-            raise RcloneUploadError("An error occured when rclone was uploading a file",
-                                    response.stdout.decode('utf-8'),
-                                    job.episode,
-                                    dest)
+            Rclone._run(command, RcloneUploadError("An error occured when rclone was uploading a file", "", job.episode, dest))
 
     @staticmethod
     def download(job: Job, sources: List[str], tempfolder: str, flags: str) -> str:
@@ -105,12 +133,8 @@ class Rclone:
             LoggingUtils.debug("Docker mode not detected, using system rclone config", color=LoggingUtils.YELLOW)
         command.extend(["copyto", rclone_src_file, rclone_dest_file])
         command.extend(flags.split())
-        LoggingUtils.debug("Running command {}".format(' '.join(command)))
-        response = subprocess.run(command, stdout=subprocess.PIPE)
 
-        # If the copy failed, return None
-        if response.returncode != 0:
-            raise RcloneDownloadError("Unable to copy episode file to local folder using rclone", "", job.show, job.episode)
+        Rclone._run(command, RcloneDownloadError("Unable to copy episode file to local folder using rclone", "", job.show, job.episode))
 
         LoggingUtils.debug("Download complete.", color=LoggingUtils.GREEN)
         return rclone_dest_file
@@ -129,9 +153,8 @@ class Rclone:
             else:
                 LoggingUtils.debug("Docker mode not detected, using system rclone config", color=LoggingUtils.YELLOW)
             command.extend(["lsjson", "-R", source + job.show])
+            response = Rclone._run(command, RcloneLSJsonError("Rclone failed to run lsjson", "", job.show, job.episode))
 
-            LoggingUtils.debug("Running command {}".format(' '.join(command)))
-            response = subprocess.run(command, stdout=subprocess.PIPE)
             # Get the episode list in that folder
             episode_list = json.loads(response.stdout.decode('utf-8'))
             # Check if our job episode exists
