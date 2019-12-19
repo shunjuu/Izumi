@@ -3,17 +3,20 @@ Handles FFMPEG tasks
 
 Commands mostly start with [binary, -i, srcfile]
 Alternatively, they could be [binary, -hide_banner, -loglevel, panic, -i, srcfile]
+
+We need to pipe ffmpeg to stdout also to capture sigterm for warm shutdown
 """
 
 import shutil
 import subprocess
 import time
 
-from typing import Tuple
+from typing import Iterable, Tuple
 
 from src.shared.constants.Job import Job #pylint: disable=import-error
 from src.shared.modules.haikan import Haikan #pylint: disable=import-error
 
+from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError #pylint: disable=import-error
 from src.shared.factory.utils.BinUtils import BinUtils #pylint: disable=import-error
 from src.shared.factory.utils.DockerUtils import DockerUtils #pylint: disable=import-error
 from src.shared.factory.utils.LoggingUtils import LoggingUtils #pylint: disable=import-error
@@ -23,6 +26,22 @@ from src.encoder.factory.utils.AssetUtils import AssetUtils #pylint: disable=imp
 from src.encoder.exceptions.errors.FFmpegError import FFmpegError #pylint: disable=import-error
 
 class FFmpeg:
+
+    @staticmethod
+    def _run(command: Iterable[str], error_message: str) -> int:
+        """
+        A wrapping over subprocess.run(). This sets the stderr, stdout, and handles converting
+        SIGINT signals to quit jobs.
+        """
+        LoggingUtils.debug("Running command {}".format(' '.join(command)))
+        result = subprocess.run(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        if result.returncode == 255:
+            LoggingUtils.warning("User killed running ffmpeg process, canceling operation and adding to failed job queue.", color=LoggingUtils.RED)
+            raise WorkerCancelledError(helper=True)
+        elif result.returncode != 0:
+            raise FFmpegError(error_message, result.stderr.decode('utf-8'))
+        else:
+            return result.returncode # == 0
 
     @staticmethod
     def prepare(job: Job, src_file: str, tempfolder: str) -> Tuple[bool, str, str]:
@@ -47,9 +66,7 @@ class FFmpeg:
         LoggingUtils.debug("Extracting main subtitle file to {}".format(sub1_file))
         command = [binary, "-i", src_file] # ffmpeg -i temp.mkv
         command.extend(["-map", "0:{}".format(info.subtitle_main_index), sub1_file]) # -map 0:2 sub1.ass
-        result = subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
-        if result.returncode !=0:
-            raise FFmpegError("Error occured while extracting the main subtitle file", result.stderr.decode('utf-8'))
+        FFmpeg._run(command, "Error occured while extracting the main subtitle file")
         LoggingUtils.debug("Successfully extracted main subtitle file", color=LoggingUtils.GREEN)
 
         # Extract the secondary sub file if it exists - simplifies future encoding
@@ -59,12 +76,8 @@ class FFmpeg:
             LoggingUtils.debug("Extracting secondary subtitle file to {}".format(sub2_file))
             command = [binary, "-i", src_file] # ffmpeg -i temp.mkv
             command.extend(["-map", "0:{}".format(info.subtitle_extra_index), sub2_file])
-            result = subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
-            if result.returncode != 0:
-                LoggingUtils.warning("Error occured while extracting secondary subtitle file, ignoring", color=LoggingUtils.YELLOW)
-                sub2_file = None
-            else:
-                LoggingUtils.debug("Sucessfully extracted secondary subtitle file", color=LoggingUtils.GREEN)
+            FFmpeg._run(command, "Error occured while extracting secondary subtitle file, ignoring")
+            LoggingUtils.debug("Sucessfully extracted secondary subtitle file", color=LoggingUtils.GREEN)
 
         dest_temp_file = PathUtils.clean_directory_path(tempfolder) + "temp2.mkv" # Where the new file will be temporarily stored
         LoggingUtils.debug("Creating new prepared file at {}".format(dest_temp_file))
@@ -74,10 +87,7 @@ class FFmpeg:
         command.extend(["-c:a", "copy", "-c:v", "copy", dest_temp_file])
 
         # Create the new file
-        LoggingUtils.debug("Running command {}".format(' '.join(command)))
-        result = subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
-        if result.returncode != 0:
-            raise FFmpegError("Error occured while ffmpeg was preparing the episode", result.stderr.decode('utf-8'))
+        FFmpeg._run(command, "Error occured while ffmpeg was preparing the episode")
 
         # Replace the original file with this
         LoggingUtils.debug("Successfully prepared the episode, now replacing original...", color=LoggingUtils.GREEN)
@@ -87,7 +97,7 @@ class FFmpeg:
         # We have to run another clear copy - this removes any corrupted tracks, usually subtitles
         LoggingUtils.debug("Running final clean pass on file...", color=LoggingUtils.YELLOW)
         command = [binary, "-i", src_file, "-c", "copy", dest_temp_file]
-        subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
+        FFmpeg._run(command, "Error occured while ffmpeg was running a final clean pass on the episode")
         shutil.move(dest_temp_file, src_file)
         LoggingUtils.debug("Successfully ran clean pass on file...", color=LoggingUtils.GREEN)
 
@@ -106,10 +116,7 @@ class FFmpeg:
         command.extend(["-metadata:s:{}".format(info.streams), "mimetype=application/x-truetype-font"]) # Add metadata
         command.extend(["-c:a", "copy", "-c:v", "copy", "-c:s", "copy", dest_temp_file])
 
-        LoggingUtils.debug("Running command {}".format(' '.join(command)))
-        result = subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
-        if result.returncode != 0:
-            raise FFmpegError("Error occured while ffmpeg was attaching font to the episode", result.stderr.decode('utf-8'))
+        FFmpeg._run(command, "Error occured while ffmpeg was attaching font to the episode")
 
         # Replace the original file with this
         LoggingUtils.debug("Successfully added font to file, now replacing original...", color=LoggingUtils.GREEN)
@@ -153,11 +160,7 @@ class FFmpeg:
         command.extend(["-strict", "-2", "-y", hardsub_file])
 
         LoggingUtils.debug("Starting hardsub encode of file with main subtitle track...", color=LoggingUtils.YELLOW)
-        LoggingUtils.debug("Running command {}".format(' '.join(command)))
-        result = subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
-        if result.returncode != 0:
-            raise FFmpegError("Error occured while encoding the file with the main subtitle track", result.stderr.decode('utf-8'))
-
+        FFmpeg._run(command, "Error occured while encoding the file with the main subtitle track")
         LoggingUtils.debug("Successfully encoded hardsub of file with main subtitle track", color=LoggingUtils.GREEN)
 
         # If there's a secondary track, we want to encode that too
@@ -170,11 +173,7 @@ class FFmpeg:
             command.extend(["-c:a", "copy", "-strict", "-2", "-y", extra_file])
 
             LoggingUtils.debug("Starting hardsub encode of file with extra subtitle track...", color=LoggingUtils.YELLOW)
-            LoggingUtils.debug("Running command {}".format(' '.join(command)))
-            result = subprocess.run(command, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
-            if result.returncode != 0:
-                raise FFmpegError("Error occured while encoding the file with extra subtitle track", result.stderr.decode('utf-8'))
-
+            FFmpeg._run(command, "Error occured while encoding the file with extra subtitle track")
             LoggingUtils.debug("Successfully encoded hardsub of file with extra subtitle track", color=LoggingUtils.GREEN)
             shutil.move(extra_file, hardsub_file)
         else:
