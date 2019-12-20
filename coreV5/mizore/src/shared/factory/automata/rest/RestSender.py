@@ -20,10 +20,10 @@ from src.shared.factory.utils.LoggingUtils import LoggingUtils #pylint: disable=
 class RestSender:
 
     @staticmethod
-    def send(json_str: str, urls: List[Dict[str, str]]) -> bool:
+    def send(json_dict: str, urls: List[Dict[str, str]]) -> bool:
         """
         Sends notifications. Returns bool if all successful
-        Assumes the passed in string is already in JSON form.
+        Assumes the passed in string is already in JSON dict form.
         """
         for url in urls:
 
@@ -37,7 +37,7 @@ class RestSender:
                 headers['authorization'] = url['auth']
             
             try:
-                res = requests.post(url['url'], json=json_str, headers=headers, timeout=5)
+                res = requests.post(url['url'], json=json_dict, headers=headers, timeout=5)
 
                 if res.status_code == 200:
                     LoggingUtils.info("Successfully sent with return of 200 OK")
