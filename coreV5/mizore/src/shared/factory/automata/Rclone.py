@@ -1,5 +1,8 @@
 """
 Automata for executing rclone commands
+
+RQ seems to gracefully handle SIGINT/SIGKILL despite us ovewriting the signal handler,
+so that's pretty neat.
 """
 
 import json
@@ -9,8 +12,6 @@ import subprocess
 
 from os import kill
 from typing import Iterable, List
-
-#from src.shared.exceptions.errors import RcloneError
 
 from src.shared.constants.Job import Job #pylint: disable=import-error
 from src.shared.exceptions.errors.RcloneError import RcloneError, RcloneUploadError, RcloneDownloadError, RcloneDownloadNotFoundError, RcloneLSJsonError #pylint: disable=import-error
