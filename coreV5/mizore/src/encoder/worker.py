@@ -51,7 +51,7 @@ def encode(job: Job) -> None:
 
         # Step 7: Send POST requests
         LoggingUtils.info("[7/7] Sending POST requests to endpoints...", color=LoggingUtils.LCYAN)
-        RestSender.send(JobUtils.to_jsons(hardsub_job), EncoderConf.endpoints)
+        RestSender.send(JobUtils.to_dict(hardsub_job), EncoderConf.endpoints)
 
         # Finally, destroy the temp folder
         TempFolderController.destroy_temp_folder()
