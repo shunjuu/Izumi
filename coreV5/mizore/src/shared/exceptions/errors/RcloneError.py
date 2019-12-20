@@ -29,3 +29,8 @@ class RcloneDownloadNotFoundError(RcloneError):
     """When a file requested for download isn't found"""
     def __init__(self, message: str, output: str, source: str, dest: str):
         super().__init__(message, output, source, dest)
+
+class RcloneLSJsonError(RcloneError):
+    """When the rclone lsjson command fails"""
+    def __init__(self, message: str, output: str, source: str, dest: str):
+        super().__init__(message, output, source, dest)
