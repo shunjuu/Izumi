@@ -2,10 +2,10 @@
 This is the central and starting point of the "Encoder" worker
 """
 
-import pprint
 
 from src.shared.constants.Job import Job #pylint: disable=import-error
 from src.shared.exceptions.errors.RcloneError import RcloneError #pylint: disable=import-error
+from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError #pylint: disable=import-error
 from src.shared.factory.automata.rest.RestSender import RestSender #pylint: disable=import-error
 from src.shared.factory.automata.Rclone import Rclone #pylint: disable=import-error
 from src.shared.factory.controllers.TempFolderController import TempFolderController #pylint: disable=import-error
@@ -76,6 +76,14 @@ def encode(job: Job) -> None:
 
         # Reraise - this will clutter up the logs but make it visible in RQ-dashboard
         raise fe
+
+    except WorkerCancelledError as we:
+
+        LoggingUtils.critical(we.message, color=LoggingUtils.LRED)
+        TempFolderController.destroy_temp_folder()
+
+        # Reraise for dashboard
+        raise we
 
     except Exception as e:
         # In the event of an exception, we want to simply log it
