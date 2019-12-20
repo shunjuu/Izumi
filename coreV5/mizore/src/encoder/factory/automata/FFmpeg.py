@@ -34,7 +34,7 @@ class FFmpeg:
         SIGINT signals to quit jobs.
         """
         LoggingUtils.debug("Running command {}".format(' '.join(command)))
-        result = subprocess.run(command, capture_output=True)
+        result = subprocess.run(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         if result.returncode == 255:
             LoggingUtils.warning("User killed running ffmpeg process, canceling operation and adding to failed job queue.", color=LoggingUtils.RED)
             raise WorkerCancelledError(helper=True)
