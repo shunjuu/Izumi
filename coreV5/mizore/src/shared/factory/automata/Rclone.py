@@ -51,7 +51,7 @@ class Rclone:
         signal.signal(signal.SIGTERM, Rclone._sig_handler)
 
         LoggingUtils.debug("Running command {}".format(' '.join(command)))
-        response = subprocess.run(command, capture_output=True)
+        response = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         if response.returncode != 0:
             raise run_error
