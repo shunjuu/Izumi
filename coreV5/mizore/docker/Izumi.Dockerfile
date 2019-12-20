@@ -9,7 +9,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Update our image
 RUN apt-get update -y && \
-    apt-get install apt-utils -y
+    apt-get install apt-utils gcc python3-dev -y
 
 # Install dependencies
 COPY requirements.txt /opt/requirements.txt
