@@ -37,21 +37,22 @@ else:
                                                     ident=datetime.now().strftime("%Y%m%d.%H%M"))
 print("Set Worker name as {}".format(WORKER_NAME))
 
-try:
-
+while True:
     with Connection():
-    # Boot setup
-        redis_conn = Redis(host=IzumiConf.redis_host,
-                            port=IzumiConf.redis_port,
-                            password=IzumiConf.redis_password,
-                            socket_keepalive=True,
-                            health_check_interval=5)
-
-        qs = sys.argv[1:]
-        w = Worker(qs, connection=redis_conn, name=WORKER_NAME)
-
-        w.work()
-
-except RedisConnectionError as rce:
-    LoggingUtils.critical("Lost connection to Redis instance, shutting down.", color=LoggingUtils.LRED)
-    sys.exit()
+        try:
+            redis_conn = Redis(host=IzumiConf.redis_host,
+                                port=IzumiConf.redis_port,
+                                password=IzumiConf.redis_password,
+                                socket_keepalive=True,
+                                socket_timeout=300,
+                                health_check_interval=60)
+            
+            qs = sys.argv[1:]
+            w = Worker(qs, connection=redis_conn, name=WORKER_NAME)
+            w.work()
+        except RedisConnectionError as rce:
+            LoggingUtils.critical("Lost connection to Redis instance, shutting down.", color=LoggingUtils.LRED)
+            sys.exit()
+        except TimeoutError as te:
+            LoggingUtils.debug("Timeout from socket registered, killing worker and reinitializing")
+            w.register_death()
