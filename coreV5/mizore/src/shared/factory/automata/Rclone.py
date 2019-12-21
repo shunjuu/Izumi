@@ -14,7 +14,7 @@ from os import kill
 from typing import Iterable, List
 
 from src.shared.constants.Job import Job #pylint: disable=import-error
-from src.shared.exceptions.errors.RcloneError import RcloneError, RcloneUploadError, RcloneDownloadError, RcloneDownloadNotFoundError, RcloneLSJsonError #pylint: disable=import-error
+from src.shared.exceptions.errors.RcloneError import RcloneError, RcloneUploadError, RcloneDownloadError, RcloneDownloadNotFoundError, RcloneLSJsonError, RcloneRunError #pylint: disable=import-error
 from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError #pylint: disable=import-error
 from src.shared.factory.utils.BinUtils import BinUtils #pylint: disable=import-error
 from src.shared.factory.utils.DockerUtils import DockerUtils #pylint: disable=import-error
@@ -51,7 +51,14 @@ class Rclone:
         signal.signal(signal.SIGTERM, Rclone._sig_handler)
 
         LoggingUtils.debug("Running command {}".format(' '.join(command)))
-        response = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            response = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=3600)
+        except subprocess.TimeoutExpired:
+            raise RcloneRunError("Timeout expired when running rclone command {}".format(' '.join(command)),
+                                    response.stdout.decode('utf-8'), '', '')
+        except:
+            raise RcloneRunError("Some kind of error occured while running rclone command {}".format(' '.join(command)),
+                                    response.stdout.decode('utf-8'), '', '')
 
         if response.returncode != 0:
             raise run_error
@@ -87,7 +94,6 @@ class Rclone:
                 LoggingUtils.debug("Docker mode not detected, using system rclone config", color=LoggingUtils.YELLOW)
             command.extend(["copyto", upload_file, rclone_dest])
             command.extend(flags.split())
-            LoggingUtils.debug("Running command {}".format(' '.join(command)))
             Rclone._run(command, RcloneUploadError("An error occured when rclone was uploading a file", "", job.episode, dest))
 
     @staticmethod

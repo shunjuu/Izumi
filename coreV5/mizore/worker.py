@@ -40,7 +40,12 @@ try:
 
     with Connection():
     # Boot setup
-        redis_conn = Redis(host=IzumiConf.redis_host, port=IzumiConf.redis_port, password=IzumiConf.redis_password)
+        redis_conn = Redis(host=IzumiConf.redis_host,
+                            port=IzumiConf.redis_port,
+                            password=IzumiConf.redis_password,
+                            socket_keepalive=True,
+                            socket_timeout=180,
+                            health_check_interval=60)
 
         qs = sys.argv[1:]
         w = Worker(qs, connection=redis_conn, name=WORKER_NAME)
