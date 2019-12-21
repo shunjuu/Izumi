@@ -44,7 +44,6 @@ while True:
                                 port=IzumiConf.redis_port,
                                 password=IzumiConf.redis_password,
                                 socket_keepalive=True,
-                                socket_timeout=300,
                                 health_check_interval=60)
             
             qs = sys.argv[1:]
