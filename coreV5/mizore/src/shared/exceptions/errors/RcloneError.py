@@ -34,3 +34,8 @@ class RcloneLSJsonError(RcloneError):
     """When the rclone lsjson command fails"""
     def __init__(self, message: str, output: str, source: str, dest: str):
         super().__init__(message, output, source, dest)
+
+class RcloneRunError(RcloneError):
+    """When running a command fails - usually by timeout"""
+    def __init__(self, message: str, output: str, source: str, dest: str):
+        super().__init__(message, output, source, dest)
