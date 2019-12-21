@@ -13,6 +13,7 @@ from datetime import datetime
 
 from redis import Redis
 from redis.exceptions import ConnectionError as RedisConnectionError
+from redis.exceptions import TimeoutError
 from rq import Connection, Queue, Worker
 
 from src.izumi.factory.conf.IzumiConf import IzumiConf
@@ -44,8 +45,7 @@ try:
                             port=IzumiConf.redis_port,
                             password=IzumiConf.redis_password,
                             socket_keepalive=True,
-                            socket_timeout=180,
-                            health_check_interval=60)
+                            health_check_interval=5)
 
         qs = sys.argv[1:]
         w = Worker(qs, connection=redis_conn, name=WORKER_NAME)
