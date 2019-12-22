@@ -14,7 +14,8 @@ from datetime import datetime
 from redis import Redis
 from redis.exceptions import ConnectionError as RedisConnectionError
 from redis.exceptions import TimeoutError
-from rq import Connection, Queue, Worker
+#from rq import Connection, Queue, Worker
+from src.rq.rq import Connection, Queue, Worker
 
 from src.izumi.factory.conf.IzumiConf import IzumiConf
 from src.shared.factory.utils.LoggingUtils import LoggingUtils
@@ -37,17 +38,19 @@ else:
                                                     ident=datetime.now().strftime("%Y%m%d.%H%M"))
 print("Set Worker name as {}".format(WORKER_NAME))
 
-with Connection():
-    try:
-        redis_conn = Redis(host=IzumiConf.redis_host,
-                            port=IzumiConf.redis_port,
-                            password=IzumiConf.redis_password,
-                            socket_keepalive=True,
-                            health_check_interval=60)
-        
-        qs = sys.argv[1:]
-        w = Worker(qs, connection=redis_conn, name=WORKER_NAME)
-        w.work()
-    except RedisConnectionError as rce:
-        LoggingUtils.critical("Lost connection to Redis instance, shutting down.", color=LoggingUtils.LRED)
-        sys.exit()
+while True:
+    with Connection():
+        try:
+            redis_conn = Redis(host=IzumiConf.redis_host,
+                                port=IzumiConf.redis_port,
+                                password=IzumiConf.redis_password,
+                                socket_keepalive=True,
+                                socket_timeout=180,
+                                health_check_interval=60)
+
+            qs = sys.argv[1:]
+            w = Worker(qs, connection=redis_conn, name=WORKER_NAME)
+            w.work()
+        except RedisConnectionError as rce:
+            LoggingUtils.critical("Lost connection to Redis instance, shutting down.", color=LoggingUtils.LRED)
+            sys.exit()
