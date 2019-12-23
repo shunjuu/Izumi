@@ -18,15 +18,16 @@ from redis.exceptions import TimeoutError
 from src.rq.rq import Connection, Queue, Worker
 
 from src.izumi.factory.conf.IzumiConf import IzumiConf
+from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError
 from src.shared.factory.utils.LoggingUtils import LoggingUtils
 
 # Preload libraries
 from src.encoder import worker as encode_worker
 
 # Reject Mac OS systems
-if platform.system().lower() == "darwin":
-    print("Warning: MacOS has an ObjC error with RQ, please run 'rq worker <queue> instead'")
-    sys.exit()
+#if platform.system().lower() == "darwin":
+#    print("Warning: MacOS has an ObjC error with RQ, please run 'rq worker <queue> instead'")
+#    sys.exit()
 
 # Set worker name based on user host, or if Docker, the passed in build variable
 WORKER_NAME = str()
@@ -54,3 +55,11 @@ while True:
         except RedisConnectionError as rce:
             LoggingUtils.critical("Lost connection to Redis instance, shutting down.", color=LoggingUtils.LRED)
             sys.exit()
+        except WorkerCancelledError:
+            LoggingUtils.warning("Worker killed externally, shutting down...")
+            sys.exit()
+        except TimeoutError:
+            # We expect a timeout error to occur as this forces the worker to reregister
+            # Silently handle and let the loop continue
+            LoggingUtils.debug("Timeout error caught, handling silently...")
+            pass
