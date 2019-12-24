@@ -39,6 +39,9 @@ else:
                                                     ident=datetime.now().strftime("%Y%m%d.%H%M"))
 print("Set Worker name as {}".format(WORKER_NAME))
 
+qs = sys.argv[1:]
+LoggingUtils.info("*** Listening on {}...".format(', '.join(qs)), color=LoggingUtils.LGREEN)
+
 while True:
     with Connection():
         try:
@@ -49,7 +52,6 @@ while True:
                                 socket_timeout=180,
                                 health_check_interval=60)
 
-            qs = sys.argv[1:]
             w = Worker(qs, connection=redis_conn, name=WORKER_NAME)
             w.work()
         except RedisConnectionError as rce:
@@ -61,5 +63,5 @@ while True:
         except TimeoutError:
             # We expect a timeout error to occur as this forces the worker to reregister
             # Silently handle and let the loop continue
-            LoggingUtils.debug("Timeout error caught, handling silently...")
+            # LoggingUtils.debug("Timeout error caught, handling silently...")
             pass
