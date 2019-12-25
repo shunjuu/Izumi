@@ -25,9 +25,9 @@ from src.shared.factory.utils.LoggingUtils import LoggingUtils
 from src.encoder import worker as encode_worker
 
 # Reject Mac OS systems
-#if platform.system().lower() == "darwin":
-#    print("Warning: MacOS has an ObjC error with RQ, please run 'rq worker <queue> instead'")
-#    sys.exit()
+if platform.system().lower() == "darwin":
+    print("Warning: MacOS has an ObjC error with RQ, please run 'rq worker <queue> instead'")
+    sys.exit()
 
 # Set worker name based on user host, or if Docker, the passed in build variable
 WORKER_NAME = str()
