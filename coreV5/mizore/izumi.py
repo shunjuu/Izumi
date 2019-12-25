@@ -31,7 +31,8 @@ from flask import Flask, jsonify, request
 pickle.HIGHEST_PROTOCOL = 4 # Force to use Protocol 4 to support modern Python systems
 import rq_dashboard
 from redis import Redis
-from rq import Queue
+#from rq import Queue
+from src.rq.rq import Queue
 
 from redis.exceptions import ConnectionError as RedisConnectionError
 
