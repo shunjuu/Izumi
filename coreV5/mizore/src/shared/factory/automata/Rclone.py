@@ -56,6 +56,9 @@ class Rclone:
         except subprocess.TimeoutExpired:
             raise RcloneRunError("Timeout expired when running rclone command {}".format(' '.join(command)),
                                     response.stdout.decode('utf-8'), '', '')
+        except WorkerCancelledError:
+            # Cleanly pass on the Worker Cancelled Error
+            raise WorkerCancelledError()
         except:
             raise RcloneRunError("Some kind of error occured while running rclone command {}".format(' '.join(command)),
                                     response.stdout.decode('utf-8'), '', '')

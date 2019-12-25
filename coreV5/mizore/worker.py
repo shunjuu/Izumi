@@ -13,9 +13,12 @@ from datetime import datetime
 
 from redis import Redis
 from redis.exceptions import ConnectionError as RedisConnectionError
-from rq import Connection, Queue, Worker
+from redis.exceptions import TimeoutError
+#from rq import Connection, Queue, Worker
+from src.rq.rq import Connection, Queue, Worker
 
 from src.izumi.factory.conf.IzumiConf import IzumiConf
+from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError
 from src.shared.factory.utils.LoggingUtils import LoggingUtils
 
 # Preload libraries
@@ -36,22 +39,29 @@ else:
                                                     ident=datetime.now().strftime("%Y%m%d.%H%M"))
 print("Set Worker name as {}".format(WORKER_NAME))
 
-try:
+qs = sys.argv[1:]
+LoggingUtils.info("*** Listening on {}...".format(', '.join(qs)), color=LoggingUtils.LGREEN)
 
+while True:
     with Connection():
-    # Boot setup
-        redis_conn = Redis(host=IzumiConf.redis_host,
-                            port=IzumiConf.redis_port,
-                            password=IzumiConf.redis_password,
-                            socket_keepalive=True,
-                            socket_timeout=180,
-                            health_check_interval=60)
+        try:
+            redis_conn = Redis(host=IzumiConf.redis_host,
+                                port=IzumiConf.redis_port,
+                                password=IzumiConf.redis_password,
+                                socket_keepalive=True,
+                                socket_timeout=180,
+                                health_check_interval=60)
 
-        qs = sys.argv[1:]
-        w = Worker(qs, connection=redis_conn, name=WORKER_NAME)
-
-        w.work()
-
-except RedisConnectionError as rce:
-    LoggingUtils.critical("Lost connection to Redis instance, shutting down.", color=LoggingUtils.LRED)
-    sys.exit()
+            w = Worker(qs, connection=redis_conn, name=WORKER_NAME)
+            w.work()
+        except RedisConnectionError as rce:
+            LoggingUtils.critical("Lost connection to Redis instance, shutting down.", color=LoggingUtils.LRED)
+            sys.exit()
+        except WorkerCancelledError:
+            LoggingUtils.warning("Worker killed externally, shutting down...")
+            sys.exit()
+        except TimeoutError:
+            # We expect a timeout error to occur as this forces the worker to reregister
+            # Silently handle and let the loop continue
+            # LoggingUtils.debug("Timeout error caught, handling silently...")
+            pass
