@@ -154,6 +154,8 @@ class Haikan:
                         if 'tags' in stream and 'language' in stream['tags']:
                             pi._audio_tags_language = str(stream['tags']['language']).lower()
                         break
+            else:
+                LoggingUtils.debug("Audio stream index was set in multiselect, proceeding...")
 
     @classmethod
     def _load_video_info(cls, pi, info):
