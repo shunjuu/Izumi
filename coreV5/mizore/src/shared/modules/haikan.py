@@ -144,7 +144,7 @@ class Haikan:
 
             # However, for now, we should just set the first stream anyways and log a warning
             if not pi.audio_codec_name:
-                LoggingUtils.warning("Unable to determine which audio stream to count, using first available...", color=LoggingUtils.RED)
+                LoggingUtils.warning("Unable to determine which audio stream to index, using first available...", color=LoggingUtils.RED)
                 for stream in streams:
                     if stream['codec_type'].lower() == "audio":
                         pi._audio_stream_index = int(stream['index'])
@@ -195,6 +195,15 @@ class Haikan:
                                 pi._subtitle_extra_index = int(stream['index'])
                             else:
                                 pi._subtitle_main_index = int(stream['index'])
+            # If no subs were selected, default to the first available
+            LoggingUtils.warning("Unable to determine which subtitle stream to index, using first available...", color=LoggingUtils.RED)
+            if pi.subtitle_main_index < 1:
+                for stream in streams:
+                    if stream['codec_type'].lower() == "subtitle":
+                        pi._subtitle_main_index = int(stream['index'])
+                        break
+            else:
+                LoggingUtils.debug("Subtitle stream was detected in multiselected, proceeding...")
 
     @classmethod
     def _make_probe_info(cls, info):
