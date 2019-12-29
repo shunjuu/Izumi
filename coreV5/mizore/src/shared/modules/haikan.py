@@ -142,6 +142,19 @@ class Haikan:
             # All streams iterated but none were Japanese - this means the streams aren't tagged properly.
             # In this case, do not set anything - This will be a signal that the audio streams aren't reliable
 
+            # However, for now, we should just set the first stream anyways and log a warning
+            LoggingUtils.warning("Unable to determine which audio stream to count, using first available...", color=LoggingUtils.RED)
+            for stream in streams:
+                if stream['codec_type'].lower() == "audio":
+                    pi._audio_stream_index = int(stream['index'])
+                    pi._audio_codec_name = str(stream['codec_name']).lower()
+                    pi._audio_codec_long_name = stream['codec_long_name']
+
+                    if 'tags' in stream and 'language' in stream['tags']:
+                        pi._audio_tags_language = str(stream['tags']['language']).lower()
+                    break
+
+
     @classmethod
     def _load_video_info(cls, pi, info):
         """
