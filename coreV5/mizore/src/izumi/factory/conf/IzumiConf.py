@@ -47,7 +47,7 @@ class IzumiConf:
     #pylint: disable=no-self-argument
     @classproperty
     def notify_route(cls) -> str:
-        return PathUtils.modify_flask_route(str(cls._CONF['flask']['routes']['encode']))
+        return PathUtils.modify_flask_route(str(cls._CONF['flask']['routes']['notify']))
 
     """
     Encoding priorities

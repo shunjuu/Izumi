@@ -23,6 +23,7 @@ from src.izumi.factory.conf.IzumiConf import IzumiConf
 
 # Workers
 from src.encoder import worker as encode_worker
+from src.notifier import worker as notify_worker
 
 # Flask imports
 from flask import Flask, jsonify, request
@@ -56,6 +57,29 @@ app.register_blueprint(rq_dashboard.blueprint, url_prefix=IzumiConf.dashboard_ro
 
 # Disable the default Flask logging since RQ spams it and we want to use our own
 logging.getLogger('werkzeug').setLevel(logging.ERROR)
+
+@app.route(IzumiConf.notify_route, methods=['POST'])
+def notify():
+
+    LoggingUtils.info("Received a request for notify")
+
+    authorized = RequestAuthorizer.authorize(request.headers)
+    # Check authorization
+    if not authorized:
+        LoggingUtils.debug("Returning 401 http status code", color=LoggingUtils.YELLOW)
+        return "Unauthorized request", 401
+
+    job = JobGenerator.create_from_json(request.get_json())
+    # Create a job instance
+    if not job:
+        LoggingUtils.debug("Returning 400 http status code", color=LoggingUtils.YELLOW)
+        return "Malformed request", 400
+
+    # Enqueue job
+    Queue('notify', connection=redis_conn).enqueue(notify_worker.notify, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=job.episode)
+    LoggingUtils.info("Enqueued a new notify job to the 'notify' queue", color=LoggingUtils.CYAN)
+
+    return "Request accepted", 200
 
 @app.route(IzumiConf.encode_route, methods=['POST'])
 def encode():
