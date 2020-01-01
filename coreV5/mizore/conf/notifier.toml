@@ -1,5 +1,5 @@
 [trackers]
-anilist = "aleytia"
+anilist = ""
 myanimelist = ""
 
 whitelist = ["fate"]
@@ -9,7 +9,7 @@ whitelist = ["fate"]
 # Endpoints for Discord webhooks
 # Leave as an empty list to disable
 discord-webhook = [
-    "https://discord.webhook.url/identifier"
+    "https://discord.webhook.url/identifier",
 ]
 
 
