@@ -7,13 +7,12 @@ from os import environ
 from os.path import abspath
 from typing import List
 
-from src.shared.factory.utils.BinUtils import BinUtils #pylint: disable=import-error
-from src.shared.factory.utils.LoggingUtils import LoggingUtils #pylint: disable=import-error
+from src.LoggingUtils import LoggingUtils #pylint: disable=import-error
 
 class Haikan:
 
     # Same commands, but use local ffprobe for interactive - because Mac/Linux builds differ
-    _FFPROBE = (BinUtils.ffprobe, "-print_format", "json", "-show_format", "-v", "quiet",
+    _FFPROBE = ("ffprobe", "-print_format", "json", "-show_format", "-v", "quiet",
         "-show_format", "-show_streams", "-i")
 
     class ProbeInfo:
@@ -250,3 +249,7 @@ class Haikan:
 
         probe = cls._make_probe_info(sys_ret_json)
         return probe
+
+if __name__ == "__main__":
+    import pprint
+    pprint.pprint(Haikan.scan(sys.argv[1]).__dict__)
