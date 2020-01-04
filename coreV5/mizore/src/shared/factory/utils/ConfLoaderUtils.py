@@ -13,15 +13,18 @@ class ConfLoaderUtils:
     _AUTH = None
     _IZUMI = None
     _ENCODER = None
+    _NOTIFIER = None
 
     _auth_path = "conf/auth.yml"
     _izumi_path = "conf/izumi.toml"
     _encoder_path = "conf/encoder.toml"
+    _notifier_path = "conf/notifier.toml"
 
     if DockerUtils.docker:
         _auth_path = DockerUtils.path + _auth_path
         _izumi_path = DockerUtils.path + _izumi_path
         _encoder_path = DockerUtils.path + _encoder_path
+        _notifier_path = DockerUtils.path + _notifier_path
 
     # Load the auth yaml file
     with open(_auth_path) as ayml:
@@ -35,6 +38,10 @@ class ConfLoaderUtils:
     with open(_encoder_path) as eml:
         _ENCODER = toml.load(eml)
 
+    # Load Notifier conf file
+    with open(_notifier_path) as nml:
+        _NOTIFIER = toml.load(nml)
+
     @classmethod
     def get_auth(cls) -> dict:
         return cls._AUTH
@@ -46,3 +53,7 @@ class ConfLoaderUtils:
     @classmethod
     def get_encoder(cls) -> dict:
         return cls._ENCODER
+
+    @classmethod
+    def get_notifier(cls) -> dict:
+        return cls._NOTIFIER
