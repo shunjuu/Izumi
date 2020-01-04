@@ -40,6 +40,7 @@ else:
 print("Set Worker name as {}".format(WORKER_NAME))
 
 qs = sys.argv[1:]
+qs = [q for q in qs if q] # Remove empty elements
 LoggingUtils.info("*** Listening on {}...".format(', '.join(qs)), color=LoggingUtils.LGREEN)
 
 while True:

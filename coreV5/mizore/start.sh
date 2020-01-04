@@ -78,7 +78,7 @@ function docker {
             -e DOCKER='true' \
             "$IMAGE_NAME"
         command docker logs -f "$CONTAINER_NAME"
-    
+
     elif [ $1 == "notify" ] || [ $1 == "n" ] || [ $1 == "notifier" ]; then
         echo "Starting Izumi notifier worker in Docker"
 
@@ -94,13 +94,40 @@ function docker {
             "$IMAGE_NAME"
         command docker logs -f "$CONTAINER_NAME"
 
+    elif [ $1 == "work" ] || [ $1 == "w" ] || [ $1 == "worker" ]; then
+        echo "Starting Izumi general worker in Docker"
+
+        IMAGE_NAME="$(grep '^image_name = ' conf/worker.toml | awk -F '"' '{print $2}')"
+        CONTAINER_NAME="$(grep '^container_name = ' conf/worker.toml | awk -F '"' '{print $2}')"
+
+        echo "Docker image is '$IMAGE_NAME', container name is '$CONTAINER_NAME'"
+        echo
+
+        ENCODE_SET="$(grep '^encode = ' conf/worker.toml | awk -F '= ' '{print $2}')"
+        NOTIFY_SET="$(grep '^notify = ' conf/worker.toml | awk -F '= ' '{print $2}')"
+        DISTRIBUTE_SET="$(grep '^distribute = ' conf/worker.toml | awk -F '= ' '{print $2}')"
+
+        [[ $ENCODE_SET == "false" ]] && ENCODE_MODE="" || ENCODE_MODE="encode"
+        [[ $NOTIFY_SET == "false" ]] && NOTIFY_MODE="" || NOTIFY_MODE="notify"
+        [[ $DISTRIBUTE_SET == "false" ]] && DISTRIBUTE_MODE="" || DISTRIBUTE_MODE="distribute"
+
+        echo "Encode Mode: $ENCODE_SET"
+        echo "Notify Mode: $NOTIFY_SET"
+        echo "Distribute Mode: $DISTRIBUTE_SET"
+
+        command docker run -d \
+            --name "$CONTAINER_NAME" \
+            -e DOCKER='true' \
+            "$IMAGE_NAME" python3 /izumi/worker.py "$ENCODE_MODE" "$NOTIFY_MODE" "$DISTRIBUTE_MODE"
+        command docker logs -f "$CONTAINER_NAME"
+
     fi
 }
 
 function helper {
     echo "Usage: ./start.sh {1} {2}"
     echo "{1}: docker || d || interactive || i"
-    echo "{2}: izumi || i || encode || e || notify || n"
+    echo "{2}: izumi || i || encode || e || notify || n || worker || w"
 }
 
 case "$1" in

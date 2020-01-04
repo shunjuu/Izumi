@@ -27,9 +27,19 @@ function notify {
         .
 }
 
+function worker {
+    IMAGE_NAME="$(grep '^image_name = ' conf/worker.toml | awk -F '"' '{print $2}')"
+    echo "Building Izumi worker with image name: $IMAGE_NAME"
+    docker build \
+        -f "docker/Worker.Dockerfile" \
+        -t "$IMAGE_NAME" \
+        --build-arg WORKER_NAME="$(whoami)@$(hostname):$(date +%Y%m%d.%H%M)" \
+        .
+}
+
 function helper {
     echo "Run the script with one of the following args: "
-    echo "izumi || i || encode || e || notify || n"
+    echo "izumi || i || encode || e || notify || n || work || w"
 }
 
 case "$1" in
@@ -37,7 +47,7 @@ case "$1" in
     "izumi"|"i")
         izumi
         ;;
-    
+
     "encode"|"e"|"encoder")
         encode
         ;;
@@ -45,11 +55,15 @@ case "$1" in
     "notify"|"notifier"|"n")
         notify
         ;;
-    
+
+    "worker"|"work"|"w")
+        worker
+        ;;
+
     "help"|"h")
         helper
         ;;
-    
+
     *)
         helper
         ;;
