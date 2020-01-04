@@ -40,6 +40,38 @@ function interactive {
             python3 worker.py notify
         fi
 
+    elif [ $1 == "worker" ] || [ $1 == "work" ] || [ $1 == "w" ]; then
+
+        ENCODE_SET="$(grep '^encode = ' conf/worker.toml | awk -F '= ' '{print $2}')"
+        NOTIFY_SET="$(grep '^notify = ' conf/worker.toml | awk -F '= ' '{print $2}')"
+        DISTRIBUTE_SET="$(grep '^distribute = ' conf/worker.toml | awk -F '= ' '{print $2}')"
+
+        # Add a space at the end of names for correct queue appending
+        [[ $ENCODE_SET == "false" ]] && ENCODE_MODE="" || ENCODE_MODE="encode "
+        [[ $NOTIFY_SET == "false" ]] && NOTIFY_MODE="" || NOTIFY_MODE="notify "
+        [[ $DISTRIBUTE_SET == "false" ]] && DISTRIBUTE_MODE="" || DISTRIBUTE_MODE="distribute "
+
+        echo "Encode Mode: $ENCODE_SET"
+        echo "Notify Mode: $NOTIFY_SET"
+        echo "Distribute Mode: $DISTRIBUTE_SET"
+
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            echo "Detected a Mac OS user, booting RQ manually"
+
+            HOST="$(grep '^host = ' conf/izumi.toml | awk -F '"' '{print $2}')"
+            PORT="$(grep '^port = ' conf/izumi.toml | awk -F '= ' '{print $2}' | awk 'NR==2')"
+            PASSWORD="$(grep '^password = ' conf/izumi.toml | awk -F '"' '{print $2}')"
+
+            rq worker \
+                --url "redis://:$PASSWORD@$HOST:$PORT" \
+                --name "$(whoami)@$(hostname):$(date +%Y%m%d.%H%M)" \
+                "$ENCODE_MODE""$NOTIFY_MODE""$DISTRIBUTE_MODE"
+
+        else
+            echo "Booting RQ through worker script"
+            python3 worker.py "$ENCODE_MODE" "$NOTIFY_MODE" "$DISTRIBUTE_MODE"
+        fi
+
     fi
 }
 
