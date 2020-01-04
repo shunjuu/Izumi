@@ -1,0 +1,28 @@
+[trackers]
+anilist = ""
+myanimelist = ""
+
+whitelist = ["fate"]
+
+[modules]
+
+# Endpoints for Discord webhooks
+# Leave as an empty list to disable
+discord-webhook = [
+    "https://discord.webhook.url/identifier",
+]
+
+
+# Send POST requests upon completion of the job
+[endpoints]
+# Include a list of URLs like the example below.
+# Auth key can be removed completely or left empty.
+# Leave as empty list to disable
+urls = [
+    { url = "https://endpoint1.url", auth = "authorization_key1" },
+    { url = "https://endpoint2.url" }
+]
+
+[system]
+image_name = "izumi/v5/notifier"
+container_name = "izumi-v5-notifier"

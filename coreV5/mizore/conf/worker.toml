@@ -1,0 +1,8 @@
+[system]
+image_name = "izumi/v5/worker"
+container_name = "izumi-v5-worker"
+
+[queues]
+encode = false
+notify = true
+distribute = false
