@@ -14,6 +14,8 @@ from src.shared.factory.utils.LoggingUtils import LoggingUtils
 from src.shared.modules.hisha import HishaInfo
 
 class DiscordWebhook:
+
+    _EMPTY_INFO = "〇〇"
     
     MAL_ANI_BASE = "https://myanimelist.net/anime/"
     ANI_ANI_BASE = "https://anilist.co/anime/"
@@ -45,7 +47,11 @@ class DiscordWebhook:
 
         embed = dict()
         embed['title'] = job.episode
-        embed['description'] = "{} mins, {} [{}]".format(hisha.duration, size(job.filesize), job.sub.capitalize())
+
+        duration = hisha.duration if hisha.duration != -1 else cls._EMPTY_INFO
+        filesize = size(job.filesize) if job.filesize > 0 else cls._EMPTY_INFO
+        embed['description'] = "{} mins, {} [{}]".format(duration, filesize, job.sub.capitalize())
+
         embed['color'] = 65535 if job.sub.lower().startswith('s') else 65280
         embed['timestamp'] = DiscordWebhook._get_timestamp()
         embed['footer'] = {'text': hisha.title_userPreferred}
@@ -53,7 +59,12 @@ class DiscordWebhook:
         embed['author'] = {'name': hisha.studio, 'url': hisha.studio_url}
 
         embed['fields'] = list()
-        embed['fields'].append({'name': 'Stats', 'value': 'Score: {}/100, Pop: {}, Total: {} Eps.'.format(hisha.averageScore, hisha.popularity, hisha.episodes)})
+
+        averageScore = hisha.averageScore if hisha.averageScore != -1 else cls._EMPTY_INFO
+        popularity = hisha.popularity if hisha.popularity != -1 else cls._EMPTY_INFO
+        episodes = hisha.episodes if hisha.episodes != -1 else cls._EMPTY_INFO
+        embed['fields'].append({'name': 'Stats', 'value': 'Score: {}/100, Pop: {}, Total: {} Eps.'.format(averageScore, popularity, episodes)})
+
         embed['fields'].append({'name': 'Links', 'value': "[MyAnimeList]({}) | [Anilist]({}) | [Kitsu]({})".format(
             cls.MAL_ANI_BASE + str(hisha.idMal), cls.ANI_ANI_BASE + str(hisha.id), cls.KIT_ANI_BASE + str(hisha.idKitsu) 
         )})
