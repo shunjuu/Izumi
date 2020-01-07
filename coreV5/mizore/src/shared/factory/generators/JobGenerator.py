@@ -5,7 +5,7 @@ Handles generating Job units from a variety of sources.
 We consider this a generator, not a util class - Generators are stored separately.
 """
 
-from src.shared.constants.Job import Job, JobType
+from src.shared.constants.Job import Job
 
 from src.shared.factory.utils.LoggingUtils import LoggingUtils
 
