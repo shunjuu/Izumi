@@ -12,7 +12,7 @@ from src.shared.factory.utils.LoggingUtils import LoggingUtils
 class JobGenerator:
 
     @staticmethod
-    def create_from_json(data: dict, jobtype: JobType) -> Job:
+    def create_from_json(data: dict) -> Job:
         try:
             LoggingUtils.debug("Creating new Job instance with the following info:", color=LoggingUtils.MAGENTA)
             LoggingUtils.debug("Job.show: {}".format(data['show']), color=LoggingUtils.MAGENTA)
@@ -24,8 +24,7 @@ class JobGenerator:
                 data['show'], 
                 data['episode'], 
                 int(data['filesize']), 
-                data['sub'],
-                jobtype)
+                data['sub'])
         except:
             LoggingUtils.error("Failed to create Job from request - json body is malformed", color=LoggingUtils.RED)
             return None
