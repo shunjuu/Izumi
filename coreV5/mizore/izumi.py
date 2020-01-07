@@ -14,7 +14,6 @@ import yaml
 from time import sleep
 
 # Custom imports
-from src.shared.constants.Job import JobType
 from src.shared.factory.automata.auth.RequestAuthorizer import RequestAuthorizer
 from src.shared.factory.generators.JobGenerator import JobGenerator
 from src.shared.factory.utils.ConfLoaderUtils import ConfLoaderUtils
