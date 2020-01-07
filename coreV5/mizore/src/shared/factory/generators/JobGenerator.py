@@ -1,16 +1,18 @@
+#pylint: disable=import-error
+
 """
 Handles generating Job units from a variety of sources.
 We consider this a generator, not a util class - Generators are stored separately.
 """
 
-from src.shared.constants.Job import Job #pylint: disable=import-error
+from src.shared.constants.Job import Job, JobType
 
-from src.shared.factory.utils.LoggingUtils import LoggingUtils #pylint: disable=import-error
+from src.shared.factory.utils.LoggingUtils import LoggingUtils
 
 class JobGenerator:
 
     @staticmethod
-    def create_from_json(data: dict) -> Job:
+    def create_from_json(data: dict, jobtype: JobType) -> Job:
         try:
             LoggingUtils.debug("Creating new Job instance with the following info:", color=LoggingUtils.MAGENTA)
             LoggingUtils.debug("Job.show: {}".format(data['show']), color=LoggingUtils.MAGENTA)
@@ -22,7 +24,8 @@ class JobGenerator:
                 data['show'], 
                 data['episode'], 
                 int(data['filesize']), 
-                data['sub'])
+                data['sub'],
+                jobtype)
         except:
             LoggingUtils.error("Failed to create Job from request - json body is malformed", color=LoggingUtils.RED)
             return None
