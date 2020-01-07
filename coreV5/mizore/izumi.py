@@ -23,7 +23,8 @@ from src.shared.factory.utils.LoggingUtils import LoggingUtils
 from src.izumi.factory.conf.IzumiConf import IzumiConf
 
 # Workers
-from src.router import route as route_worker
+from src.encoder.worker import encode as encode_worker
+from src.notifier.worker import notify as notify_worker
 
 # Flask imports
 from flask import Flask, jsonify, request
@@ -74,14 +75,14 @@ def notify():
         LoggingUtils.debug("Returning 401 http status code", color=LoggingUtils.YELLOW)
         return "Unauthorized request", 401
 
-    job = JobGenerator.create_from_json(request.get_json(), JobType.NOTIFY)
+    job = JobGenerator.create_from_json(request.get_json())
     # Create a job instance
     if not job:
         LoggingUtils.debug("Returning 400 http status code", color=LoggingUtils.YELLOW)
         return "Malformed request", 400
 
     # Enqueue job
-    notify_queue.enqueue(route_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "notify"))
+    notify_queue.enqueue(notify_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "notify"))
     LoggingUtils.info("Enqueued a new notify job to the 'notify' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -97,14 +98,14 @@ def encode():
         LoggingUtils.debug("Returning 401 http status code", color=LoggingUtils.YELLOW)
         return "Unauthorized request", 401
 
-    job = JobGenerator.create_from_json(request.get_json(), JobType.ENCODE)
+    job = JobGenerator.create_from_json(request.get_json())
     # Create a job instance
     if not job:
         LoggingUtils.debug("Returning 400 http status code", color=LoggingUtils.YELLOW)
         return "Malformed request", 400
 
     # Enqueue job
-    encode_queue.enqueue(route_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "encode"))
+    encode_queue.enqueue(encode_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "encode"))
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -122,14 +123,14 @@ def encode_hp():
         LoggingUtils.debug("Returning 401 http status code", color=LoggingUtils.YELLOW)
         return "Unauthorized request", 401
 
-    job = JobGenerator.create_from_json(request.get_json(), JobType.ENCODE)
+    job = JobGenerator.create_from_json(request.get_json())
     # Create a job instance
     if not job:
         LoggingUtils.debug("Returning 400 http status code", color=LoggingUtils.YELLOW)
         return "Malformed request", 400
 
     # Enqueue job
-    encode_hp_queue.enqueue(route_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "encode-hp"))
+    encode_hp_queue.enqueue(encode_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "encode-hp"))
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -145,14 +146,14 @@ def encode_mp():
         LoggingUtils.debug("Returning 401 http status code", color=LoggingUtils.YELLOW)
         return "Unauthorized request", 401
 
-    job = JobGenerator.create_from_json(request.get_json(), JobType.ENCODE)
+    job = JobGenerator.create_from_json(request.get_json())
     # Create a job instance
     if not job:
         LoggingUtils.debug("Returning 400 http status code", color=LoggingUtils.YELLOW)
         return "Malformed request", 400
 
     # Enqueue job
-    encode_mp_queue.enqueue(route_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "encode-mp"))
+    encode_mp_queue.enqueue(encode_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "encode-mp"))
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -168,14 +169,14 @@ def encode_lp():
         LoggingUtils.debug("Returning 401 http status code", color=LoggingUtils.YELLOW)
         return "Unauthorized request", 401
 
-    job = JobGenerator.create_from_json(request.get_json(), JobType.ENCODE)
+    job = JobGenerator.create_from_json(request.get_json())
     # Create a job instance
     if not job:
         LoggingUtils.debug("Returning 400 http status code", color=LoggingUtils.YELLOW)
         return "Malformed request", 400
 
     # Enqueue job
-    encode_lp_queue.enqueue(route_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "encode-lp"))
+    encode_lp_queue.enqueue(encode_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "encode-lp"))
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
