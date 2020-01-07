@@ -10,21 +10,13 @@ Request type json:
 }
 """
 
-from enum import Enum
-
-class JobType(Enum):
-    DISTRIBUTE = "distribute"
-    ENCODE = "encode"
-    NOTIFY = "notify"
-
 class Job:
 
-    def __init__(self, show: str = None, episode: str = None, filesize: int = -1, sub: str = None, jobtype: JobType = None):
+    def __init__(self, show: str = None, episode: str = None, filesize: int = -1, sub: str = None):
         self._show = show
         self._episode = episode
         self._filesize = filesize
         self._sub = sub
-        self._jobtype = jobtype
 
     @property
     def show(self) -> str:
@@ -41,7 +33,3 @@ class Job:
     @property
     def sub(self) -> str:
         return self._sub
-
-    @property
-    def jobtype(self) -> JobType:
-        return self._jobtype
