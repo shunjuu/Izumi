@@ -14,6 +14,7 @@ import yaml
 from time import sleep
 
 # Custom imports
+from src.shared.constants.Job import JobType
 from src.shared.factory.automata.auth.RequestAuthorizer import RequestAuthorizer
 from src.shared.factory.generators.JobGenerator import JobGenerator
 from src.shared.factory.utils.ConfLoaderUtils import ConfLoaderUtils
@@ -22,8 +23,7 @@ from src.shared.factory.utils.LoggingUtils import LoggingUtils
 from src.izumi.factory.conf.IzumiConf import IzumiConf
 
 # Workers
-from src.encoder import worker as encode_worker
-from src.notifier import worker as notify_worker
+from src.router import route as route_worker
 
 # Flask imports
 from flask import Flask, jsonify, request
@@ -69,14 +69,14 @@ def notify():
         LoggingUtils.debug("Returning 401 http status code", color=LoggingUtils.YELLOW)
         return "Unauthorized request", 401
 
-    job = JobGenerator.create_from_json(request.get_json())
+    job = JobGenerator.create_from_json(request.get_json(), JobType.NOTIFY)
     # Create a job instance
     if not job:
         LoggingUtils.debug("Returning 400 http status code", color=LoggingUtils.YELLOW)
         return "Malformed request", 400
 
     # Enqueue job
-    Queue('notify', connection=redis_conn).enqueue(notify_worker.notify, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=job.episode)
+    Queue('notify', connection=redis_conn).enqueue(route_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=job.episode)
     LoggingUtils.info("Enqueued a new notify job to the 'notify' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -92,14 +92,14 @@ def encode():
         LoggingUtils.debug("Returning 401 http status code", color=LoggingUtils.YELLOW)
         return "Unauthorized request", 401
 
-    job = JobGenerator.create_from_json(request.get_json())
+    job = JobGenerator.create_from_json(request.get_json(), JobType.ENCODE)
     # Create a job instance
     if not job:
         LoggingUtils.debug("Returning 400 http status code", color=LoggingUtils.YELLOW)
         return "Malformed request", 400
 
     # Enqueue job
-    Queue('encode', connection=redis_conn).enqueue(encode_worker.encode, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=job.episode)
+    Queue('encode', connection=redis_conn).enqueue(route_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=job.episode)
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -117,14 +117,14 @@ def encode_hp():
         LoggingUtils.debug("Returning 401 http status code", color=LoggingUtils.YELLOW)
         return "Unauthorized request", 401
 
-    job = JobGenerator.create_from_json(request.get_json())
+    job = JobGenerator.create_from_json(request.get_json(), JobType.ENCODE)
     # Create a job instance
     if not job:
         LoggingUtils.debug("Returning 400 http status code", color=LoggingUtils.YELLOW)
         return "Malformed request", 400
 
     # Enqueue job
-    Queue('encode-hp', connection=redis_conn).enqueue(encode_worker.encode, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=job.episode)
+    Queue('encode-hp', connection=redis_conn).enqueue(route_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=job.episode)
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -140,14 +140,14 @@ def encode_mp():
         LoggingUtils.debug("Returning 401 http status code", color=LoggingUtils.YELLOW)
         return "Unauthorized request", 401
 
-    job = JobGenerator.create_from_json(request.get_json())
+    job = JobGenerator.create_from_json(request.get_json(), JobType.ENCODE)
     # Create a job instance
     if not job:
         LoggingUtils.debug("Returning 400 http status code", color=LoggingUtils.YELLOW)
         return "Malformed request", 400
 
     # Enqueue job
-    Queue('encode-mp', connection=redis_conn).enqueue(encode_worker.encode, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=job.episode)
+    Queue('encode-mp', connection=redis_conn).enqueue(route_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=job.episode)
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -163,14 +163,14 @@ def encode_lp():
         LoggingUtils.debug("Returning 401 http status code", color=LoggingUtils.YELLOW)
         return "Unauthorized request", 401
 
-    job = JobGenerator.create_from_json(request.get_json())
+    job = JobGenerator.create_from_json(request.get_json(), JobType.ENCODE)
     # Create a job instance
     if not job:
         LoggingUtils.debug("Returning 400 http status code", color=LoggingUtils.YELLOW)
         return "Malformed request", 400
 
     # Enqueue job
-    Queue('encode-lp', connection=redis_conn).enqueue(encode_worker.encode, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=job.episode)
+    Queue('encode-lp', connection=redis_conn).enqueue(route_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=job.episode)
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
