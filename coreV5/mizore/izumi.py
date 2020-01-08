@@ -53,6 +53,11 @@ encode_hp_queue = Queue('encode-hp', connection=redis_conn)
 encode_mp_queue = Queue('encode-mp', connection=redis_conn)
 encode_lp_queue = Queue('encode-lp', connection=redis_conn)
 
+# Timeouts
+JOB_TIMEOUT = "12h"
+RESULT_TTL = "7d"
+FAILURE_TTL = "7d"
+
 app = Flask(__name__)
 app.config['RQ_DASHBOARD_REDIS_URL'] = 'redis://:{password}@{host}:{port}'.format(
     host=IzumiConf.redis_host,
@@ -81,7 +86,7 @@ def notify():
         return "Malformed request", 400
 
     # Enqueue job
-    notify_queue.enqueue(notify_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "notify"))
+    notify_queue.enqueue(notify_worker, job, job_timeout=JOB_TIMEOUT, result_ttl=RESULT_TTL, failure_ttl=FAILURE_TTL, job_id=_create_job_id(job.episode, "notify"))
     LoggingUtils.info("Enqueued a new notify job to the 'notify' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -104,7 +109,7 @@ def encode():
         return "Malformed request", 400
 
     # Enqueue job
-    encode_queue.enqueue(encode_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "encode"))
+    encode_queue.enqueue(encode_worker, job, job_timeout=JOB_TIMEOUT, result_ttl=RESULT_TTL, failure_ttl=FAILURE_TTL, job_id=_create_job_id(job.episode, "encode"))
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -129,7 +134,7 @@ def encode_hp():
         return "Malformed request", 400
 
     # Enqueue job
-    encode_hp_queue.enqueue(encode_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "encode-hp"))
+    encode_hp_queue.enqueue(encode_worker, job, job_timeout=JOB_TIMEOUT, result_ttl=RESULT_TTL, failure_ttl=FAILURE_TTL, job_id=_create_job_id(job.episode, "encode-hp"))
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -152,7 +157,7 @@ def encode_mp():
         return "Malformed request", 400
 
     # Enqueue job
-    encode_mp_queue.enqueue(encode_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "encode-mp"))
+    encode_mp_queue.enqueue(encode_worker, job, job_timeout=JOB_TIMEOUT, result_ttl=RESULT_TTL, failure_ttl=FAILURE_TTL, job_id=_create_job_id(job.episode, "encode-mp"))
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -175,7 +180,7 @@ def encode_lp():
         return "Malformed request", 400
 
     # Enqueue job
-    encode_lp_queue.enqueue(encode_worker, job, job_timeout="4h", result_ttl="7d", failure_ttl="7d", job_id=_create_job_id(job.episode, "encode-lp"))
+    encode_lp_queue.enqueue(encode_worker, job, job_timeout=JOB_TIMEOUT, result_ttl=RESULT_TTL, failure_ttl=FAILURE_TTL, job_id=_create_job_id(job.episode, "encode-lp"))
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
