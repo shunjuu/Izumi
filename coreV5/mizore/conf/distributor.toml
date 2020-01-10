@@ -1,0 +1,48 @@
+# This is the Distributor's's config file
+
+[trackers]
+anilist = ""
+myanimelist = ""
+
+whitelist = ["fate"]
+
+# Rclone downloading configs
+[softsub.downloading]
+# A list of rclone configs to try and download given file from
+# Must provide at least a single config, must be a path to a directory
+sources = ["/Users/adieuri/Movies/Izumi/Softsub"]
+rclone_flags = "--stats 1s --stats-one-line --progress"
+
+# Rclone uploading configs
+[softsub.uploading]
+# A list of rclone configs to upload to.
+# Must provide at least a single config, must be a path to a directory
+destinations = ["/Users/adieuri/Desktop/Softsub"]
+rclone_flags = "--stats 1s --stats-one-line --progress"
+
+[hardsub.downloading]
+# A list of rclone configs to try and download given file from
+# Must provide at least a single config, must be a path to a directory
+sources = ["/Users/adieuri/Movies/Izumi/Hardsub"]
+rclone_flags = "--stats 1s --stats-one-line --progress"
+
+# Rclone uploading configs
+[hardsub.uploading]
+# A list of rclone configs to upload to.
+# Must provide at least a single config, must be a path to a directory
+destinations = ["/Users/adieuri/Desktop/Hardsub"]
+rclone_flags = "--stats 1s --stats-one-line --progress"
+
+# Send POST requests upon completion of the job
+[endpoints]
+# Include a list of URLs like the example below.
+# Auth key can be removed completely or left empty.
+urls = [
+    { url = "https://endpoint1.url", auth = "authorization_key1" },
+    { url = "https://endpoint2.url" }
+]
+
+[system]
+
+image_name = "izumi/v5/distributor"
+container_name = "izumi-v5-distributor"

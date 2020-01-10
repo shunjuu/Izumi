@@ -88,3 +88,6 @@ def encode(job: Job) -> None:
     except Exception as e:
         # In the event of an exception, we want to simply log it
         LoggingUtils.critical(e, color=LoggingUtils.LRED)
+        TempFolderController.destroy_temp_folder()
+
+        raise e

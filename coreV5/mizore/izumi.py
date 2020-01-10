@@ -22,6 +22,7 @@ from src.shared.factory.utils.LoggingUtils import LoggingUtils
 from src.izumi.factory.conf.IzumiConf import IzumiConf
 
 # Workers
+from src.distributor.worker import distribute as distribute_worker
 from src.encoder.worker import encode as encode_worker
 from src.notifier.worker import notify as notify_worker
 
@@ -48,6 +49,7 @@ signal.signal(signal.SIGTERM, sig_handler)
 # Boot setup
 redis_conn = Redis(host=IzumiConf.redis_host, port=IzumiConf.redis_port, password=IzumiConf.redis_password)
 notify_queue = Queue('notify', connection=redis_conn)
+distribute_queue = Queue('distribute', connection=redis_conn)
 encode_queue = Queue('encode', connection=redis_conn)
 encode_hp_queue = Queue('encode-hp', connection=redis_conn)
 encode_mp_queue = Queue('encode-mp', connection=redis_conn)
@@ -88,6 +90,29 @@ def notify():
     # Enqueue job
     notify_queue.enqueue(notify_worker, job, job_timeout=JOB_TIMEOUT, result_ttl=RESULT_TTL, failure_ttl=FAILURE_TTL, job_id=_create_job_id(job.episode, "notify"))
     LoggingUtils.info("Enqueued a new notify job to the 'notify' queue", color=LoggingUtils.CYAN)
+
+    return "Request accepted", 200
+
+@app.route(IzumiConf.distribute_route, methods=['POST'])
+def distribute():
+
+    LoggingUtils.info("Received a request for distribute")
+
+    authorized = RequestAuthorizer.authorize(request.headers)
+    # Check authorization
+    if not authorized:
+        LoggingUtils.debug("Returning 401 http status code", color=LoggingUtils.YELLOW)
+        return "Unauthorized request", 401
+
+    job = JobGenerator.create_from_json(request.get_json())
+    # Create a job instance
+    if not job:
+        LoggingUtils.debug("Returning 400 http status code", color=LoggingUtils.YELLOW)
+        return "Malformed request", 400
+
+    # Enqueue job
+    distribute_queue.enqueue(distribute_worker, job, job_timeout=JOB_TIMEOUT, result_ttl=RESULT_TTL, failure_ttl=FAILURE_TTL, job_id=_create_job_id(job.episode, "distribute"))
+    LoggingUtils.info("Enqueued a new distribute job to the 'notify' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
 
@@ -198,7 +223,7 @@ def handle_redis_connection_error(error):
     return jsonify(response), 500
 
 def _create_job_id(episode: str, jobtype: str) -> str:
-    return "[{}] {}".format(episode, jobtype)
+    return "[{}] {}".format(jobtype, episode)
 
 if __name__ == "__main__":
 
