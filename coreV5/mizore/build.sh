@@ -27,6 +27,16 @@ function notify {
         .
 }
 
+function distribute {
+    IMAGE_NAME="$(grep '^image_name = ' conf/distributor.toml | awk -F '"' '{print $2}')"
+    echo "Building Izumi distributor worker with image name: $IMAGE_NAME"
+    docker build \
+        -f "docker/Distribute.Dockerfile" \
+        -t "$IMAGE_NAME" \
+        --build-arg WORKER_NAME="$(whoami)@$(hostname):$(date +%Y%m%d.%H%M)" \
+        .
+}
+
 function worker {
     IMAGE_NAME="$(grep '^image_name = ' conf/worker.toml | awk -F '"' '{print $2}')"
     echo "Building Izumi worker with image name: $IMAGE_NAME"
@@ -54,6 +64,10 @@ case "$1" in
 
     "notify"|"notifier"|"n")
         notify
+        ;;
+
+    "distribute"|"distributor"|"d")
+        distribute
         ;;
 
     "worker"|"work"|"w")
