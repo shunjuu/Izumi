@@ -43,3 +43,4 @@ def notify(job: Job) -> None:
     except Exception as e:
         # In the event of an exception, we want to simply log it
         LoggingUtils.critical(e, color=LoggingUtils.LRED)
+        raise e

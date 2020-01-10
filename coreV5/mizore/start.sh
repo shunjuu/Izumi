@@ -40,6 +40,23 @@ function interactive {
             python3 worker.py notify
         fi
 
+    elif [ $1 == "distribute" ] || [ $1 == "d" ] || [ $1 == "distributor" ]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            echo "Detected a MacOS user, booting RQ manually"
+
+            HOST="$(grep '^host = ' conf/izumi.toml | awk -F '"' '{print $2}')"
+            PORT="$(grep '^port = ' conf/izumi.toml | awk -F '= ' '{print $2}' | awk 'NR==2')"
+            PASSWORD="$(grep '^password = ' conf/izumi.toml | awk -F '"' '{print $2}')"
+
+            rq worker \
+                --url "redis://:$PASSWORD@$HOST:$PORT" \
+                --name "$(whoami)@$(hostname):$(date +%Y%m%d.%H%M)" \
+                distribute
+        else
+            echo "Booting RQ through worker script"
+            python3 worker.py distribute
+        fi
+
     elif [ $1 == "worker" ] || [ $1 == "work" ] || [ $1 == "w" ]; then
 
         ENCODE_SET="$(grep '^encode = ' conf/worker.toml | awk -F '= ' '{print $2}')"
@@ -126,6 +143,22 @@ function docker {
             "$IMAGE_NAME"
         command docker logs -f "$CONTAINER_NAME"
 
+    elif [ $1 == "distribute" ] || [ $1 == "d" ] || [ $1 == "distributor" ]; then
+        echo "Starting Izumi distributor worker in Docker"
+
+        IMAGE_NAME="$(grep '^image_name = ' conf/distributor.toml | awk -F '"' '{print $2}')"
+        CONTAINER_NAME="$(grep '^container_name = ' conf/distributor.toml | awk -F '"' '{print $2}')"
+
+        echo "Docker image is '$IMAGE_NAME', container name is '$CONTAINER_NAME'"
+        echo
+
+        command docker run -d \
+            --name "$CONTAINER_NAME" \
+            -e DOCKER='true' \
+            "$IMAGE_NAME"
+        command docker logs -f "$CONTAINER_NAME"
+
+
     elif [ $1 == "work" ] || [ $1 == "w" ] || [ $1 == "worker" ]; then
         echo "Starting Izumi general worker in Docker"
 
@@ -159,7 +192,7 @@ function docker {
 function helper {
     echo "Usage: ./start.sh {1} {2}"
     echo "{1}: docker || d || interactive || i"
-    echo "{2}: izumi || i || encode || e || notify || n || worker || w"
+    echo "{2}: izumi || i || encode || e || notify || n || distribute || d || worker || w"
 }
 
 case "$1" in
