@@ -143,6 +143,22 @@ function docker {
             "$IMAGE_NAME"
         command docker logs -f "$CONTAINER_NAME"
 
+    elif [ $1 == "distribute" ] || [ $1 == "d" ] || [ $1 == "distributor" ]; then
+        echo "Starting Izumi distributor worker in Docker"
+
+        IMAGE_NAME="$(grep '^image_name = ' conf/distributor.toml | awk -F '"' '{print $2}')"
+        CONTAINER_NAME="$(grep '^container_name = ' conf/distributor.toml | awk -F '"' '{print $2}')"
+
+        echo "Docker image is '$IMAGE_NAME', container name is '$CONTAINER_NAME'"
+        echo
+
+        command docker run -d \
+            --name "$CONTAINER_NAME" \
+            -e DOCKER='true' \
+            "$IMAGE_NAME"
+        command docker logs -f "$CONTAINER_NAME"
+
+
     elif [ $1 == "work" ] || [ $1 == "w" ] || [ $1 == "worker" ]; then
         echo "Starting Izumi general worker in Docker"
 
