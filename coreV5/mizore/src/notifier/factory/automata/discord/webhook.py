@@ -16,7 +16,7 @@ from src.shared.modules.hisha import HishaInfo
 class DiscordWebhook:
 
     _EMPTY_INFO = "〇〇"
-    
+
     MAL_ANI_BASE = "https://myanimelist.net/anime/"
     ANI_ANI_BASE = "https://anilist.co/anime/"
     KIT_ANI_BASE = "https://kitsu.io/anime/"
@@ -38,7 +38,7 @@ class DiscordWebhook:
         LoggingUtils.info("Done sending out webhook notifications", color=LoggingUtils.GREEN)
 
         return
-    
+
     @classmethod
     def _generate_embed(cls, job: Job, hisha: HishaInfo, webhooks: List[str]) -> Dict[str, List]:
 
@@ -66,7 +66,9 @@ class DiscordWebhook:
         embed['fields'].append({'name': 'Stats', 'value': 'Score: {}/100, Pop: {}, Total: {} Eps.'.format(averageScore, popularity, episodes)})
 
         embed['fields'].append({'name': 'Links', 'value': "[MyAnimeList]({}) | [Anilist]({}) | [Kitsu]({})".format(
-            cls.MAL_ANI_BASE + str(hisha.idMal), cls.ANI_ANI_BASE + str(hisha.id), cls.KIT_ANI_BASE + str(hisha.idKitsu) 
+            str.strip(cls.MAL_ANI_BASE + str(hisha.idMal)),
+            str.strip(cls.ANI_ANI_BASE + str(hisha.id)),
+            str.strip(cls.KIT_ANI_BASE + str(hisha.idKitsu))
         )})
 
         webhook['embeds'].append(embed)
