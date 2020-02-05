@@ -82,11 +82,11 @@ function interactive {
             rq worker \
                 --url "redis://:$PASSWORD@$HOST:$PORT" \
                 --name "$(whoami)@$(hostname):$(date +%Y%m%d.%H%M)" \
-                "$ENCODE_MODE""$NOTIFY_MODE""$DISTRIBUTE_MODE"
+                "$NOTIFY_MODE""$DISTRIBUTE_MODE""$ENCODE_MODE"
 
         else
             echo "Booting RQ through worker script"
-            python3 worker.py "$ENCODE_MODE" "$NOTIFY_MODE" "$DISTRIBUTE_MODE"
+            python3 worker.py "$NOTIFY_MODE" "$DISTRIBUTE_MODE" "$ENCODE_MODE"
         fi
 
     fi
@@ -183,7 +183,7 @@ function docker {
         command docker run -d \
             --name "$CONTAINER_NAME" \
             -e DOCKER='true' \
-            "$IMAGE_NAME" python3 /izumi/worker.py "$ENCODE_MODE" "$NOTIFY_MODE" "$DISTRIBUTE_MODE"
+            "$IMAGE_NAME" python3 /izumi/worker.py "$NOTIFY_MODE" "$DISTRIBUTE_MODE" "$ENCODE_MODE"
         command docker logs -f "$CONTAINER_NAME"
 
     fi
