@@ -50,3 +50,16 @@ class ConfPickleUtils:
             endpoints_copy.append(endpoint_conf)
 
         return endpoints_copy
+
+    @staticmethod
+    def clean_list(li) -> List:
+        list_copy = list()
+        for i in li:
+            list_copy.append(i)
+        return list_copy
+
+    @staticmethod
+    def format_string(st) -> str:
+        """Returns the string as it or returns none instead"""
+        if st: return st
+        return None

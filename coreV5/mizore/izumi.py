@@ -22,6 +22,7 @@ from src.shared.factory.utils.LoggingUtils import LoggingUtils
 from src.izumi.factory.conf.IzumiConf import IzumiConf
 from src.izumi.factory.conf.RcloneConf import RcloneConf
 from src.izumi.factory.conf.EncoderConf import EncoderConf
+from src.izumi.factory.conf.NotifierConf import NotifierConf
 
 # Workers
 from src.distributor.worker import distribute as distribute_worker
@@ -90,7 +91,12 @@ def notify():
         return "Malformed request", 400
 
     # Enqueue job
-    notify_queue.enqueue(notify_worker, job, job_timeout=JOB_TIMEOUT, result_ttl=RESULT_TTL, failure_ttl=FAILURE_TTL, job_id=_create_job_id(job.episode, "notify"))
+    notify_queue.enqueue(notify_worker,
+                        args=(job, NotifierConf.create_notifier_config_store()),
+                        job_timeout=JOB_TIMEOUT,
+                        result_ttl=RESULT_TTL,
+                        failure_ttl=FAILURE_TTL,
+                        job_id=_create_job_id(job.episode, "notify"))
     LoggingUtils.info("Enqueued a new notify job to the 'notify' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200

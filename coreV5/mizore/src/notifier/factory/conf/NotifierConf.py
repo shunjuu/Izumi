@@ -42,6 +42,6 @@ class NotifierConf:
         return cls._CONF['endpoints']['urls']
 
     @classproperty
-    def whitelist(cls) -> str:
+    def whitelist(cls) -> List[str]:
         """Returns whitelist of terms to check yes"""
         return cls._CONF['trackers']['whitelist']

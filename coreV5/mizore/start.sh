@@ -34,7 +34,7 @@ function interactive {
             rq worker \
                 --url "redis://:$PASSWORD@$HOST:$PORT" \
                 --name "$(whoami)@$(hostname):$(date +%Y%m%d.%H%M)" \
-                encode
+                notify
         else
             echo "Booting RQ through worker script"
             python3 worker.py notify
