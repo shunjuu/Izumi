@@ -1,25 +1,28 @@
+# pylint:disable=import-error
 """
 This is the central and starting point of the "Encoder" worker
 """
 
 
-from src.shared.constants.Job import Job #pylint: disable=import-error
-from src.shared.exceptions.errors.RcloneError import RcloneError #pylint: disable=import-error
-from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError #pylint: disable=import-error
-from src.shared.factory.automata.rest.RestSender import RestSender #pylint: disable=import-error
-from src.shared.factory.automata.Rclone import Rclone #pylint: disable=import-error
-from src.shared.factory.controllers.TempFolderController import TempFolderController #pylint: disable=import-error
-from src.shared.factory.utils.JobUtils import JobUtils #pylint: disable=import-error
-from src.shared.factory.utils.LoggingUtils import LoggingUtils #pylint: disable=import-error
-from src.shared.modules.haikan import Haikan #pylint: disable=import-error
+from src.shared.constants.Job import Job
+from src.shared.constants.config.encoder_config_store import EncoderConfigStore
+from src.shared.constants.config.rclone_config_store import RcloneConfigStore
+from src.shared.exceptions.errors.RcloneError import RcloneError
+from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError
+from src.shared.factory.automata.rest.RestSender import RestSender
+from src.shared.factory.automata.Rclone import Rclone
+from src.shared.factory.controllers.TempFolderController import TempFolderController
+from src.shared.factory.utils.JobUtils import JobUtils
+from src.shared.factory.utils.LoggingUtils import LoggingUtils
+from src.shared.modules.haikan import Haikan
 
-from src.encoder.exceptions.errors.FFmpegError import FFmpegError #pylint: disable=import-error
-from src.encoder.factory.automata.FFmpeg import FFmpeg #pylint: disable=import-error
-from src.encoder.factory.conf.EncoderConf import EncoderConf #pylint: disable=import-error
-from src.encoder.factory.generators.EncodeJobGenerator import EncodeJobGenerator #pylint: disable=import-error
+from src.encoder.exceptions.errors.FFmpegError import FFmpegError
+from src.encoder.factory.automata.FFmpeg import FFmpeg
+from src.encoder.factory.conf.EncoderConf import EncoderConf
+from src.encoder.factory.generators.EncodeJobGenerator import EncodeJobGenerator
 
 
-def encode(job: Job) -> None:
+def encode(job: Job, rconf: RcloneConfigStore, econf: EncoderConfigStore) -> None:
     """Job worker"""
 
     tempfolder = TempFolderController.get_temp_folder()
