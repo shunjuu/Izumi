@@ -28,13 +28,13 @@ class EncoderConf:
         for i in range(len(sources)):
             sources[i] = PathUtils.clean_directory_path(sources[i])
         return sources
-    
+
     #pylint: disable=no-self-argument
     @classproperty
     def downloading_rclone_flags(cls) -> str:
         """Flags used for rclone when downloading"""
         return str(cls._CONF['downloading']['rclone_flags'])
-    
+
     #pylint: disable=no-self-argument
     @classproperty
     def uploading_destinations(cls) -> List[str]:
@@ -52,7 +52,7 @@ class EncoderConf:
     def uploading_rclone_flags(cls) -> str:
         """Flags used for rclone when uploading"""
         return str(cls._CONF['uploading']['rclone_flags'])
-    
+
     #pylint: disable=no-self-argument
     @classproperty
     def endpoints(cls) -> List[Dict[str, str]]:

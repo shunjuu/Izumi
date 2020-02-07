@@ -21,6 +21,7 @@ from src.shared.factory.utils.LoggingUtils import LoggingUtils
 
 from src.izumi.factory.conf.IzumiConf import IzumiConf
 from src.izumi.factory.conf.RcloneConf import RcloneConf
+from src.izumi.factory.conf.EncoderConf import EncoderConf
 
 # Workers
 from src.distributor.worker import distribute as distribute_worker
