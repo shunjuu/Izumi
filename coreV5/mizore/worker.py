@@ -23,6 +23,7 @@ from redis.exceptions import TimeoutError
 from src.rq.rq import Connection, Queue, Worker
 
 # Preload libraries
+from src.distributor import worker as distribute_worker
 from src.encoder import worker as encode_worker
 from src.notifier import worker as notify_worker
 
