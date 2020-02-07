@@ -18,10 +18,10 @@ class RcloneTempFileController:
     def get_temp_file(cls, rcs: RcloneConfigStore) -> str:
         if not cls.TEMP_PATH:
             LoggingUtils.debug("No rclone temp file detected, creating one.", color=LoggingUtils.YELLOW)
-            cls.TEMP_PATH = tempfile.mkstemp()
+            _, cls.TEMP_PATH = tempfile.mkstemp(suffix=".conf")
             with open(cls.TEMP_PATH, 'w') as rconf:
                 rconf.write(rcs.content)
-            LoggingUtils.debug("Created a temporary file for rclone.conf", color=LoggingUtils.GREEN)
+            LoggingUtils.debug("Created a temporary file for rclone.conf at " + cls.TEMP_PATH, color=LoggingUtils.GREEN)
         return cls.TEMP_PATH
 
     @classmethod
@@ -33,7 +33,7 @@ class RcloneTempFileController:
 
         try:
             os.remove(cls.TEMP_PATH)
-            LoggingUtils.debug("Cleared the rclone temp file", color=LoggingUtils.GREEN)
+            LoggingUtils.debug("Cleared the rclone temp file at " + cls.TEMP_PATH, color=LoggingUtils.GREEN)
             cls.TEMP_PATH = str()
         except:
             LoggingUtils.warning("Unable to clear the rclone temp file", color=LoggingUtils.RED)

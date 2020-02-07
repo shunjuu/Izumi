@@ -8,7 +8,6 @@ class RcloneConfigStore:
 
         def __init__(self, content: str):
             self._content = content
-            self._file = str()
 
         @property
         def content(self):

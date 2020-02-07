@@ -11,6 +11,7 @@ from src.shared.exceptions.errors.RcloneError import RcloneError
 from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError
 from src.shared.factory.automata.rest.RestSender import RestSender
 from src.shared.factory.automata.Rclone import Rclone
+from src.shared.factory.controllers.RcloneTempFileController import RcloneTempFileController
 from src.shared.factory.controllers.TempFolderController import TempFolderController
 from src.shared.factory.utils.JobUtils import JobUtils
 from src.shared.factory.utils.LoggingUtils import LoggingUtils
@@ -18,7 +19,7 @@ from src.shared.modules.haikan import Haikan
 
 from src.encoder.exceptions.errors.FFmpegError import FFmpegError
 from src.encoder.factory.automata.FFmpeg import FFmpeg
-from src.encoder.factory.conf.EncoderConf import EncoderConf
+#from src.encoder.factory.conf.EncoderConf import EncoderConf
 from src.encoder.factory.generators.EncodeJobGenerator import EncodeJobGenerator
 
 
@@ -26,11 +27,12 @@ def encode(job: Job, rconf: RcloneConfigStore, econf: EncoderConfigStore) -> Non
     """Job worker"""
 
     tempfolder = TempFolderController.get_temp_folder()
+    rclone_conf_tempfile = RcloneTempFileController.get_temp_file(rconf)
 
     try:
         # Step 1: Copy the file from rclone provided source to temp folder
         LoggingUtils.info("[1/7] Starting download of episode file...", color=LoggingUtils.LCYAN)
-        src_file = Rclone.download(job, EncoderConf.downloading_sources, tempfolder, EncoderConf.downloading_rclone_flags)
+        src_file = Rclone.download(job, econf.downloading_sources, tempfolder, econf.downloading_rclone_flags)
 
         # Step 2: Prepare the file (copy over streams, populate metadata, extract subs, etc)
         LoggingUtils.info("[2/7] Preparing episode file for hardsub and extracting subs...", color=LoggingUtils.LCYAN)
@@ -50,14 +52,15 @@ def encode(job: Job, rconf: RcloneConfigStore, econf: EncoderConfigStore) -> Non
 
         # Step 6: Upload the new file
         LoggingUtils.info("[6/7] Uploading hardsubbed file to destination(s)...", color=LoggingUtils.LCYAN)
-        Rclone.upload(hardsub_job, EncoderConf.uploading_destinations, hardsub_file, EncoderConf.uploading_rclone_flags)
+        Rclone.upload(hardsub_job, econf.uploading_destinations, hardsub_file, econf.uploading_rclone_flags)
 
         # Step 7: Send POST requests
         LoggingUtils.info("[7/7] Sending POST requests to endpoints...", color=LoggingUtils.LCYAN)
-        RestSender.send(JobUtils.to_dict(hardsub_job), EncoderConf.endpoints)
+        RestSender.send(JobUtils.to_dict(hardsub_job), econf.endpoints)
 
-        # Finally, destroy the temp folder
+        # Finally, destroy the temp folder and files
         TempFolderController.destroy_temp_folder()
+        RcloneTempFileController.destroy_temp_file()
 
     except RcloneError as re:
 
@@ -66,6 +69,7 @@ def encode(job: Job, rconf: RcloneConfigStore, econf: EncoderConfigStore) -> Non
         LoggingUtils.critical(re.output, color=LoggingUtils.RED)
         # In any case, delete the temp folder
         TempFolderController.destroy_temp_folder()
+        RcloneTempFileController.destroy_temp_file()
 
         # Reraise - this will clutter up the logs but make it visible in RQ-dashboard
         raise re
@@ -76,6 +80,7 @@ def encode(job: Job, rconf: RcloneConfigStore, econf: EncoderConfigStore) -> Non
         LoggingUtils.critical(fe.output, color=LoggingUtils.RED)
         # In any case, delete the temp folder
         TempFolderController.destroy_temp_folder()
+        RcloneTempFileController.destroy_temp_file()
 
         # Reraise - this will clutter up the logs but make it visible in RQ-dashboard
         raise fe
@@ -84,6 +89,7 @@ def encode(job: Job, rconf: RcloneConfigStore, econf: EncoderConfigStore) -> Non
 
         LoggingUtils.critical(we.message, color=LoggingUtils.LRED)
         TempFolderController.destroy_temp_folder()
+        RcloneTempFileController.destroy_temp_file()
 
         # Reraise for dashboard
         raise we
@@ -92,5 +98,6 @@ def encode(job: Job, rconf: RcloneConfigStore, econf: EncoderConfigStore) -> Non
         # In the event of an exception, we want to simply log it
         LoggingUtils.critical(e, color=LoggingUtils.LRED)
         TempFolderController.destroy_temp_folder()
+        RcloneTempFileController.destroy_temp_file()
 
         raise e
