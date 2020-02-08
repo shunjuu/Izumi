@@ -1,3 +1,7 @@
+# Ignore the binaries inside the core folder
+core/acquisition/bin/*
+core/distributor/bin/*
+core/encoder/bin/*
 
 # Created by https://www.gitignore.io/api/node,java,macos,python,kotlin,csharp
 # Edit at https://www.gitignore.io/?templates=node,java,macos,python,kotlin,csharp
