@@ -2,6 +2,12 @@
 image_name = "izumi/v5/worker"
 container_name = "izumi-v5-worker"
 
+[redis]
+# For the host, do not include http/https/redis://
+host = "localhost"
+port = 6379
+password = ""
+
 [queues]
 encode = false
 notify = true

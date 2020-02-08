@@ -11,12 +11,14 @@ class ConfLoaderUtils:
 
     # The different auth files we will need to load
     _AUTH = None
+    _RCLONE = None
     _IZUMI = None
     _ENCODER = None
     _NOTIFIER = None
     _DISTRIBUTOR = None
 
     _auth_path = "conf/auth.yml"
+    _rclone_path = "conf/rclone.conf"
     _izumi_path = "conf/izumi.toml"
     _encoder_path = "conf/encoder.toml"
     _notifier_path = "conf/notifier.toml"
@@ -24,6 +26,7 @@ class ConfLoaderUtils:
 
     if DockerUtils.docker:
         _auth_path = DockerUtils.path + _auth_path
+        _rclone_path = DockerUtils.path + _rclone_path
         _izumi_path = DockerUtils.path + _izumi_path
         _encoder_path = DockerUtils.path + _encoder_path
         _notifier_path = DockerUtils.path + _notifier_path
@@ -32,6 +35,10 @@ class ConfLoaderUtils:
     # Load the auth yaml file
     with open(_auth_path) as ayml:
         _AUTH = yaml.load(ayml, Loader=yaml.BaseLoader)
+
+    # Load rclone conf just purely as a string
+    with open(_rclone_path) as rconf:
+        _RCLONE = rconf.read()
 
     # Load the Shared Master Izumi conf file
     with open(_izumi_path) as iml:
@@ -52,6 +59,10 @@ class ConfLoaderUtils:
     @classmethod
     def get_auth(cls) -> dict:
         return cls._AUTH
+
+    @classmethod
+    def get_rclone(cls) -> str:
+        return cls._RCLONE
 
     @classmethod
     def get_izumi(cls) -> dict:
