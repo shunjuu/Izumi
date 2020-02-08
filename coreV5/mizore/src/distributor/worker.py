@@ -4,8 +4,6 @@
 This is the central and starting point of the "Distributor" worker
 """
 
-#from src.distributor.factory.conf.DistributorConf import DistributorConf
-
 from src.shared.constants.Job import Job
 from src.shared.constants.config.distributor_config_store import DistributorConfigStore
 from src.shared.constants.config.rclone_config_store import RcloneConfigStore

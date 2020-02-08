@@ -3,7 +3,6 @@
 """
 This is the central and starting point of the "Notify" worker
 """
-import pprint
 
 from src.notifier.factory.automata.discord.webhook import DiscordWebhook
 

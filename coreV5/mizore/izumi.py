@@ -178,7 +178,12 @@ def encode_hp():
         return "Malformed request", 400
 
     # Enqueue job
-    encode_hp_queue.enqueue(encode_worker, job, job_timeout=JOB_TIMEOUT, result_ttl=RESULT_TTL, failure_ttl=FAILURE_TTL, job_id=_create_job_id(job.episode, "encode-hp"))
+    encode_hp_queue.enqueue(encode_worker,
+                            args=(job, RcloneConf.get_config(), EncoderConf.create_encoder_config_store()),
+                            job_timeout=JOB_TIMEOUT,
+                            result_ttl=RESULT_TTL,
+                            failure_ttl=FAILURE_TTL,
+                            job_id=_create_job_id(job.episode, "encode"))
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -201,7 +206,12 @@ def encode_mp():
         return "Malformed request", 400
 
     # Enqueue job
-    encode_mp_queue.enqueue(encode_worker, job, job_timeout=JOB_TIMEOUT, result_ttl=RESULT_TTL, failure_ttl=FAILURE_TTL, job_id=_create_job_id(job.episode, "encode-mp"))
+    encode_mp_queue.enqueue(encode_worker,
+                            args=(job, RcloneConf.get_config(), EncoderConf.create_encoder_config_store()),
+                            job_timeout=JOB_TIMEOUT,
+                            result_ttl=RESULT_TTL,
+                            failure_ttl=FAILURE_TTL,
+                            job_id=_create_job_id(job.episode, "encode"))
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
@@ -224,7 +234,12 @@ def encode_lp():
         return "Malformed request", 400
 
     # Enqueue job
-    encode_lp_queue.enqueue(encode_worker, job, job_timeout=JOB_TIMEOUT, result_ttl=RESULT_TTL, failure_ttl=FAILURE_TTL, job_id=_create_job_id(job.episode, "encode-lp"))
+    encode_lp_queue.enqueue(encode_worker,
+                            args=(job, RcloneConf.get_config(), EncoderConf.create_encoder_config_store()),
+                            job_timeout=JOB_TIMEOUT,
+                            result_ttl=RESULT_TTL,
+                            failure_ttl=FAILURE_TTL,
+                            job_id=_create_job_id(job.episode, "encode"))
     LoggingUtils.info("Enqueued a new encoder job to the 'encode' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200

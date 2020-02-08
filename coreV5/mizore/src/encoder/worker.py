@@ -3,7 +3,6 @@
 This is the central and starting point of the "Encoder" worker
 """
 
-
 from src.shared.constants.Job import Job
 from src.shared.constants.config.encoder_config_store import EncoderConfigStore
 from src.shared.constants.config.rclone_config_store import RcloneConfigStore
@@ -19,7 +18,6 @@ from src.shared.modules.haikan import Haikan
 
 from src.encoder.exceptions.errors.FFmpegError import FFmpegError
 from src.encoder.factory.automata.FFmpeg import FFmpeg
-#from src.encoder.factory.conf.EncoderConf import EncoderConf
 from src.encoder.factory.generators.EncodeJobGenerator import EncodeJobGenerator
 
 
@@ -32,7 +30,7 @@ def encode(job: Job, rconf: RcloneConfigStore, econf: EncoderConfigStore) -> Non
     try:
         # Step 1: Copy the file from rclone provided source to temp folder
         LoggingUtils.info("[1/7] Starting download of episode file...", color=LoggingUtils.LCYAN)
-        src_file = Rclone.download(job, econf.downloading_sources, tempfolder, econf.downloading_rclone_flags)
+        src_file = Rclone.download(job, econf.downloading_sources, tempfolder, rclone_conf_tempfile, econf.downloading_rclone_flags)
 
         # Step 2: Prepare the file (copy over streams, populate metadata, extract subs, etc)
         LoggingUtils.info("[2/7] Preparing episode file for hardsub and extracting subs...", color=LoggingUtils.LCYAN)
@@ -52,7 +50,7 @@ def encode(job: Job, rconf: RcloneConfigStore, econf: EncoderConfigStore) -> Non
 
         # Step 6: Upload the new file
         LoggingUtils.info("[6/7] Uploading hardsubbed file to destination(s)...", color=LoggingUtils.LCYAN)
-        Rclone.upload(hardsub_job, econf.uploading_destinations, hardsub_file, econf.uploading_rclone_flags)
+        Rclone.upload(hardsub_job, econf.uploading_destinations, hardsub_file, rclone_conf_tempfile, econf.uploading_rclone_flags)
 
         # Step 7: Send POST requests
         LoggingUtils.info("[7/7] Sending POST requests to endpoints...", color=LoggingUtils.LCYAN)
