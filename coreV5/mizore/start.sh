@@ -64,9 +64,9 @@ function interactive {
         DISTRIBUTE_SET="$(grep '^distribute = ' conf/worker.toml | awk -F '= ' '{print $2}')"
 
         # Add a space at the end of names for correct queue appending
-        [[ $ENCODE_SET == "false" ]] && ENCODE_MODE="" || ENCODE_MODE="encode "
-        [[ $NOTIFY_SET == "false" ]] && NOTIFY_MODE="" || NOTIFY_MODE="notify "
-        [[ $DISTRIBUTE_SET == "false" ]] && DISTRIBUTE_MODE="" || DISTRIBUTE_MODE="distribute "
+        [[ $ENCODE_SET == "false" ]] && ENCODE_MODE="" || ENCODE_MODE="encode"
+        [[ $NOTIFY_SET == "false" ]] && NOTIFY_MODE="" || NOTIFY_MODE="notify"
+        [[ $DISTRIBUTE_SET == "false" ]] && DISTRIBUTE_MODE="" || DISTRIBUTE_MODE="distribute"
 
         echo "Encode Mode: $ENCODE_SET"
         echo "Notify Mode: $NOTIFY_SET"
