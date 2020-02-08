@@ -115,7 +115,7 @@ class Rclone:
         # Step 1: Download the episode if possible
         dl_source = None
         for source in sources:
-            if Rclone._check_episode_exists(job, source):
+            if Rclone._check_episode_exists(job, rclone_config, source):
                 LoggingUtils.debug("Found episode in source {}, downloading...".format(source), color=LoggingUtils.GREEN)
                 dl_source = source
                 break
@@ -154,7 +154,7 @@ class Rclone:
         return rclone_dest_file
 
     @staticmethod
-    def _check_episode_exists(job: Job, source: str) -> bool:
+    def _check_episode_exists(job: Job, rclone_config: str, source: str) -> bool:
         """Given a source, check if Job file exists in source"""
         LoggingUtils.debug("Checking for episode in source: {}".format(source))
         try:
