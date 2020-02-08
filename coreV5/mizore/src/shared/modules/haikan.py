@@ -35,7 +35,6 @@ class Haikan:
             # Stream information
 
             # We can assume there's only one video stream
-            self._video_bits_per_raw_sample: int = int()
             self._video_codec_name: str = str()
             self._video_codec_long_name: str = str()
             self._video_stream_index: int = int()
@@ -63,8 +62,6 @@ class Haikan:
         @property
         def streams(self) -> int: return self._streams
 
-        @property
-        def video_bits_per_raw_sample(self) -> int: return self._video_bits_per_raw_sample
         @property
         def video_bits(self) -> int: return self._video_bits_per_raw_sample
         @property
@@ -165,7 +162,6 @@ class Haikan:
         streams = info['streams']
         for stream in streams:
             if stream['codec_type'].lower() == "video":
-                pi._video_bits_per_raw_sample = int(stream['bits_per_raw_sample'])
                 pi._video_codec_name = str(stream['codec_name']).lower()
                 pi._video_codec_long_name = stream['codec_long_name']
                 pi._video_stream_index = int(stream['index'])
