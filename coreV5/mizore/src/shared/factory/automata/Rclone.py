@@ -19,7 +19,6 @@ from src.shared.constants.config.rclone_config_store import RcloneConfigStore
 from src.shared.exceptions.errors.RcloneError import RcloneError, RcloneUploadError, RcloneDownloadError, RcloneDownloadNotFoundError, RcloneLSJsonError, RcloneRunError
 from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError
 from src.shared.factory.utils.BinUtils import BinUtils
-from src.shared.factory.utils.DockerUtils import DockerUtils
 from src.shared.factory.utils.LoggingUtils import LoggingUtils
 from src.shared.factory.utils.PathUtils import PathUtils
 
@@ -116,7 +115,7 @@ class Rclone:
         # Step 1: Download the episode if possible
         dl_source = None
         for source in sources:
-            if Rclone._check_episode_exists(job, source):
+            if Rclone._check_episode_exists(job, rclone_config, source):
                 LoggingUtils.debug("Found episode in source {}, downloading...".format(source), color=LoggingUtils.GREEN)
                 dl_source = source
                 break
@@ -155,18 +154,16 @@ class Rclone:
         return rclone_dest_file
 
     @staticmethod
-    def _check_episode_exists(job: Job, source: str) -> bool:
+    def _check_episode_exists(job: Job, rclone_config: str, source: str) -> bool:
         """Given a source, check if Job file exists in source"""
         LoggingUtils.debug("Checking for episode in source: {}".format(source))
         try:
             # Call rclone to check whether or not something exists
             command = [BinUtils.rclone]
-            # If running in Docker, we need to load the user's rclone.conf in the conf folder
-            if DockerUtils.docker:
-                LoggingUtils.debug("Docker mode detected, referencing rclone config in the conf folder", color=LoggingUtils.YELLOW)
-                command.extend(["--config={}".format(DockerUtils.conf + "rclone.conf")])
-            else:
-                LoggingUtils.debug("Docker mode not detected, using system rclone config", color=LoggingUtils.YELLOW)
+
+            LoggingUtils.debug("Using temporary rclone file at " + rclone_config, color=LoggingUtils.YELLOW)
+            command.extend(["--config={}".format(rclone_config)])
+
             command.extend(["lsjson", "-R", source + job.show])
             response = Rclone._run(command, RcloneLSJsonError("Rclone failed to run lsjson", "", job.show, job.episode))
 
