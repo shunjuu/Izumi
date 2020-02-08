@@ -1,3 +1,4 @@
+# pylint: disable=import-error
 """
 Automata for executing rclone commands
 
@@ -13,13 +14,14 @@ import subprocess
 from os import kill
 from typing import Iterable, List
 
-from src.shared.constants.Job import Job #pylint: disable=import-error
-from src.shared.exceptions.errors.RcloneError import RcloneError, RcloneUploadError, RcloneDownloadError, RcloneDownloadNotFoundError, RcloneLSJsonError, RcloneRunError #pylint: disable=import-error
-from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError #pylint: disable=import-error
-from src.shared.factory.utils.BinUtils import BinUtils #pylint: disable=import-error
-from src.shared.factory.utils.DockerUtils import DockerUtils #pylint: disable=import-error
-from src.shared.factory.utils.LoggingUtils import LoggingUtils #pylint: disable=import-error
-from src.shared.factory.utils.PathUtils import PathUtils #pylint: disable=import-error
+from src.shared.constants.Job import Job
+from src.shared.constants.config.rclone_config_store import RcloneConfigStore
+from src.shared.exceptions.errors.RcloneError import RcloneError, RcloneUploadError, RcloneDownloadError, RcloneDownloadNotFoundError, RcloneLSJsonError, RcloneRunError
+from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError
+from src.shared.factory.utils.BinUtils import BinUtils
+from src.shared.factory.utils.DockerUtils import DockerUtils
+from src.shared.factory.utils.LoggingUtils import LoggingUtils
+from src.shared.factory.utils.PathUtils import PathUtils
 
 class Rclone:
 
@@ -72,7 +74,7 @@ class Rclone:
         return response
 
     @staticmethod
-    def upload(job: Job, destinations: List[str], upload_file: str, flags: str) -> bool:
+    def upload(job: Job, destinations: List[str], upload_file: str, rclone_config: str, flags: str) -> bool:
         """
         Upload the completed new hardsub file into the rclone destinations
         Returns a boolean based on success
@@ -80,6 +82,7 @@ class Rclone:
         job: Job to do! This is the job of the HARDSUB file
         destinations: list of rlcone destinations (e.g., EncoderConf.uploading_destinations)
         upload_file: Path to the file to be uploaded
+        rclone_config: Path to the rclone config file
         flags: rclone flag
 
         This method will upload the file and include its show name:
@@ -89,18 +92,16 @@ class Rclone:
             LoggingUtils.debug("Uploading to {}".format(dest))
             rclone_dest = PathUtils.clean_directory_path(dest) + PathUtils.clean_directory_path(job.show) + job.episode
             command = [BinUtils.rclone]
-            # If running in Docker, we need to load the user's rclone.conf in the conf folder
-            if DockerUtils.docker:
-                LoggingUtils.debug("Docker mode detected, referencing rclone config in the conf folder", color=LoggingUtils.YELLOW)
-                command.extend(["--config={}".format(DockerUtils.conf + "rclone.conf")])
-            else:
-                LoggingUtils.debug("Docker mode not detected, using system rclone config", color=LoggingUtils.YELLOW)
+
+            LoggingUtils.debug("Using temporary rclone file at " + rclone_config, color=LoggingUtils.YELLOW)
+            command.extend(["--config={}".format(rclone_config)])
+
             command.extend(["copyto", upload_file, rclone_dest])
             command.extend(flags.split())
             Rclone._run(command, RcloneUploadError("An error occured when rclone was uploading a file", "", job.episode, dest))
 
     @staticmethod
-    def download(job: Job, sources: List[str], tempfolder: str, flags: str) -> str:
+    def download(job: Job, sources: List[str], tempfolder: str, rclone_config: str, flags: str) -> str:
         """
         Download the provided episode from sources
         Returns the path of the downloaded file
@@ -108,6 +109,7 @@ class Rclone:
         job: Job to do!
         sources: list of rclone sources (EncoderConf.downloading_sources)
         tmppath: Path of the temporary folder
+        rclone_config: Path to the rclone config file
         flags: rclone flags
         """
 
@@ -125,12 +127,12 @@ class Rclone:
 
         # Download the episode
         tempfolder = PathUtils.clean_directory_path(tempfolder)
-        episode_src_file = Rclone._download_episode(job, dl_source, tempfolder, flags)
+        episode_src_file = Rclone._download_episode(job, dl_source, tempfolder, rclone_config, flags)
 
         return episode_src_file
 
     @staticmethod
-    def _download_episode(job: Job, source: str, tempfolder: str, flags: str) -> str:
+    def _download_episode(job: Job, source: str, tempfolder: str, rclone_config: str, flags: str) -> str:
         """Helper to download file from remote to local temp"""
         # Note 1: The file will always ben downloaded as "temp.mkv"
         rclone_src_file = source + PathUtils.clean_directory_path(job.show) + job.episode
@@ -140,12 +142,10 @@ class Rclone:
 
         LoggingUtils.debug("Beginning download...", color=LoggingUtils.YELLOW)
         command = [BinUtils.rclone]
-        # If running in Docker, we need to load the user's rclone.conf in the conf folder
-        if DockerUtils.docker:
-            LoggingUtils.debug("Docker mode detected, referencing rclone config in the conf folder", color=LoggingUtils.YELLOW)
-            command.extend(["--config={}".format(DockerUtils.conf + "rclone.conf")])
-        else:
-            LoggingUtils.debug("Docker mode not detected, using system rclone config", color=LoggingUtils.YELLOW)
+
+        LoggingUtils.debug("Using temporary rclone file at " + rclone_config, color=LoggingUtils.YELLOW)
+        command.extend(["--config={}".format(rclone_config)])
+
         command.extend(["copyto", rclone_src_file, rclone_dest_file])
         command.extend(flags.split())
 

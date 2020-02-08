@@ -4,7 +4,7 @@
 [downloading]
 # A list of rclone configs to try and download given file from
 # Must provide at least a single config, must be a path to a directory
-sources = ["/Users/adieuri/Movies/Izumi"]
+sources = ["/Users/adieuri/Movies/Izumi/Softsub"]
 rclone_flags = "--stats 1s --stats-one-line --progress"
 
 # Rclone uploading configs
