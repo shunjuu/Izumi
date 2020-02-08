@@ -184,7 +184,5 @@ class FFmpeg:
     @staticmethod
     def _binary(info: Haikan.ProbeInfo) -> str:
         """Returns which version of ffmpeg to use"""
-        if info.video_bits == 8:
-            return BinUtils.ffmpeg
-        elif info.video_bits == 10:
-            return BinUtils.ffmpeg10
+        # FFmpeg supports both now.
+        return BinUtils.ffmpeg
