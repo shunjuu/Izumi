@@ -63,8 +63,6 @@ class Haikan:
         def streams(self) -> int: return self._streams
 
         @property
-        def video_bits(self) -> int: return self._video_bits_per_raw_sample
-        @property
         def video_codec_name(self) -> str: return self._video_codec_name
         @property
         def video_codec_long_name(self) -> str: return self._video_codec_long_name
