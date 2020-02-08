@@ -37,7 +37,6 @@ def distribute(job: Job, rconf: RcloneConfigStore, dconf: DistributorConfigStore
         # Step 2: Check filter
         LoggingUtils.info("[2/X] Checking user list filters...", color=LoggingUtils.CYAN)
         filters = UserListFilter.check(job, info, dconf.anilist_tracker, dconf.mal_tracker, dconf.whitelist)
-        #filters = UserListFilter.check(job, info, DistributorConf.anilist_tracker, DistributorConf.mal_tracker, DistributorConf.whitelist)
         if not filters:
             LoggingUtils.info("User isn't watching this show, concluding job immediately.", color=LoggingUtils.LYELLOW)
             return False
@@ -50,20 +49,16 @@ def distribute(job: Job, rconf: RcloneConfigStore, dconf: DistributorConfigStore
 
         if job.sub.lower() == "softsub":
             LoggingUtils.info("Softsub mode detected, loading softsub download configs", color=LoggingUtils.CYAN)
-            #sources = DistributorConf.softsub_downloading_sources
             sources = dconf.softsub_downloading_sources
-            #flags = DistributorConf.softsub_downloading_rclone_flags
             flags = dconf.softsub_downloading_rclone_flags
         elif job.sub.lower() == "hardsub":
             LoggingUtils.info("Hardsub mode detected, loading hardsub download configs", color=LoggingUtils.CYAN)
-            #sources = DistributorConf.hardsub_downloading_sources
             sources = dconf.hardsub_downloading_sources
-            #flags = DistributorConf.hardsub_downloading_rclone_flags
             flags = dconf.hardsub_downloading_rclone_flags
         else:
             raise JobSubTypeError(job, "Unknown sub type {}".format(job.sub))
         
-        src_file = Rclone.download(job, sources, tempfolder, flags)
+        src_file = Rclone.download(job, sources, tempfolder, rclone_conf_tempfile, flags)
 
         # Step 4: Upload it elsewhere
         LoggingUtils.info("[4/5] Uploading hardsubbed file to destination(s)...", color=LoggingUtils.LCYAN)
@@ -73,25 +68,20 @@ def distribute(job: Job, rconf: RcloneConfigStore, dconf: DistributorConfigStore
 
         if job.sub.lower() == "softsub":
             LoggingUtils.info("Softsub mode detected, loading softsub upload configs", color=LoggingUtils.CYAN)
-            #destinations = DistributorConf.softsub_uploading_destinations
             destinations = dconf.softsub_uploading_destinations
-            #flags = DistributorConf.softsub_uploading_rclone_flags
             flags = dconf.softsub_uploading_rclone_flags
         elif job.sub.lower() == "hardsub":
             LoggingUtils.info("Hardsub mode detected, loading hardsub upload configs", color=LoggingUtils.CYAN)
-            #destinations = DistributorConf.hardsub_uploading_destinations
             destinations = dconf.hardsub_uploading_destinations
-            #flags = DistributorConf.hardsub_uploading_rclone_flags
             flags = dconf.hardsub_uploading_rclone_flags
         else:
             raise JobSubTypeError(job, "Unknown sub type {}".format(job.sub))
 
-        Rclone.upload(job, destinations, src_file, flags)
+        Rclone.upload(job, destinations, src_file, rclone_conf_tempfile, flags)
 
         # Step 5: Send POST requests
         LoggingUtils.info("[5/5] Sending POST requests to endpoints...", color=LoggingUtils.LCYAN)
         RestSender.send(JobUtils.to_dict(job), dconf.endpoints)
-        #RestSender.send(JobUtils.to_dict(job), DistributorConf.endpoints)
 
         # Finally, destroy the temp folder
         TempFolderController.destroy_temp_folder()
