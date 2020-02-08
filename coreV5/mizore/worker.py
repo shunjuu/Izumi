@@ -12,7 +12,7 @@ import sys
 from datetime import datetime
 
 # Import this first!
-from src.izumi.factory.conf.IzumiConf import IzumiConf
+from src.worker.factory.conf.WorkerConf import WorkerConf
 from src.shared.exceptions.errors.WorkerCancelledError import WorkerCancelledError
 from src.shared.factory.utils.LoggingUtils import LoggingUtils
 
@@ -28,9 +28,11 @@ from src.encoder import worker as encode_worker
 from src.notifier import worker as notify_worker
 
 # Reject Mac OS systems
+"""
 if platform.system().lower() == "darwin":
     LoggingUtils.critical("Warning: MacOS has an ObjC error with RQ, please run 'rq worker <queue> instead'", color=LoggingUtils.LRED)
     sys.exit()
+"""
 
 # Set worker name based on user host, or if Docker, the passed in build variable
 WORKER_NAME = str()
@@ -49,9 +51,9 @@ LoggingUtils.info("*** Listening on {}...".format(', '.join(qs)), color=LoggingU
 while True:
     with Connection():
         try:
-            redis_conn = Redis(host=IzumiConf.redis_host,
-                                port=IzumiConf.redis_port,
-                                password=IzumiConf.redis_password,
+            redis_conn = Redis(host=WorkerConf.redis_host,
+                                port=WorkerConf.redis_port,
+                                password=WorkerConf.redis_password,
                                 socket_keepalive=True,
                                 socket_timeout=180,
                                 health_check_interval=60)
