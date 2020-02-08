@@ -1,6 +1,6 @@
 # pylint: disable=import-error
 """
-Creates EncoderConf objects to pass down into the system.
+Creates EncoderConfigStore objects to pass down into the system.
 """
 
 from typing import Dict, List

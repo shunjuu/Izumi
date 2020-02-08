@@ -12,7 +12,7 @@ class NotifierConfigStore:
         mal_t: str: MyAnimeList tracker to filter
         disc_w: List[str]: List of discord webhook urls
         edpts: List[Dict[str, str,]]: Endpoints for POSTing
-        white: str: Whitelist terms to auto-pass
+        white: List[str]: Whitelist terms to auto-pass
         """
         self._anilist_tracker = ani_t
         self._mal_tracker = mal_t
@@ -37,5 +37,5 @@ class NotifierConfigStore:
         return self._endpoints
 
     @property
-    def whitelist(self) -> str:
+    def whitelist(self) -> List[str]:
         return self._whitelist

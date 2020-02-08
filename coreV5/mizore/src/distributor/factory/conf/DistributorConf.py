@@ -35,7 +35,7 @@ class DistributorConf:
         return mal
         
     @classproperty
-    def whitelist(cls) -> str:
+    def whitelist(cls) -> List[str]:
         """Returns whitelist of terms to check yes"""
         return cls._CONF['trackers']['whitelist']
     

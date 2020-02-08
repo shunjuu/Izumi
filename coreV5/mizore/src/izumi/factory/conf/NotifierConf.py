@@ -1,6 +1,6 @@
 #pylint: disable=import-error
 """
-Creates NotifierConf objects to pass down into the system.
+Creates NotifierConfigStore objects to pass down into the system.
 """
 
 from src.shared.constants.config.notifier_config_store import NotifierConfigStore

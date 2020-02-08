@@ -7,6 +7,8 @@ This is the central and starting point of the "Distributor" worker
 from src.distributor.factory.conf.DistributorConf import DistributorConf
 
 from src.shared.constants.Job import Job
+from src.shared.constants.config.distributor_config_store import DistributorConfigStore
+from src.shared.constants.config.rclone_config_store import RcloneConfigStore
 from src.shared.factory.automata.UserListFilter import UserListFilter
 from src.shared.factory.automata.Rclone import Rclone
 from src.shared.factory.automata.rest.RestSender import RestSender
@@ -20,7 +22,7 @@ from src.shared.exceptions.errors.JobError import JobSubTypeError
 
 hisha = Hisha()
 
-def distribute(job: Job) -> None:
+def distribute(job: Job, rconf: RcloneConfigStore, dconf: DistributorConfigStore) -> None:
     """Job worker"""
 
     tempfolder = TempFolderController.get_temp_folder()
