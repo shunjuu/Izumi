@@ -135,7 +135,7 @@ class Rclone:
         """Helper to download file from remote to local temp"""
         # Note 1: The file will always ben downloaded as "temp.mkv"
         rclone_src_file = source + PathUtils.clean_directory_path(job.show) + job.episode
-        rclone_dest_file = tempfolder + "temp.mkv"
+        rclone_dest_file = tempfolder + "temp"
         LoggingUtils.debug("Sourcing file from \"{}\"".format(rclone_src_file))
         LoggingUtils.debug("Downloading to temp file at \"{}\"".format(rclone_dest_file), color=LoggingUtils.YELLOW)
 
