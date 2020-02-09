@@ -7,6 +7,7 @@ git submodule update
 function interactive {
     # This script is for preparing the application for running in any mode
     pip3 install --user -r requirements.txt
+    echo "Make sure you have a version of rclone, ffmpeg, and ffprobe available."
 }
 
 function docker {
