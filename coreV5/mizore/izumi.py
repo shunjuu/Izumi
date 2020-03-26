@@ -126,7 +126,7 @@ def distribute():
                             result_ttl=RESULT_TTL,
                             failure_ttl=FAILURE_TTL,
                             job_id=_create_job_id(job.episode, "distribute"))
-    LoggingUtils.info("Enqueued a new distribute job to the 'notify' queue", color=LoggingUtils.CYAN)
+    LoggingUtils.info("Enqueued a new distribute job to the 'distribute' queue", color=LoggingUtils.CYAN)
 
     return "Request accepted", 200
 
