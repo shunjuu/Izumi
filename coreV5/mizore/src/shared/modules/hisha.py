@@ -10,6 +10,7 @@ import pprint
 
 from src.shared.factory.utils.LoggingUtils import LoggingUtils
 
+ANILIST_URL = "https://anilist.co"
 ANILIST_API_URL = "https://graphql.anilist.co"
 KITSU_API_URL = "https://kitsu.io/api/edge/anime?filter[text]="
 
@@ -486,10 +487,10 @@ class Hisha:
                     return (node['name'], node['siteUrl'])
             # If a main studio isn't found, return None
             LoggingUtils.debug("Didn't find any main studio edge, returning default")
-            return ("N/A", "N/A")
+            return ("N/A", ANILIST_URL)
         except:
             LoggingUtils.warning("Didn't find any main studio edge, returning default", color=LoggingUtils.YELLOW)
-            return ("N/A", "N/A")
+            return ("N/A", ANILIST_URL)
 
     def _create_hisha_info(self, show, title):
         """
