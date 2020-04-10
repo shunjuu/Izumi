@@ -488,7 +488,7 @@ class Hisha:
             LoggingUtils.debug("Didn't find any main studio edge, returning default")
             return ("N/A", "N/A")
         except:
-            LoggingUtils.warning("Didn't find any main studio edge, returning None", color=LoggingUtils.YELLOW)
+            LoggingUtils.warning("Didn't find any main studio edge, returning default", color=LoggingUtils.YELLOW)
             return ("N/A", "N/A")
 
     def _create_hisha_info(self, show, title):
