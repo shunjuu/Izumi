@@ -487,10 +487,10 @@ class Hisha:
                     return (node['name'], node['siteUrl'])
             # If a main studio isn't found, return None
             LoggingUtils.debug("Didn't find any main studio edge, returning default")
-            return ("N/A", ANILIST_URL)
+            return ("Unknown", ANILIST_URL)
         except:
             LoggingUtils.warning("Didn't find any main studio edge, returning default", color=LoggingUtils.YELLOW)
-            return ("N/A", ANILIST_URL)
+            return ("Unknown", ANILIST_URL)
 
     def _create_hisha_info(self, show, title):
         """
