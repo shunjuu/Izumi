@@ -106,10 +106,10 @@ function docker {
         echo "Docker image is '$IMAGE_NAME', container name is '$CONTAINER_NAME'"
         echo
 
+        # You should add your own Traefik configurations here
         command docker run -d \
             -p "127.0.0.1:$DOCKER_PORT:$FLASK_PORT" \
             --name "$CONTAINER_NAME" \
-            -e DOCKER='true' \
             "$IMAGE_NAME"
         command docker logs -f "$CONTAINER_NAME"
 
@@ -124,7 +124,7 @@ function docker {
 
         command docker run -d \
             --name "$CONTAINER_NAME" \
-            -e DOCKER='true' \
+            -l "traefik.enable=false" \
             "$IMAGE_NAME"
         command docker logs -f "$CONTAINER_NAME"
 
@@ -139,7 +139,7 @@ function docker {
 
         command docker run -d \
             --name "$CONTAINER_NAME" \
-            -e DOCKER='true' \
+            -l "traefik.enable=false" \
             "$IMAGE_NAME"
         command docker logs -f "$CONTAINER_NAME"
 
@@ -154,7 +154,7 @@ function docker {
 
         command docker run -d \
             --name "$CONTAINER_NAME" \
-            -e DOCKER='true' \
+            -l "traefik.enable=false" \
             "$IMAGE_NAME"
         command docker logs -f "$CONTAINER_NAME"
 
@@ -182,7 +182,7 @@ function docker {
 
         command docker run -d \
             --name "$CONTAINER_NAME" \
-            -e DOCKER='true' \
+            -l "traefik.enable=false" \
             "$IMAGE_NAME" python3 /izumi/worker.py "$NOTIFY_MODE" "$DISTRIBUTE_MODE" "$ENCODE_MODE"
         command docker logs -f "$CONTAINER_NAME"
 
