@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker run -i --rm \
+docker run -d \
     --cap-add=NET_ADMIN \
     --name=alice \
     -p 9080:9080 \
