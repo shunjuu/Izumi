@@ -32,6 +32,7 @@ from src.notifier.worker import notify as notify_worker
 
 # Flask imports
 from flask import Flask, jsonify, request
+from src.izumi.factory.automata.auth.DashboardAuthorizer import DashboardAuthorizer
 
 # Distributed System imports
 pickle.HIGHEST_PROTOCOL = 4 # Force to use Protocol 4 to support modern Python systems
@@ -69,6 +70,7 @@ app.config['RQ_DASHBOARD_REDIS_URL'] = 'redis://:{password}@{host}:{port}'.forma
     host=IzumiConf.redis_host,
     port=str(IzumiConf.redis_port),
     password=IzumiConf.redis_password)
+rq_dashboard.blueprint.before_request(DashboardAuthorizer.authorize)
 app.register_blueprint(rq_dashboard.blueprint, url_prefix=IzumiConf.dashboard_route)
 
 # Disable the default Flask logging since RQ spams it and we want to use our own
