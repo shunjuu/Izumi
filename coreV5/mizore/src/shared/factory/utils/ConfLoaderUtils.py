@@ -11,6 +11,7 @@ class ConfLoaderUtils:
 
     # The different auth files we will need to load
     _AUTH = None
+    _DASHBOARD_AUTH = None
     _RCLONE = None
     _IZUMI = None
     _ENCODER = None
@@ -18,6 +19,7 @@ class ConfLoaderUtils:
     _DISTRIBUTOR = None
 
     _auth_path = "conf/auth.yml"
+    _dashboard_auth_path = "conf/dashboard_auth.yml"
     _rclone_path = "conf/rclone.conf"
     _izumi_path = "conf/izumi.toml"
     _encoder_path = "conf/encoder.toml"
@@ -26,6 +28,7 @@ class ConfLoaderUtils:
 
     if DockerUtils.docker:
         _auth_path = DockerUtils.path + _auth_path
+        _dashboard_auth_path = DockerUtils.path + _dashboard_auth_path
         _rclone_path = DockerUtils.path + _rclone_path
         _izumi_path = DockerUtils.path + _izumi_path
         _encoder_path = DockerUtils.path + _encoder_path
@@ -34,7 +37,11 @@ class ConfLoaderUtils:
 
     # Load the auth yaml file
     with open(_auth_path) as ayml:
-        _AUTH = yaml.load(ayml, Loader=yaml.BaseLoader)
+        _AUTH = yaml.load(ayml, Loader=yaml.BaseLoader) or dict()
+
+    # Load the dashboard yaml file
+    with open(_dashboard_auth_path) as dayml:
+        _DASHBOARD_AUTH = yaml.load(dayml, Loader=yaml.BaseLoader) or dict()
 
     # Load rclone conf just purely as a string
     with open(_rclone_path) as rconf:
@@ -59,6 +66,10 @@ class ConfLoaderUtils:
     @classmethod
     def get_auth(cls) -> dict:
         return cls._AUTH
+
+    @classmethod
+    def get_dashboard_auth(cls) -> dict:
+        return cls._DASHBOARD_AUTH
 
     @classmethod
     def get_rclone(cls) -> str:
