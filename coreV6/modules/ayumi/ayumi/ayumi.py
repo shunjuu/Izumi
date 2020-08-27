@@ -24,7 +24,7 @@ try:
 except:
     _RABBITPY_IMPORTED = False
 
-_AMPQ_EXCHANGE = settings.get("ampq_exchange", "logs_gateway")
+_AMPQ_EXCHANGE = settings.get("log_exchange", "logs_gateway")
 _CONSOLE_FORMAT = settings.get(
     "log_console_format", "[{filename}:{functionname}]: {msg}")
 _DATE_FORMAT = settings.get("log_date_format", "%a|%b%y|%X|%Z")
@@ -41,7 +41,7 @@ _LOG_LEVEL = defaultdict(
 _LOG_NAME = settings.get("log_name", "izumi")
 
 
-class LogColors:
+class AyumiColors:
 
     RED = '\033[31m'
     GREEN = '\033[32m'
@@ -60,7 +60,7 @@ class LogColors:
     _ENDC = '\033[0m'
 
 
-class LogHelper(type):
+class AyumiHelper(type):
 
     pika_channel = None
     rabbitpy_channel = None
@@ -117,13 +117,13 @@ class LogHelper(type):
 
     @classmethod
     def _console(cls, msg: str, color: str) -> None:
-        filename, functionname = LogHelper.get_calling_details()
+        filename, functionname = AyumiHelper.get_calling_details()
         getattr(cls.logger, currentframe().f_back.f_code.co_name)("{}{}{}".format(
             color,
             _CONSOLE_FORMAT.format(
                 filename=filename, functionname=functionname, msg=msg
             ),
-            LogColors._ENDC
+            AyumiColors._ENDC
         ))
 
     @classmethod
@@ -142,7 +142,7 @@ class LogHelper(type):
                 properties=pika.BasicProperties(
                     content_type="application/json",
                     delivery_mode=2,
-                    headers=LogHelper.get_headers(),
+                    headers=AyumiHelper.get_headers(),
                     timestamp=int(time())
                 )
             )
@@ -155,7 +155,7 @@ class LogHelper(type):
                 properties={
                     "content_type": "application/json",
                     "delivery_mode": 2,
-                    "headers": LogHelper.get_headers(),
+                    "headers": AyumiHelper.get_headers(),
                     "timestamp": int(time())
                 })
             message.publish(_AMPQ_EXCHANGE, currentframe().f_back.f_code.co_name.lower())
@@ -175,7 +175,7 @@ class LogHelper(type):
         # The third object in the tuple is the function name
         functionname = str(frame[3])
         module = getmodule(frame[0])
-        filename = LogHelper.get_base_filename(module.__file__)
+        filename = AyumiHelper.get_base_filename(module.__file__)
         return (filename, functionname)
 
     @staticmethod
