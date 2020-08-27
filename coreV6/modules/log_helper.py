@@ -1,7 +1,6 @@
 # Handles all aspects of logging
 
 import logging
-import pika
 
 from collections import defaultdict
 from dynaconf import settings
@@ -13,6 +12,18 @@ from socket import getfqdn
 from time import time
 from typing import Dict, Tuple
 
+try:
+    import pika
+    _PIKA_IMPORTED = True
+except:
+    _PIKA_IMPORTED = False
+
+try:
+    import rabbitpy
+    _RABBITPY_IMPORTED = True
+except:
+    _RABBITPY_IMPORTED = False
+
 _AMPQ_EXCHANGE = settings.get("ampq_exchange", "logs_gateway")
 _CONSOLE_FORMAT = settings.get(
     "log_console_format", "[{filename}:{functionname}]: {msg}")
@@ -21,8 +32,7 @@ _LOG_FORMAT = settings.get(
     "log_logger_format", "[%(asctime)s][%(levelname)s]: %(message)s")
 _LOG_LEVEL = defaultdict(
     lambda: logging.NOTSET,
-    {"NOTSET": logging.NOTSET,
-     "DEBUG": logging.DEBUG,
+    {"DEBUG": logging.DEBUG,
      "INFO": logging.INFO,
      "WARNING": logging.WARNING,
      "ERROR": logging.ERROR,
@@ -50,11 +60,10 @@ class LogColors:
     _ENDC = '\033[0m'
 
 
-
-
 class LogHelper(type):
 
-    channel = None
+    pika_channel = None
+    rabbitpy_channel = None
 
     logging.basicConfig(format=_LOG_FORMAT, datefmt=_DATE_FORMAT)
     logger = logging.getLogger(name=_LOG_NAME)
@@ -65,14 +74,18 @@ class LogHelper(type):
         return cls.logger
 
     @classmethod
-    def set_channel(cls, channel) -> None:
-        cls.channel = channel
+    def set_pika_channel(cls, channel) -> None:
+        cls.pika_channel = channel
+
+    @classmethod
+    def set_rabbitpy_channel(cls, channel) -> None:
+        cls.rabbitpy_channel = channel
 
     @classmethod
     def notset(cls, msg: str, color: str = "") -> None:
         cls._console(msg, color)
         cls._publish(msg, color)
-    
+
     @classmethod
     def debug(cls, msg: str, color: str = "") -> None:
         cls._console(msg, color)
@@ -97,11 +110,11 @@ class LogHelper(type):
     def error(cls, msg: str, color: str = "") -> None:
         cls._console(msg, color)
         cls._publish(msg, color)
-    
+
     """
     --- ACTUAL FUNCTIONS FOR LOGGING/PUBLISHING/ETC ---
     """
-    
+
     @classmethod
     def _console(cls, msg: str, color: str) -> None:
         filename, functionname = LogHelper.get_calling_details()
@@ -112,27 +125,40 @@ class LogHelper(type):
             ),
             LogColors._ENDC
         ))
-    
+
     @classmethod
     def _publish(cls, msg: str, color: str) -> None:
 
-        if cls.channel and cls.channel.is_open:
+        # Color can be an empty string, so convert that to None for JSON.
+        if not color:
+            color = None
 
-            # Color can be an empty string, so convert that to None for JSON.
-            if not color:
-                color = None 
-
-            cls.channel.basic_publish(
+        # Publish to Pika
+        if _PIKA_IMPORTED and cls.pika_channel:
+            cls.pika_channel.basic_publish(
                 body=dumps({"body": msg, "color": color}),
                 exchange=_AMPQ_EXCHANGE,
                 routing_key=currentframe().f_back.f_code.co_name.lower(),
                 properties=pika.BasicProperties(
-                    headers=LogHelper.get_headers(),
                     content_type="application/json",
                     delivery_mode=2,
+                    headers=LogHelper.get_headers(),
                     timestamp=int(time())
                 )
             )
+
+        # Publish to RabbitPy
+        if _RABBITPY_IMPORTED and cls.rabbitpy_channel:
+            message = rabbitpy.Message(
+                cls.rabbitpy_channel,
+                dumps({"body": msg, "color": color}),
+                properties={
+                    "content_type": "application/json",
+                    "delivery_mode": 2,
+                    "headers": LogHelper.get_headers(),
+                    "timestamp": int(time())
+                })
+            message.publish(_AMPQ_EXCHANGE, currentframe().f_back.f_code.co_name.lower())
 
     @staticmethod
     def get_headers() -> Dict[str, str]:
