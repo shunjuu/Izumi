@@ -24,22 +24,6 @@ try:
 except:
     _RABBITPY_IMPORTED = False
 
-_AMPQ_EXCHANGE = settings.get("log_exchange", "logs_gateway")
-_CONSOLE_FORMAT = settings.get(
-    "log_console_format", "[{filename}:{functionname}]: {msg}")
-_DATE_FORMAT = settings.get("log_date_format", "%a|%b%y|%X|%Z")
-_LOG_FORMAT = settings.get(
-    "log_logger_format", "[%(asctime)s][%(levelname)s]: %(message)s")
-_LOG_LEVEL = defaultdict(
-    lambda: logging.NOTSET,
-    {"DEBUG": logging.DEBUG,
-     "INFO": logging.INFO,
-     "WARNING": logging.WARNING,
-     "ERROR": logging.ERROR,
-     "CRITICAL": logging.CRITICAL}
-)[settings.get("log_level", "INFO").capitalize()]
-_LOG_NAME = settings.get("log_name", "izumi")
-
 
 class AyumiColors:
 
@@ -65,9 +49,16 @@ class AyumiHelper(type):
     pika_channel = None
     rabbitpy_channel = None
 
+    _AMPQ_EXCHANGE = settings.get("log_exchange", "logs_gateway")
+    _CONSOLE_FORMAT = settings.get(
+        "log_console_format", "[{filename}:{functionname}]: {msg}")
+    _DATE_FORMAT = settings.get("log_date_format", "%a|%b%y|%X|%Z")
+    _LOG_FORMAT = settings.get(
+        "log_logger_format", "[%(asctime)s][%(levelname)s]: %(message)s")
+
     logging.basicConfig(format=_LOG_FORMAT, datefmt=_DATE_FORMAT)
-    logger = logging.getLogger(name=_LOG_NAME)
-    logger.setLevel(_LOG_LEVEL)
+    logger = logging.getLogger() # Use root logger so all other apps can output too.
+    logger.setLevel(logging.getLevelName(settings.get("log_level", "NOTSET")))
 
     @classmethod
     def get_logger(cls) -> logging.Logger:
@@ -120,7 +111,7 @@ class AyumiHelper(type):
         filename, functionname = AyumiHelper.get_calling_details()
         getattr(cls.logger, currentframe().f_back.f_code.co_name)("{}{}{}".format(
             color,
-            _CONSOLE_FORMAT.format(
+            cls._CONSOLE_FORMAT.format(
                 filename=filename, functionname=functionname, msg=msg
             ),
             AyumiColors._ENDC
@@ -137,7 +128,7 @@ class AyumiHelper(type):
         if _PIKA_IMPORTED and cls.pika_channel:
             cls.pika_channel.basic_publish(
                 body=dumps({"body": msg, "color": color}),
-                exchange=_AMPQ_EXCHANGE,
+                exchange=cls._AMPQ_EXCHANGE,
                 routing_key=currentframe().f_back.f_code.co_name.lower(),
                 properties=pika.BasicProperties(
                     content_type="application/json",
@@ -158,7 +149,7 @@ class AyumiHelper(type):
                     "headers": AyumiHelper.get_headers(),
                     "timestamp": int(time())
                 })
-            message.publish(_AMPQ_EXCHANGE, currentframe().f_back.f_code.co_name.lower())
+            message.publish(cls._AMPQ_EXCHANGE, currentframe().f_back.f_code.co_name.lower())
 
     @staticmethod
     def get_headers() -> Dict[str, str]:
