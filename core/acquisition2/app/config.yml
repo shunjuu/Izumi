@@ -1,0 +1,81 @@
+# This is the folder the application will watch for new files. 
+# [type: String-URL]
+# This MUST be included in this config, and not the web-config.
+# Will automatically be changed in Docker
+watch-folder: "/home/rocia/Desktop/watch"
+
+# You can optionally load a global config from a web source.
+# If you do not, leave this as an empty string.
+# [type: String-URL]
+web-config: ""
+
+# Grouping body to specify the names used when uploading files
+uploading:
+
+  # A list of rclone strings for Acqusition to upload the file to
+  # There must be at least one destination listed, because Acquisition
+  # doesn't touch original files. Usually this is just a list of 1 element.
+  # [type: A list of strings]
+  upload-destinations:
+    - "kan:Anime/Test/"
+
+  # This is an optional parameter which allows you to specify the name of an 
+  # "Airing" folder for shows. It's recommend you use the Airing folder because
+  # if switching to a web config, the Airing folder will be tacked on.
+  # This is also used to tack the same suffix onto every destination.
+  # To not use it, simply leave it as an empty string.
+  airing-folder-name: "Airing"
+
+  # Flags to be used in the rclone uploading prompt. Determines verbosity of rclone.
+  rclone-flags: "--stats 1s --stats-one-line --progress"
+
+# Grouping body to list endpoints for other Izumi modules for this app to talk to.
+endpoints:
+
+  # All modules use and accept the same formatted request
+  # Thus, there is no need to "group" each type of request
+
+  # [always] URLs will always be POST'd, regardless of the response
+  # To have no URLs in this list, use an empty list, i.e.:
+  # always: []
+  always:
+    - url: "https://endpoint1.url/notify"
+      auth: "authorization_key1"
+    - url: "https://endpoint2.url/encode"
+    - url: "https://endpoint3.url/distribute"
+
+  # [sequential] URLs are sorted into groups.
+  # For each group, the URLs will be tested in order until one of them succeeds.
+  # All the groups will be tested.
+  # To specify no groups, use an empty dict, i.e.:
+  # sequential: {}
+  sequential:
+    group1:
+      - url: "https://endpoint1.url/notify"
+        auth: "authorization_key1"
+      - url: "https://endpoint2.url/notify"
+    group2:
+      - url: "https://endpoint3.url/distribute"
+
+# Application-specific settings
+system:
+
+  # The identifier for this system
+  name: "izumi"
+
+  # This is the delimiter used by inotify to split the arguments.
+  # Don't edit this unless you know what you're doing.
+  # [type: String]
+  delimiter: "||"
+
+  # Whether or not the application should print more information.
+  # [type: Boolean]
+  verbose: Yes
+
+  # Logging settings
+  logging:
+
+    # The style of the log output messages, using %(var)s style
+    logfmt: "[%(name)s] (%(levelname)s) %(asctime)s: %(message)s"
+    # The strftime-style format for %(asctime)s
+    datefmt: "%a|%b%y %X %Z"
