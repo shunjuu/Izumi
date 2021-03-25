@@ -2,5 +2,5 @@ anitopy==2.0.0
 Flask==1.0.3
 hurry.filesize==0.9
 requests==2.20.0
-PyYAML==5.1
+PyYAML==5.4
 fbchat==1.6.5
